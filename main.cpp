@@ -1,6 +1,6 @@
 #include "mbed.h"
 
-void print_char(char c = '*')
+void print_char(char c = '$')
 {
     printf("%c", c);
     fflush(stdout);
