@@ -10,7 +10,6 @@
 // STM32F7 DCMI driver
 #include "stm32f7xx_hal_dcmi.h"
 
-DCMI_HandleTypeDef hdcmi;
 
 /** 
  * Initialize DCMI and DMA interfaces
@@ -22,15 +21,13 @@ DCMI_HandleTypeDef hdcmi;
  * Transfers data between peripherals (camera module)
  * and main memory without intervention of the CPU
 **/
+
+DCMI_HandleTypeDef hdcmi; // Create DCMI parameter structure
+
 void camera_init()
 {
-    /**
-     * Program the required configuration through following parameters:
-     * horizontal and vertical polarity, pixel clock polarity, Capture Rate,
-     * Synchronization Mode, code of the frame delimiter and data width 
-     * using HAL_DCMI_Init() function.
-    **/
-    hdcmi.Instance = DCMI;
+    // Set parameters in hdcmi structure
+    hdcmi.Instance = DCMI; // Instance
     hdcmi.Init.SynchroMode = DCMI_SYNCHRO_HARDWARE; // Synchronization mode
     hdcmi.Init.PCKPolarity = DCMI_PCKPOLARITY_RISING; // Pixel clock polarity
     hdcmi.Init.VSPolarity = DCMI_VSPOLARITY_LOW; // Vertical polarity
@@ -39,10 +36,10 @@ void camera_init()
     hdcmi.Init.ExtendedDataMode = DCMI_EXTEND_DATA_8B; // Data width
     hdcmi.Init.JPEGMode = DCMI_JPEG_DISABLE; // JPEG mode
 
-    HAL_DCMI_Init(&hdcmi);
+    HAL_DCMI_Init(&hdcmi); // Initialize DCMI with given parameter structure
 }
 
 int main()
 {
-    camera_init();
+    camera_init(); // Run camera initialization
 }
