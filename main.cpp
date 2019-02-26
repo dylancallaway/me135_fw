@@ -1,6 +1,6 @@
 /**
  * Firmware for Bair Hockey image processing and motor control
- * Written using MBED OS 5
+ * Written with MBED OS 5
  * Running on NUCLEO-F767Z1 Arm Cortex M7 microcontroller
  * Authors: Dylan Callaway
 **/
@@ -29,7 +29,7 @@
 #define DCMI_MEMORY_LOC NULL
 
 // Output resolution = 400x296x3 x 8 bits = 355200 bytes = 0x56B80 bytes
-// Length of DCMI data to be transferred ***IN WORDS*** ??? MAYBE how tf do you specify this??
+// Length of DCMI data to be transferred ***IN WORDS***
 // For a 32bit CPU: 1 word = 32 bits = 4 bytes
 #define DCMI_MEMORY_LEN NULL
 
@@ -38,7 +38,6 @@ DMA_HandleTypeDef hdma;   // Create DMA configuration parameters structure
 
 void camera_init()
 {
-
     //--------------HDCMI Setup------------------------------------------------------
     // Set parameters in hdcmi structure
     hdcmi.Instance = DCMI;                             // Instance
@@ -52,6 +51,7 @@ void camera_init()
 
     HAL_DCMI_Init(&hdcmi); // Initialize DCMI with given parameter structure
     //---------------------------------------------------------------------------
+
 
     //--------------------HDMA Setup-----------------------------------------
     // Set parameters in hdma structure
