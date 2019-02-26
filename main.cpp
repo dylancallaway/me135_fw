@@ -22,10 +22,14 @@
  * and main memory without intervention of the CPU
 **/
 
-#define DCMI_MEMORY_LOC 0 // Memory destination for DCMI DMA. "destination memory buffer address (LCD Frame buffer)"
+// Memory destination for DCMI DMA. "destination memory buffer address (LCD Frame buffer)"
+// How tf do you specify this?? *******
+#define DCMI_MEMORY_LOC 0
 
-// Output resolution = 400x296x3 x 8bits = 355200 bytes = 0x56B80 bytes
-#define DCMI_MEMORY_LEN 0x56B80 // Length of DCMI data to be transferred
+// Output resolution = 400x296x3 x 8 bits = 355200 bytes = 0x56B80 bytes
+// Length of DCMI data to be transferred ***IN WORDS*** ??? MAYBE how tf do you specify this??
+// For a 32bit CPU: 1 word = 32 bits = 4 bytes
+#define DCMI_MEMORY_LEN 0x56B80 
 
 DCMI_HandleTypeDef hdcmi; // Create DCMI parameter structure
 
