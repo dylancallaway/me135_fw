@@ -28,10 +28,11 @@
 // How tf do you specify this?? *******
 #define DCMI_MEMORY_LOC NULL
 
-// Output resolution = 400x296x3 x 8 bits = 355200 bytes = 0x56B80 bytes
+// Output format RGB565: 5 bit red, 6 bit green, 5 bit blue.
+// Output size = 400x296x2 x 5 bits + 400x296x1 x 6 bits = 1894400 bits = 236800 bytes = 59200 words = 0xE740 words
 // Length of DCMI data to be transferred ***IN WORDS***
 // For a 32bit CPU: 1 word = 32 bits = 4 bytes
-#define DCMI_MEMORY_LEN NULL
+#define DCMI_MEMORY_LEN 0xE740
 
 DCMI_HandleTypeDef hdcmi; // Create DCMI configuration parameters structure
 DMA_HandleTypeDef hdma;   // Create DMA configuration parameters structure
@@ -40,10 +41,10 @@ void camera_init()
 {
     //--------------HDCMI Setup------------------------------------------------------
     // Set parameters in hdcmi structure
-    hdcmi.Instance = DCMI;                             // Instance
+    hdcmi.Instance = DCMI;
     hdcmi.Init.SynchroMode = DCMI_SYNCHRO_HARDWARE;    // Synchronization mode
     hdcmi.Init.PCKPolarity = DCMI_PCKPOLARITY_RISING;  // Pixel clock polarity
-    hdcmi.Init.VSPolarity = DCMI_VSPOLARITY_LOW;       // Vertical polarity
+    hdcmi.Init.VSPolarity = DCMI_VSPOLARITY_HIGH;      // Vertical polarity
     hdcmi.Init.HSPolarity = DCMI_HSPOLARITY_HIGH;      // Horizontal polarity
     hdcmi.Init.CaptureRate = DCMI_CR_ALL_FRAME;        // Capture rate
     hdcmi.Init.ExtendedDataMode = DCMI_EXTEND_DATA_8B; // Data width
@@ -61,12 +62,15 @@ void camera_init()
     hdma.Init.MemInc = DMA_MINC_ENABLE;
     hdma.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
     hdma.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
-    hdma.Init.Mode = DMA_NORMAL;
-    hdma.Init.Priority = DMA_PRIORITY_LOW;
+    hdma.Init.Mode = DMA_CIRCULAR; // or DMA_NORMAL ?
+    hdma.Init.Priority = DMA_PRIORITY_HIGH;
     hdma.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    hdma.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+    hdma.Init.MemBurst = DMA_MBURST_SINGLE;
+    hdma.Init.PeriphBurst = DMA_PBURST_SINGLE;
 
     // Need to use this function to initialize DMA2_Stream1 channel1.
-    // Something like: HAL_DMA_Init(DMA_HandleTypeDef *hdma);
+    // Example: HAL_DMA_Init(DMA_HandleTypeDef *hdma);
     HAL_DMA_Init(&hdma);
     //----------------------------------------------------------------------
 }
