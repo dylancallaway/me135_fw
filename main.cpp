@@ -22,6 +22,11 @@
  * and main memory without intervention of the CPU
 **/
 
+#define DCMI_MEMORY_LOC 0 // Memory destination for DCMI DMA. "destination memory buffer address (LCD Frame buffer)"
+
+// Output resolution = 400x296x3 x 8bits = 355200 bytes = 0x56B80 bytes
+#define DCMI_MEMORY_LEN 0x56B80 // Length of DCMI data to be transferred
+
 DCMI_HandleTypeDef hdcmi; // Create DCMI parameter structure
 
 void camera_init()
@@ -37,6 +42,7 @@ void camera_init()
     hdcmi.Init.JPEGMode = DCMI_JPEG_DISABLE; // JPEG mode
 
     HAL_DCMI_Init(&hdcmi); // Initialize DCMI with given parameter structure
+    HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, DCMI_MEMORY_LOC, DCMI_MEMORY_LEN); // Enable DCMI DMA and enable capture
 }
 
 int main()
