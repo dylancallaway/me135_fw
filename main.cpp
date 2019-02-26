@@ -26,12 +26,12 @@
 
 // Memory destination for DCMI DMA. "destination memory buffer address (LCD Frame buffer)"
 // How tf do you specify this?? *******
-#define DCMI_MEMORY_LOC NULL
+#define DCMI_MEMORY_LOC 0
 
 // Output resolution = 400x296x3 x 8 bits = 355200 bytes = 0x56B80 bytes
 // Length of DCMI data to be transferred ***IN WORDS*** ??? MAYBE how tf do you specify this??
 // For a 32bit CPU: 1 word = 32 bits = 4 bytes
-#define DCMI_MEMORY_LEN NULL
+#define DCMI_MEMORY_LEN 0
 
 DCMI_HandleTypeDef hdcmi; // Create DCMI configuration parameters structure
 DMA_HandleTypeDef hdma;   // Create DMA configuration parameters structure
@@ -52,7 +52,7 @@ void camera_init()
 
     // Set parameters in hdma structure
     hdma.Instance = DMA2_Stream1;
-    hdma.init.Channel = DMA_CHANNEL_1;
+    hdma.Init.Channel = DMA_CHANNEL_1;
 
     // Need to use this function to initialize DMA2_Stream1 channel1.
     // Something like: HAL_DMA_Init(DMA_HandleTypeDef *hdma);
