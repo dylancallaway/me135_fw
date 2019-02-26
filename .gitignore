@@ -1,6 +1,6 @@
 /mbed-os
 .mbed
-mbed-settings.py
-mbed-settings.pyc
+mbed_settings.py
+mbed_settings.pyc
 mbed-os.lib
 /BUILD
