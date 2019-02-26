@@ -38,6 +38,8 @@ DMA_HandleTypeDef hdma;   // Create DMA configuration parameters structure
 
 void camera_init()
 {
+
+    //--------------HDCMI Setup------------------------------------------------------
     // Set parameters in hdcmi structure
     hdcmi.Instance = DCMI;                             // Instance
     hdcmi.Init.SynchroMode = DCMI_SYNCHRO_HARDWARE;    // Synchronization mode
@@ -49,14 +51,25 @@ void camera_init()
     hdcmi.Init.JPEGMode = DCMI_JPEG_DISABLE;           // JPEG mode
 
     HAL_DCMI_Init(&hdcmi); // Initialize DCMI with given parameter structure
+    //---------------------------------------------------------------------------
 
+    //--------------------HDMA Setup-----------------------------------------
     // Set parameters in hdma structure
     hdma.Instance = DMA2_Stream1;
     hdma.Init.Channel = DMA_CHANNEL_1;
+    hdma.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma.Init.MemInc = DMA_MINC_ENABLE;
+    hdma.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+    hdma.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+    hdma.Init.Mode = DMA_NORMAL;
+    hdma.Init.Priority = DMA_PRIORITY_LOW;
+    hdma.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
 
     // Need to use this function to initialize DMA2_Stream1 channel1.
     // Something like: HAL_DMA_Init(DMA_HandleTypeDef *hdma);
     HAL_DMA_Init(&hdma);
+    //----------------------------------------------------------------------
 
     HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, DCMI_MEMORY_LOC, DCMI_MEMORY_LEN); // Enable DCMI DMA and enable capture
 }
