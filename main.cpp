@@ -52,7 +52,6 @@ void camera_init()
     HAL_DCMI_Init(&hdcmi); // Initialize DCMI with given parameter structure
     //---------------------------------------------------------------------------
 
-
     //--------------------HDMA Setup-----------------------------------------
     // Set parameters in hdma structure
     hdma.Instance = DMA2_Stream1;
@@ -70,11 +69,10 @@ void camera_init()
     // Something like: HAL_DMA_Init(DMA_HandleTypeDef *hdma);
     HAL_DMA_Init(&hdma);
     //----------------------------------------------------------------------
-
-    HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, DCMI_MEMORY_LOC, DCMI_MEMORY_LEN); // Enable DCMI DMA and enable capture
 }
 
 int main()
 {
-    camera_init(); // Run camera initialization
+    camera_init();                                                                    // Run camera initialization
+    HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, DCMI_MEMORY_LOC, DCMI_MEMORY_LEN); // Enable DCMI, DMA and capture a frame
 }
