@@ -4,3 +4,4 @@ mbed_settings.py
 mbed_settings.pyc
 mbed-os.lib
 /BUILD
+/STM32Cube_FW_F7_V1.15.0

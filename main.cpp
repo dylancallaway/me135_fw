@@ -1,7 +1,7 @@
 /**
  * Firmware for Bair Hockey image processing and motor control
  * Written with MBED OS 5
- * Running on NUCLEO-F767Z1 Arm Cortex M7 microcontroller
+ * Running on NUCLEO-F767ZI Arm Cortex M7 microcontroller
  * Authors: Dylan Callaway
 **/
 
@@ -34,49 +34,54 @@
 // For a 32bit CPU: 1 word = 32 bits = 4 bytes
 #define DCMI_MEMORY_LEN 0xE740
 
-DCMI_HandleTypeDef hdcmi; // Create DCMI configuration parameters structure
-DMA_HandleTypeDef hdma;   // Create DMA configuration parameters structure
+DCMI_HandleTypeDef dcmi_handle; // Create DCMI configuration parameters structure
+DMA_HandleTypeDef dma_handle;   // Create DMA configuration parameters structure
 
-void camera_init()
+void Camera_Config(void)
 {
-    //--------------HDCMI Setup------------------------------------------------------
-    // Set parameters in hdcmi structure
-    hdcmi.Instance = DCMI;
-    hdcmi.Init.SynchroMode = DCMI_SYNCHRO_HARDWARE;    // Synchronization mode
-    hdcmi.Init.PCKPolarity = DCMI_PCKPOLARITY_RISING;  // Pixel clock polarity
-    hdcmi.Init.VSPolarity = DCMI_VSPOLARITY_HIGH;      // Vertical polarity
-    hdcmi.Init.HSPolarity = DCMI_HSPOLARITY_HIGH;      // Horizontal polarity
-    hdcmi.Init.CaptureRate = DCMI_CR_ALL_FRAME;        // Capture rate
-    hdcmi.Init.ExtendedDataMode = DCMI_EXTEND_DATA_8B; // Data width
-    hdcmi.Init.JPEGMode = DCMI_JPEG_DISABLE;           // JPEG mode
-
-    HAL_DCMI_Init(&hdcmi); // Initialize DCMI with given parameter structure
-    //---------------------------------------------------------------------------
-
-    //--------------------HDMA Setup-----------------------------------------
-    // Set parameters in hdma structure
-    hdma.Instance = DMA2_Stream1;
-    hdma.Init.Channel = DMA_CHANNEL_1;
-    hdma.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    hdma.Init.PeriphInc = DMA_PINC_DISABLE;
-    hdma.Init.MemInc = DMA_MINC_ENABLE;
-    hdma.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
-    hdma.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
-    hdma.Init.Mode = DMA_CIRCULAR; // or DMA_NORMAL ?
-    hdma.Init.Priority = DMA_PRIORITY_HIGH;
-    hdma.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-    hdma.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
-    hdma.Init.MemBurst = DMA_MBURST_SINGLE;
-    hdma.Init.PeriphBurst = DMA_PBURST_SINGLE;
-
-    // Need to use this function to initialize DMA2_Stream1 channel1.
-    // Example: HAL_DMA_Init(DMA_HandleTypeDef *hdma);
-    HAL_DMA_Init(&hdma);
-    //----------------------------------------------------------------------
 }
 
-int main()
+void DMA_Config(void)
 {
-    camera_init();                                                                    // Run camera initialization
-    HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, DCMI_MEMORY_LOC, DCMI_MEMORY_LEN); // Enable DCMI, DMA and capture a frame
+    // Enable DMA2 clock
+    // __DMA2_CLK_ENABLE();
+
+    // Set parameters in dma_handle structure
+    dma_handle.Instance = DMA2_Stream1;
+    dma_handle.Init.Channel = DMA_CHANNEL_1;
+    dma_handle.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    dma_handle.Init.PeriphInc = DMA_PINC_DISABLE;
+    dma_handle.Init.MemInc = DMA_MINC_ENABLE;
+    dma_handle.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+    dma_handle.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+    dma_handle.Init.Mode = DMA_CIRCULAR; // or DMA_NORMAL ?
+    dma_handle.Init.Priority = DMA_PRIORITY_HIGH;
+    dma_handle.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    dma_handle.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
+    dma_handle.Init.MemBurst = DMA_MBURST_SINGLE;
+    dma_handle.Init.PeriphBurst = DMA_PBURST_SINGLE;
+
+    // Need to use this function to initialize DMA2_Stream1 channel1.
+    // Example: HAL_DMA_Init(DMA_HandleTypeDef *dma_handle);
+    HAL_DMA_Init(&dma_handle);
+}
+
+void DCMI_Config(void)
+{
+    // Set parameters in dcmi_handle structure
+    dcmi_handle.Instance = DCMI;
+    dcmi_handle.Init.SynchroMode = DCMI_SYNCHRO_HARDWARE;    // Synchronization mode
+    dcmi_handle.Init.PCKPolarity = DCMI_PCKPOLARITY_RISING;  // Pixel clock polarity
+    dcmi_handle.Init.VSPolarity = DCMI_VSPOLARITY_HIGH;      // Vertical polarity
+    dcmi_handle.Init.HSPolarity = DCMI_HSPOLARITY_HIGH;      // Horizontal polarity
+    dcmi_handle.Init.CaptureRate = DCMI_CR_ALL_FRAME;        // Capture rate
+    dcmi_handle.Init.ExtendedDataMode = DCMI_EXTEND_DATA_8B; // Data width
+    dcmi_handle.Init.JPEGMode = DCMI_JPEG_DISABLE;           // JPEG mode
+
+    HAL_DCMI_Init(&dcmi_handle); // Initialize DCMI with given parameter structure
+}
+
+int main(void)
+{
+    HAL_DCMI_Start_DMA(&dcmi_handle, DCMI_MODE_SNAPSHOT, DCMI_MEMORY_LOC, DCMI_MEMORY_LEN); // Enable DCMI, DMA and capture a frame
 }
