@@ -40,6 +40,7 @@ void GPIO_Config(void)
 {
     GPIO_InitTypeDef gpio_init_structure; // Create GPIO configuration parameters structure
 
+    // Got this from some dude's code online lewl
     /**DCMI GPIO Configuration    
     PE4     ------> DCMI_D4
     PA4     ------> DCMI_HSYNC
@@ -54,24 +55,24 @@ void GPIO_Config(void)
     PB9     ------> DCMI_D7 
     */
 
-    /* DCMI GPIO configuration **************************************************/
     /*
-    D0 -- PC6
-    D1 -- PC7
-    D2 -- PE0
-    D3 -- PE1
-    D4 -- PE4
-    D5 -- PB6
-    D6 -- PB8
-    D7 -- PB9
-    PCK - PA6
-    HS -- PA4
-    VS -- PB7
-    XCLK -- PA8 // mc0 driven
-    Y1,Y0 Not connected
-    RST -- PC12 // active low
-    PWDN -- PC10 // active hi
-*/
+   Creating a GPIO for the DCMI works like this:
+   Call this:
+   __HAL_RCC_GPIOX_CLK_ENABLE(); // X is A-Z here
+   
+    Then run:
+    gpio_init_structure.Pin = GPIO_PIN_4 | GPIO_PIN_6;
+    gpio_init_structure.Mode = GPIO_MODE_AF_PP;
+    gpio_init_structure.Pull = GPIO_PULLUP;
+    gpio_init_structure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    gpio_init_structure.Alternate = GPIO_AF13_DCMI;
+    HAL_GPIO_Init(GPIOX, &gpio_init_structure);
+
+    // This initializes pins X4 and X6 where X is any letter A-Z
+   */
+
+    // TODO Figure out what pins to set as GPIO for DCMI
+    // Is it arbitrary or what?
 
     /* Enable GPIO clocks */
     __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -79,6 +80,8 @@ void GPIO_Config(void)
     __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_GPIOD_CLK_ENABLE();
     __HAL_RCC_GPIOE_CLK_ENABLE();
+    __HAL_RCC_GPIOF_CLK_ENABLE();
+    __HAL_RCC_GPIOG_CLK_ENABLE();
 
     /*** Configure the GPIO ***/
     /* Configure DCMI GPIO as alternate function */
@@ -183,10 +186,6 @@ void DCMI_Config(void)
 
     /* Enable the DMA ------------------ MAYBE NEEDED ??? */
     // __HAL_DMA_ENABLE(dcmi_init_structure.DMA_Handle);
-}
-
-void Camera_Config(void)
-{
 }
 
 int main(void)
