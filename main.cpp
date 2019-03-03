@@ -57,21 +57,6 @@ void GPIO_Config(void)
 {
     GPIO_InitTypeDef gpio_init_structure; // Create GPIO configuration parameters structure
 
-    // Got this from some dude's code online lewl
-    /**DCMI GPIO Configuration    
-    PE4     ------> DCMI_D4
-    PA4     ------> DCMI_HSYNC
-    PA6     ------> DCMI_PIXCLK
-    PA9     ------> DCMI_D0
-    PA10     ------> DCMI_D1
-    PD3     ------> DCMI_D5
-    PG10     ------> DCMI_D2
-    PG11     ------> DCMI_D3
-    PB7     ------> DCMI_VSYNC
-    PB8     ------> DCMI_D6
-    PB9     ------> DCMI_D7 
-    */
-
     /*
    Creating a GPIO for the DCMI works like this:
    Call this:
@@ -90,6 +75,32 @@ void GPIO_Config(void)
 
     // TODO Figure out what pins to set as GPIO for DCMI
     // Is it arbitrary or what?
+
+    /**DCMI GPIO Configuration
+     * https://www.st.com/resource/en/datasheet/stm32f767zi.pdf -> Pinouts and pin description
+    STM37F767xx Pin Name -> DCMI Pin Name
+
+    PA6  -> PIXCLK
+    PA4  -> HSYNC
+    PG9  -> VSYNC
+    
+    PA9  -> D0
+    PA10 -> D1
+    PC8  -> D2
+    PC9  -> D3
+    PC11  -> D4
+    PB6  -> D5
+    PB8  -> D6
+    PB9  -> D7
+
+    -----Unused-----
+    PC10 -> D8
+    PH7  -> D9
+    PB5  -> D10
+    PD2  -> D11
+    PC12 -> D12
+    PG7  -> D13
+    */
 
     /* Enable GPIO clocks */
     __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -213,8 +224,8 @@ void led1_heartbeat(void)
 int main(void)
 {
     GPIO_Config();
-    // DMA_Config();
-    // DCMI_Config();
-    // HAL_DCMI_Start_DMA(&dcmi_init_structure, DCMI_MODE_SNAPSHOT, DCMI_MEMORY_LOC, DCMI_MEMORY_LEN); // Enable DCMI, DMA and capture a frame
+    DMA_Config();
+    DCMI_Config();
+    HAL_DCMI_Start_DMA(&dcmi_init_structure, DCMI_MODE_SNAPSHOT, DCMI_MEMORY_LOC, DCMI_MEMORY_LEN); // Enable DCMI, DMA and capture a frame
     heartbeat_ticker.attach(led1_heartbeat, 0.5);
 }
