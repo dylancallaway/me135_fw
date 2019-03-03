@@ -1,0 +1,2 @@
+mbed compile -m NUCLEO_F767ZI
+cp BUILD/NUCLEO_F767ZI/GCC_ARM/me135_fw.bin /media/$USER/NODE_F767ZI

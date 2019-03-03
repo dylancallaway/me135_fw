@@ -36,6 +36,23 @@
 
 DCMI_HandleTypeDef dcmi_init_structure; // Create DCMI configuration parameters structure
 
+// Create timers
+Timer timer1;
+
+// Create tickers
+Ticker heartbeat_ticker;
+
+// Create threads
+Thread thread1;
+
+// Status LEDs
+DigitalOut led1(LED1); // Green
+DigitalOut led2(LED2); // Blue
+DigitalOut led3(LED3); // Red
+
+// Serial communication
+Serial pc(SERIAL_TX, SERIAL_RX, 115200);
+
 void GPIO_Config(void)
 {
     GPIO_InitTypeDef gpio_init_structure; // Create GPIO configuration parameters structure
@@ -188,10 +205,16 @@ void DCMI_Config(void)
     // __HAL_DMA_ENABLE(dcmi_init_structure.DMA_Handle);
 }
 
+void led1_heartbeat(void)
+{
+    led1 = !led1;
+}
+
 int main(void)
 {
     GPIO_Config();
-    DMA_Config();
-    DCMI_Config();
-    HAL_DCMI_Start_DMA(&dcmi_init_structure, DCMI_MODE_SNAPSHOT, DCMI_MEMORY_LOC, DCMI_MEMORY_LEN); // Enable DCMI, DMA and capture a frame
+    // DMA_Config();
+    // DCMI_Config();
+    // HAL_DCMI_Start_DMA(&dcmi_init_structure, DCMI_MODE_SNAPSHOT, DCMI_MEMORY_LOC, DCMI_MEMORY_LEN); // Enable DCMI, DMA and capture a frame
+    heartbeat_ticker.attach(led1_heartbeat, 0.5);
 }
