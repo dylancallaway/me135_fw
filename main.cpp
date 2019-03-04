@@ -46,9 +46,12 @@ Ticker heartbeat_ticker;
 Thread thread1;
 
 // Status LEDs
-DigitalOut led1(LED1); // Green
-DigitalOut led2(LED2); // Blue
-DigitalOut led3(LED3); // Red
+DigitalOut led1(LED1); // Green <- Good things LED
+DigitalOut led2(LED2); // Blue <- Debug LED
+DigitalOut led3(LED3); // Red <- Error LED
+
+// Camera config pins
+DigitalOut camera_reset();
 
 // Serial communication
 Serial pc(SERIAL_TX, SERIAL_RX, 115200);
@@ -84,11 +87,11 @@ void GPIO_Config(void)
     PA4  -> HSYNC
     PG9  -> VSYNC
     
-    PA9  -> D0
-    PA10 -> D1
+    PC6  -> D0
+    PC7 -> D1
     PC8  -> D2
     PC9  -> D3
-    PC11  -> D4
+    PC11 -> D4
     PB6  -> D5
     PB8  -> D6
     PB9  -> D7
@@ -106,9 +109,6 @@ void GPIO_Config(void)
     __HAL_RCC_GPIOA_CLK_ENABLE();
     __HAL_RCC_GPIOB_CLK_ENABLE();
     __HAL_RCC_GPIOC_CLK_ENABLE();
-    __HAL_RCC_GPIOD_CLK_ENABLE();
-    __HAL_RCC_GPIOE_CLK_ENABLE();
-    __HAL_RCC_GPIOF_CLK_ENABLE();
     __HAL_RCC_GPIOG_CLK_ENABLE();
 
     /*** Configure the GPIO ***/
@@ -120,34 +120,26 @@ void GPIO_Config(void)
     gpio_init_structure.Alternate = GPIO_AF13_DCMI;
     HAL_GPIO_Init(GPIOA, &gpio_init_structure);
 
-    gpio_init_structure.Pin = GPIO_PIN_7;
+    gpio_init_structure.Pin = GPIO_PIN_6 | GPIO_PIN_8 | GPIO_PIN_9;
     gpio_init_structure.Mode = GPIO_MODE_AF_PP;
     gpio_init_structure.Pull = GPIO_PULLUP;
     gpio_init_structure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     gpio_init_structure.Alternate = GPIO_AF13_DCMI;
     HAL_GPIO_Init(GPIOB, &gpio_init_structure);
 
-    gpio_init_structure.Pin = GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 |
-                              GPIO_PIN_9 | GPIO_PIN_11;
+    gpio_init_structure.Pin = GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_11;
     gpio_init_structure.Mode = GPIO_MODE_AF_PP;
     gpio_init_structure.Pull = GPIO_PULLUP;
     gpio_init_structure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     gpio_init_structure.Alternate = GPIO_AF13_DCMI;
     HAL_GPIO_Init(GPIOC, &gpio_init_structure);
 
-    gpio_init_structure.Pin = GPIO_PIN_3 | GPIO_PIN_6;
+    gpio_init_structure.Pin = GPIO_PIN_9;
     gpio_init_structure.Mode = GPIO_MODE_AF_PP;
     gpio_init_structure.Pull = GPIO_PULLUP;
     gpio_init_structure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     gpio_init_structure.Alternate = GPIO_AF13_DCMI;
-    HAL_GPIO_Init(GPIOD, &gpio_init_structure);
-
-    gpio_init_structure.Pin = GPIO_PIN_5 | GPIO_PIN_6;
-    gpio_init_structure.Mode = GPIO_MODE_AF_PP;
-    gpio_init_structure.Pull = GPIO_PULLUP;
-    gpio_init_structure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    gpio_init_structure.Alternate = GPIO_AF13_DCMI;
-    HAL_GPIO_Init(GPIOE, &gpio_init_structure);
+    HAL_GPIO_Init(GPIOG, &gpio_init_structure);
 }
 
 void DMA_Config(void)
@@ -188,7 +180,7 @@ void DMA_Config(void)
     HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn); // Always seems to be 57
 
     /* Configure the DMA stream */
-    HAL_DMA_Init(&dma_init_structure);
+    led3 = HAL_DMA_Init(&dma_init_structure);
 
     __HAL_DCMI_ENABLE(&dma_init_structure);
 }
@@ -210,10 +202,71 @@ void DCMI_Config(void)
 
     dcmi_init_structure.Instance = DCMI;
 
-    HAL_DCMI_Init(&dcmi_init_structure); // Initialize DCMI with given parameter structure
+    led3 = HAL_DCMI_Init(&dcmi_init_structure); // Initialize DCMI with given parameter structure
 
     /* Enable the DMA ------------------ MAYBE NEEDED ??? */
     // __HAL_DMA_ENABLE(dcmi_init_structure.DMA_Handle);
+}
+
+static void SystemClock_Config(void)
+{
+    RCC_ClkInitTypeDef RCC_ClkInitStruct;
+    RCC_OscInitTypeDef RCC_OscInitStruct;
+    HAL_StatusTypeDef ret = HAL_OK;
+
+    /* Enable Power Control clock */
+    __HAL_RCC_PWR_CLK_ENABLE();
+
+    /* The voltage scaling allows optimizing the power consumption when the device is 
+     clocked below the maximum system frequency, to update the voltage scaling value 
+     regarding system frequency refer to product datasheet.  */
+    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+    /* Enable HSE Oscillator and activate PLL with HSE as source */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLM = 25;
+    RCC_OscInitStruct.PLL.PLLN = 400;
+    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+    RCC_OscInitStruct.PLL.PLLQ = 8;
+    RCC_OscInitStruct.PLL.PLLR = 7;
+
+    ret = HAL_RCC_OscConfig(&RCC_OscInitStruct);
+    if (ret != HAL_OK)
+    {
+        while (1)
+        {
+            ;
+        }
+    }
+
+    /* Activate the OverDrive to reach the 200 MHz Frequency */
+    ret = HAL_PWREx_EnableOverDrive();
+    if (ret != HAL_OK)
+    {
+        while (1)
+        {
+            ;
+        }
+    }
+
+    /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 clocks dividers */
+    RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+
+    ret = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_6);
+    if (ret != HAL_OK)
+    {
+        while (1)
+        {
+            ;
+        }
+    }
 }
 
 void led1_heartbeat(void)
@@ -223,9 +276,22 @@ void led1_heartbeat(void)
 
 int main(void)
 {
+    /* Enable I-Cache */
+    SCB_EnableICache();
+
+    /* Enable D-Cache */
+    SCB_EnableDCache();
+
+    SystemClock_Config();
+
     GPIO_Config();
     DMA_Config();
     DCMI_Config();
-    HAL_DCMI_Start_DMA(&dcmi_init_structure, DCMI_MODE_SNAPSHOT, DCMI_MEMORY_LOC, DCMI_MEMORY_LEN); // Enable DCMI, DMA and capture a frame
+    led3 = HAL_DCMI_Start_DMA(&dcmi_init_structure, DCMI_MODE_SNAPSHOT, DCMI_MEMORY_LOC, DCMI_MEMORY_LEN); // Enable DCMI, DMA and capture a frame
+
+    // int revalue = *DCMI_MEMORY_LOC;
+    // pc.printf("%d", revalue);
+
+    // Turn on heartbeat
     heartbeat_ticker.attach(led1_heartbeat, 0.5);
 }
