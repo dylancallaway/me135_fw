@@ -51,7 +51,12 @@ DigitalOut led2(LED2); // Blue <- Debug LED
 DigitalOut led3(LED3); // Red <- Error LED
 
 // Camera config pins
-DigitalOut camera_reset();
+DigitalOut camera_RST(PA_5);
+DigitalOut camera_PWDN(PD_14);
+
+// I2C
+// I2C i2c(PB_11, PB_10); // I2C2_SCL = PB_10, I2C2_SDA = PB_11
+I2C i2c(I2C_SDA, I2C_SCL); // I2C2_SCL = PB_10, I2C2_SDA = PB_11
 
 // Serial communication
 Serial pc(SERIAL_TX, SERIAL_RX, 115200);
@@ -88,7 +93,7 @@ void GPIO_Config(void)
     PG9  -> VSYNC
     
     PC6  -> D0
-    PC7 -> D1
+    PC7  -> D1
     PC8  -> D2
     PC9  -> D3
     PC11 -> D4
@@ -189,8 +194,8 @@ void DCMI_Config(void)
 {
     /*** Configures the DCMI to interface with the camera module ***/
 
-    /* Enable DCMI clock ------------------ MAYBE NEEDED ??? */
-    // __HAL_RCC_DCMI_CLK_ENABLE();
+    /* Enable DCMI clock ------------------ MAYBE NOT NEEDED ??? */
+    __HAL_RCC_DCMI_CLK_ENABLE();
 
     /* DCMI configuration */
     dcmi_init_structure.Init.CaptureRate = DCMI_CR_ALL_FRAME;        // Capture rate
@@ -208,65 +213,15 @@ void DCMI_Config(void)
     // __HAL_DMA_ENABLE(dcmi_init_structure.DMA_Handle);
 }
 
-static void SystemClock_Config(void)
+void camera_hw_reset(void)
 {
-    RCC_ClkInitTypeDef RCC_ClkInitStruct;
-    RCC_OscInitTypeDef RCC_OscInitStruct;
-    HAL_StatusTypeDef ret = HAL_OK;
-
-    /* Enable Power Control clock */
-    __HAL_RCC_PWR_CLK_ENABLE();
-
-    /* The voltage scaling allows optimizing the power consumption when the device is 
-     clocked below the maximum system frequency, to update the voltage scaling value 
-     regarding system frequency refer to product datasheet.  */
-    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-
-    /* Enable HSE Oscillator and activate PLL with HSE as source */
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-    RCC_OscInitStruct.PLL.PLLM = 25;
-    RCC_OscInitStruct.PLL.PLLN = 400;
-    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-    RCC_OscInitStruct.PLL.PLLQ = 8;
-    RCC_OscInitStruct.PLL.PLLR = 7;
-
-    ret = HAL_RCC_OscConfig(&RCC_OscInitStruct);
-    if (ret != HAL_OK)
-    {
-        while (1)
-        {
-            ;
-        }
-    }
-
-    /* Activate the OverDrive to reach the 200 MHz Frequency */
-    ret = HAL_PWREx_EnableOverDrive();
-    if (ret != HAL_OK)
-    {
-        while (1)
-        {
-            ;
-        }
-    }
-
-    /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 clocks dividers */
-    RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
-    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
-
-    ret = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_6);
-    if (ret != HAL_OK)
-    {
-        while (1)
-        {
-            ;
-        }
-    }
+    camera_RST = 0;  // Active low
+    camera_PWDN = 1; // Active high
+    HAL_Delay(100);
+    camera_PWDN = 0;
+    HAL_Delay(3);
+    camera_RST = 1;
+    HAL_Delay(6);
 }
 
 void led1_heartbeat(void)
@@ -276,21 +231,24 @@ void led1_heartbeat(void)
 
 int main(void)
 {
-    /* Enable I-Cache */
-    SCB_EnableICache();
+    camera_hw_reset();
+    // GPIO_Config();
+    // DMA_Config();
+    // DCMI_Config();
+    // led3 = HAL_DCMI_Start_DMA(&dcmi_init_structure, DCMI_MODE_SNAPSHOT, DCMI_MEMORY_LOC, DCMI_MEMORY_LEN); // Enable DCMI, DMA and capture a frame
 
-    /* Enable D-Cache */
-    SCB_EnableDCache();
+    char recv[1];
+    // dev = 0x61;
 
-    SystemClock_Config();
+    char cmd[1];
+    cmd[0] = 0xFF;
 
-    GPIO_Config();
-    DMA_Config();
-    DCMI_Config();
-    led3 = HAL_DCMI_Start_DMA(&dcmi_init_structure, DCMI_MODE_SNAPSHOT, DCMI_MEMORY_LOC, DCMI_MEMORY_LEN); // Enable DCMI, DMA and capture a frame
+    led2 = i2c.write(0x60 << 1, cmd, 8);
+    // led3 = i2c.write(ox61 << 1, 0x0A, 4);
+    // led2 = i2c.write(0x61 << 1, 0x61, 7);
+    led3 = i2c.read(0x61 << 1, recv, 8);
 
-    // int revalue = *DCMI_MEMORY_LOC;
-    // pc.printf("%d", revalue);
+    pc.printf("\n%p", recv);
 
     // Turn on heartbeat
     heartbeat_ticker.attach(led1_heartbeat, 0.5);
