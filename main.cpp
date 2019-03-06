@@ -50,9 +50,6 @@ DigitalOut led1(LED1); // Green <- Good things LED
 DigitalOut led2(LED2); // Blue <- Debug LED
 DigitalOut led3(LED3); // Red <- Error LED
 
-// Config USER button
-DigitalIn usr_but(USER_BUTTON); // TODO attach interrupt to the button to run i2c_scan when pressed and light LED if a device is found.
-
 // Camera config pins
 DigitalOut camera_RST(PA_5);   // Reset (active low) (must be high for camera to operate)
 DigitalOut camera_PWDN(PD_14); // Power down (active high) (must be low for camera to operate)
@@ -181,11 +178,11 @@ void DMA_Config(void)
 
     /*** Configure the NVIC for DCMI and DMA ***/
     /* NVIC configuration for DCMI transfer complete interrupt */
-    HAL_NVIC_SetPriority(DCMI_IRQn, 0x0F, 0);
+    HAL_NVIC_SetPriority(DCMI_IRQn, 0x07, 0);
     HAL_NVIC_EnableIRQ(DCMI_IRQn); // Always seems to be 78
 
     /* NVIC configuration for DMA2D transfer complete interrupt */
-    HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 0x0F, 0);
+    HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 0x07, 0);
     HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn); // Always seems to be 57
 
     /* Configure the DMA stream */
@@ -242,12 +239,6 @@ void i2c_scan(void)
     if (nDevices == 0)
     {
         printf("No I2C devices found.\n");
-        led2 = 0;
-    }
-    else
-    {
-        led2 = 1;
-        HAL_Delay(500);
     }
 }
 
@@ -345,6 +336,12 @@ void led1_heartbeat(void)
 int main()
 {
     SystemClock_Config(); // Not entirely sure exactly what is needed here but this seems to work.
+
+    /* Enable I-Cache */
+    SCB_EnableICache();
+
+    /* Enable D-Cache */
+    SCB_EnableDCache();
 
     // Output clock on MCO1 -> PA_8 (for OV2640 XCLK)
     // This is needed for any communication with the camera, SCCB included
