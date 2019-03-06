@@ -54,12 +54,12 @@ DigitalOut led3(LED3); // Red <- Error LED
 DigitalOut camera_RST(PA_5);
 DigitalOut camera_PWDN(PD_14);
 
-// I2C
-// I2C i2c(PB_11, PB_10); // I2C2_SCL = PB_10, I2C2_SDA = PB_11
-I2C i2c(I2C_SDA, I2C_SCL); // I2C2_SCL = PB_10, I2C2_SDA = PB_11
+// I2C *** NEED EXTERNAL PULLUPS ON THESE PINS ***
+I2C i2c(PB_11, PB_10); // I2C2_SCL = PB_10, I2C2_SDA = PB_11
+// I2C i2c(I2C_SDA, I2C_SCL); // I2C2_SCL = PB_10, I2C2_SDA = PB_11
 
 // Serial communication
-Serial pc(SERIAL_TX, SERIAL_RX, 115200);
+// Serial pc(SERIAL_TX, SERIAL_RX, 115200);
 
 void GPIO_Config(void)
 {
@@ -173,7 +173,7 @@ void DMA_Config(void)
     dma_init_structure.Instance = DMA2_Stream1;
 
     /* Associate the initialized DMA handle to the DCMI handle */
-    __HAL_LINKDMA(&dcmi_init_structure, DMA_Handle, dma_init_structure);
+    __HAL_LINKDMA(&dcmi_init_structure, DMA_Handle, dma_init_structure); // TODO what this do?
 
     /*** Configure the NVIC for DCMI and DMA ***/
     /* NVIC configuration for DCMI transfer complete interrupt */
@@ -231,24 +231,33 @@ void led1_heartbeat(void)
 
 int main(void)
 {
-    camera_hw_reset();
-    // GPIO_Config();
-    // DMA_Config();
-    // DCMI_Config();
-    // led3 = HAL_DCMI_Start_DMA(&dcmi_init_structure, DCMI_MODE_SNAPSHOT, DCMI_MEMORY_LOC, DCMI_MEMORY_LEN); // Enable DCMI, DMA and capture a frame
+    // camera_hw_reset();
+    GPIO_Config();
+    DMA_Config();
+    DCMI_Config();
+    led3 = HAL_DCMI_Start_DMA(&dcmi_init_structure, DCMI_MODE_CONTINUOUS, DCMI_MEMORY_LOC, DCMI_MEMORY_LEN); // Enable DCMI, DMA and capture a frame
 
-    char recv[1];
+    // RCC_ClkInitTypeDef RCC_ClkInitStruct;
+    // RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK;
+    // RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
+    // RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    // led2 = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_8); // FLatecy of 8, 9, or 10 ?? WHY ??
+
+    // // Output clock on MCO1 -> PA_8
+    // HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_PLLCLK, RCC_MCODIV_1);
+
+    // char recv[1];
     // dev = 0x61;
 
-    char cmd[1];
-    cmd[0] = 0xFF;
+    // char cmd[1];
+    // cmd[0] = 0xFF;
 
-    led2 = i2c.write(0x60 << 1, cmd, 8);
+    // led2 = i2c.write(0x60 << 1, cmd, 8);
     // led3 = i2c.write(ox61 << 1, 0x0A, 4);
     // led2 = i2c.write(0x61 << 1, 0x61, 7);
-    led3 = i2c.read(0x61 << 1, recv, 8);
+    // led3 = i2c.read(0x61 << 1, recv, 8);
 
-    pc.printf("\n%p", recv);
+    // pc.printf("\n%p", recv);
 
     // Turn on heartbeat
     heartbeat_ticker.attach(led1_heartbeat, 0.5);
