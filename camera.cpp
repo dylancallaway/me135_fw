@@ -88,6 +88,8 @@ EndDependencies */
 DigitalOut camera_RST(PA_5);   // Reset (active low) (must be high for camera to operate)
 DigitalOut camera_PWDN(PD_14); // Power down (active high) (must be low for camera to operate)
 
+#define FRAME_LENGTH 0xE740
+
 /** @addtogroup BSP
   * @{
   */
@@ -185,6 +187,7 @@ uint8_t BSP_CAMERA_Init(void)
   BSP_CAMERA_HwReset();
 
   /* Read ID of Camera module via I2C */
+  // THIS USED TO SET RESOLUTION HERE, WE COULD STILL DO THAT
   // if (s5k5cag_ReadID(CAMERA_I2C_ADDRESS) == S5K5CAG_ID)
   // {
   // CameraHwAddress = CAMERA_I2C_ADDRESS;
@@ -225,7 +228,7 @@ uint8_t BSP_CAMERA_DeInit(void)
 void BSP_CAMERA_ContinuousStart(uint8_t *buff)
 {
   /* Start the camera capture */
-  HAL_DCMI_Start_DMA(&hDcmiEval, DCMI_MODE_CONTINUOUS, (uint32_t)buff, 0xE740);
+  HAL_DCMI_Start_DMA(&hDcmiEval, DCMI_MODE_CONTINUOUS, (uint32_t)buff, FRAME_LENGTH);
 }
 
 /**
@@ -235,7 +238,7 @@ void BSP_CAMERA_ContinuousStart(uint8_t *buff)
 void BSP_CAMERA_SnapshotStart(uint8_t *buff)
 {
   /* Start the camera capture */
-  HAL_DCMI_Start_DMA(&hDcmiEval, DCMI_MODE_SNAPSHOT, (uint32_t)buff, 0xE740);
+  HAL_DCMI_Start_DMA(&hDcmiEval, DCMI_MODE_SNAPSHOT, (uint32_t)buff, FRAME_LENGTH);
 }
 
 /**
@@ -280,7 +283,6 @@ uint8_t BSP_CAMERA_Stop(void)
   */
 void BSP_CAMERA_HwReset(void)
 {
-
   /* Assert the camera STANDBY pin (active high)  */
   camera_PWDN = 1;
 

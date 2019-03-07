@@ -62,13 +62,13 @@ static void CPU_CACHE_Enable(void);
   */
 int main(void)
 {
-    /* Enable the CPU Cache */
-    CPU_CACHE_Enable();
+  /* Enable the CPU Cache */
+  CPU_CACHE_Enable();
 
-    CameraResX = QVGA_RES_X;
-    CameraResY = QVGA_RES_Y;
+  CameraResX = QVGA_RES_X;
+  CameraResY = QVGA_RES_Y;
 
-    /* STM32F7xx HAL library initialization:
+  /* STM32F7xx HAL library initialization:
        - Configure the Flash prefetch
        - Systick timer is configured by default as source of time base, but user 
          can eventually implement his proper time base source (a general purpose 
@@ -78,40 +78,40 @@ int main(void)
        - Set NVIC Group Priority to 4
        - Low Level Initialization
      */
-    HAL_Init();
+  HAL_Init();
 
-    /* Configure the system clock to 200 MHz */
-    SystemClock_Config();
-    /*##-2- Initialise the LCD #################################################*/
-    /* Proceed to LTDC, DSI and LCD screen initialization with the configuration filled in above */
-    /* for stageNb == 1 */
+  /* Configure the system clock to 200 MHz */
+  SystemClock_Config();
+  /*##-2- Initialise the LCD #################################################*/
+  /* Proceed to LTDC, DSI and LCD screen initialization with the configuration filled in above */
+  /* for stageNb == 1 */
 
-    /* Initialize MFX */
-    BSP_IO_Init();
+  /* Initialize MFX */
+  BSP_IO_Init();
 
-    /* Reset and power down camera to be sure camera is Off prior start testing BSP */
-    BSP_CAMERA_HwReset();
-    BSP_CAMERA_PwrDown();
+  /* Reset and power down camera to be sure camera is Off prior start testing BSP */
+  BSP_CAMERA_HwReset();
+  BSP_CAMERA_PwrDown();
 
-    /*##-3- Camera Initialization and start capture ############################*/
-    /* Initialize the Camera in QVGA mode */
-    BSP_CAMERA_Init();
+  /*##-3- Camera Initialization and start capture ############################*/
+  /* Initialize the Camera in QVGA mode */
+  BSP_CAMERA_Init();
 
-    /* Wait 1s to let auto-loops in the camera module converge and lead to correct exposure */
-    HAL_Delay(1000);
+  /* Wait 1s to let auto-loops in the camera module converge and lead to correct exposure */
+  HAL_Delay(1000);
 
-    /* Start the Camera Snapshot Capture */
-    BSP_CAMERA_SnapshotStart((uint8_t *)CAMERA_FRAME_BUFFER);
+  /* Start the Camera Snapshot Capture */
+  BSP_CAMERA_SnapshotStart((uint8_t *)CAMERA_FRAME_BUFFER);
 
-    /* Wait until LCD frame buffer is ready */
-    HAL_Delay(200);
-    /* Stop the camera to avoid having the DMA2D work in parallel of Display */
-    /* which cause perturbation of LTDC                                      */
-    BSP_CAMERA_Stop();
+  /* Wait until LCD frame buffer is ready */
+  HAL_Delay(200);
+  /* Stop the camera to avoid having the DMA2D work in parallel of Display */
+  /* which cause perturbation of LTDC                                      */
+  BSP_CAMERA_Stop();
 
-    while (1)
-    {
-    }
+  while (1)
+  {
+  }
 }
 
 /**
@@ -119,7 +119,7 @@ int main(void)
   * @param  None
   * @retval None
   */
-// MIGHT NEED STUFF HERE FOR GETTING IMAGE DATA
+// ******************* MIGHT NEED STUFF HERE FOR GETTING IMAGE DATA **************
 // void BSP_CAMERA_FrameEventCallback(void)
 // {
 //     static uint32_t camera_line_nb;
@@ -164,63 +164,63 @@ int main(void)
   */
 static void SystemClock_Config(void)
 {
-    RCC_ClkInitTypeDef RCC_ClkInitStruct;
-    RCC_OscInitTypeDef RCC_OscInitStruct;
-    HAL_StatusTypeDef ret = HAL_OK;
+  RCC_ClkInitTypeDef RCC_ClkInitStruct;
+  RCC_OscInitTypeDef RCC_OscInitStruct;
+  HAL_StatusTypeDef ret = HAL_OK;
 
-    /* Enable Power Control clock */
-    __HAL_RCC_PWR_CLK_ENABLE();
+  /* Enable Power Control clock */
+  __HAL_RCC_PWR_CLK_ENABLE();
 
-    /* The voltage scaling allows optimizing the power consumption when the device is 
+  /* The voltage scaling allows optimizing the power consumption when the device is 
      clocked below the maximum system frequency, to update the voltage scaling value 
      regarding system frequency refer to product datasheet.  */
-    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-    /* Enable HSE Oscillator and activate PLL with HSE as source */
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-    RCC_OscInitStruct.PLL.PLLM = 25;
-    RCC_OscInitStruct.PLL.PLLN = 400;
-    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-    RCC_OscInitStruct.PLL.PLLQ = 8;
-    RCC_OscInitStruct.PLL.PLLR = 7;
+  /* Enable HSE Oscillator and activate PLL with HSE as source */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = 25;
+  RCC_OscInitStruct.PLL.PLLN = 400;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 8;
+  RCC_OscInitStruct.PLL.PLLR = 7;
 
-    ret = HAL_RCC_OscConfig(&RCC_OscInitStruct);
-    if (ret != HAL_OK)
+  ret = HAL_RCC_OscConfig(&RCC_OscInitStruct);
+  if (ret != HAL_OK)
+  {
+    while (1)
     {
-        while (1)
-        {
-            ;
-        }
+      ;
     }
+  }
 
-    /* Activate the OverDrive to reach the 200 MHz Frequency */
-    ret = HAL_PWREx_EnableOverDrive();
-    if (ret != HAL_OK)
+  /* Activate the OverDrive to reach the 200 MHz Frequency */
+  ret = HAL_PWREx_EnableOverDrive();
+  if (ret != HAL_OK)
+  {
+    while (1)
     {
-        while (1)
-        {
-            ;
-        }
+      ;
     }
+  }
 
-    /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 clocks dividers */
-    RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
-    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+  /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 clocks dividers */
+  RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-    ret = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_6);
-    if (ret != HAL_OK)
+  ret = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_6);
+  if (ret != HAL_OK)
+  {
+    while (1)
     {
-        while (1)
-        {
-            ;
-        }
+      ;
     }
+  }
 }
 
 /**
@@ -230,11 +230,11 @@ static void SystemClock_Config(void)
   */
 static void CPU_CACHE_Enable(void)
 {
-    /* Enable I-Cache */
-    SCB_EnableICache();
+  /* Enable I-Cache */
+  SCB_EnableICache();
 
-    /* Enable D-Cache */
-    SCB_EnableDCache();
+  /* Enable D-Cache */
+  SCB_EnableDCache();
 }
 
 #ifdef USE_FULL_ASSERT
@@ -248,13 +248,13 @@ static void CPU_CACHE_Enable(void)
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
-    /* User can add his own implementation to report the file name and line number,
+  /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
 
-    /* Infinite loop */
-    while (1)
-    {
-    }
+  /* Infinite loop */
+  while (1)
+  {
+  }
 }
 #endif /* USE_FULL_ASSERT */
 
