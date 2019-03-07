@@ -1,246 +1,145 @@
 /**
- * Firmware for Bair Hockey image processing and motor control
- * Written with MBED OS 5
- * Running on NUCLEO-F767ZI Arm Cortex M7 microcontroller
- * Authors: Dylan Callaway
-**/
+  ******************************************************************************
+  * @file    DCMI/DCMI_SnapshotMode/Src/main.c
+  * @author  MCD Application Team
+  * @brief   This example describe how to configure the camera interface (DCMI) in snapshot
+  *          mode to handle a single image capture in QVGA (320x240) resolution and RGB565
+  *          format and display the obtained image on LCD screen.
+  ******************************************************************************
+  * @attention
+  *
+  * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
+  * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by ST under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  */
 
+/* Includes ------------------------------------------------------------------*/
 #include "mbed.h"
+#include "camera.h"
 
-// STM32F7 DCMI driver
-#include "stm32f7xx_hal_dcmi.h"
+/** @addtogroup STM32F7xx_HAL_Examples
+  * @{
+  */
 
-// STM32F7 DMA driver
-#include "stm32f7xx_hal_dma.h"
+/** @addtogroup DCMI_SnapshotMode
+  * @{
+  */
 
-/** 
- * Initialize DCMI and DMA interfaces
- * 
- * DCMI = Digital Camera Interface
- * Powers and runs the camera module
- * 
- * DMA = Direct Memory Access
- * Transfers data between peripherals (camera module)
- * and main memory without intervention of the CPU
-**/
+/* Private typedef -----------------------------------------------------------*/
+/* Private define ------------------------------------------------------------*/
+#define QVGA_RES_X 320
+#define QVGA_RES_Y 240
 
-// Memory destination for DCMI DMA. "destination memory buffer address (LCD Frame buffer)"
-// How tf do you specify this?? *******
-#define DCMI_MEMORY_LOC 0xC0177000 // Copied this from the STM32F769I camera example ???
+#define WVGA_RES_X 800
+#define WVGA_RES_Y 480
 
-// Output format RGB565: 5 bit red, 6 bit green, 5 bit blue.
-// Output size = 400x296x2 x 5 bits + 400x296x1 x 6 bits = 1894400 bits = 236800 bytes = 59200 words = 0xE740 words
-// Length of DCMI data to be transferred ***IN WORDS***
-// For a 32bit CPU: 1 word = 32 bits = 4 bytes
-#define DCMI_MEMORY_LEN 0xE740
+#define ARGB8888_BYTE_PER_PIXEL 4
+#define RGB565_BYTE_PER_PIXEL 2
+/* Private macro -------------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
+/* Camera resolution is QVGA (320x240) */
+static uint32_t CameraResX = QVGA_RES_X;
+static uint32_t CameraResY = QVGA_RES_Y;
 
-DCMI_HandleTypeDef dcmi_init_structure; // Create DCMI configuration parameters structure
+/* Private function prototypes -----------------------------------------------*/
+static void SystemClock_Config(void);
+static void CPU_CACHE_Enable(void);
 
-// Create timers
-Timer timer1;
+#define CAMERA_FRAME_BUFFER 0xC0177000
 
-// Create tickers
-Ticker heartbeat_ticker;
+/* Exported functions ---------------------------------------------------------*/
 
-// Create threads
-Thread thread1;
-
-// Status LEDs
-DigitalOut led1(LED1); // Green <- Good things LED
-DigitalOut led2(LED2); // Blue <- Debug LED
-DigitalOut led3(LED3); // Red <- Error LED
-
-// Camera config pins
-DigitalOut camera_RST(PA_5);   // Reset (active low) (must be high for camera to operate)
-DigitalOut camera_PWDN(PD_14); // Power down (active high) (must be low for camera to operate)
-
-// I2C *** NEED EXTERNAL PULLUPS ON THESE PINS ***
-// OV2640 7 bit address: 0x30
-I2C i2c(PB_11, PB_10); // I2C2_SDA = PB_11, I2C2_SCL = PB_10
-// I2C i2c(I2C_SDA, I2C_SCL);
-
-// Serial communication at 115200 baud
-Serial pc(SERIAL_TX, SERIAL_RX, 115200);
-
-void GPIO_Config(void)
+/**
+  * @brief  Main program
+  * @param  None
+  * @retval None
+  */
+int main(void)
 {
-    GPIO_InitTypeDef gpio_init_structure; // Create GPIO configuration parameters structure
+    /* Enable the CPU Cache */
+    CPU_CACHE_Enable();
 
-    /*
-   Creating a GPIO for the DCMI works like this:
-   Call this:
-   __HAL_RCC_GPIOX_CLK_ENABLE(); // X is A-Z here
-   
-    Then run:
-    gpio_init_structure.Pin = GPIO_PIN_4 | GPIO_PIN_6;
-    gpio_init_structure.Mode = GPIO_MODE_AF_PP;
-    gpio_init_structure.Pull = GPIO_PULLUP;
-    gpio_init_structure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    gpio_init_structure.Alternate = GPIO_AF13_DCMI;
-    HAL_GPIO_Init(GPIOX, &gpio_init_structure);
+    CameraResX = QVGA_RES_X;
+    CameraResY = QVGA_RES_Y;
 
-    // This initializes pins X4 and X6 where X is any letter A-Z
-   */
+    /* STM32F7xx HAL library initialization:
+       - Configure the Flash prefetch
+       - Systick timer is configured by default as source of time base, but user 
+         can eventually implement his proper time base source (a general purpose 
+         timer for example or other time source), keeping in mind that Time base 
+         duration should be kept 1ms since PPP_TIMEOUT_VALUEs are defined and 
+         handled in milliseconds basis.
+       - Set NVIC Group Priority to 4
+       - Low Level Initialization
+     */
+    HAL_Init();
 
-    /**DCMI GPIO Configuration
-     * https://www.st.com/resource/en/datasheet/stm32f767zi.pdf -> Pinouts and pin description
-    STM37F767xx Pin Name -> DCMI Pin Name
+    /* Configure the system clock to 200 MHz */
+    SystemClock_Config();
+    /*##-2- Initialise the LCD #################################################*/
+    /* Proceed to LTDC, DSI and LCD screen initialization with the configuration filled in above */
+    /* for stageNb == 1 */
 
-    PA6  -> PIXCLK
-    PA4  -> HSYNC
-    PG9  -> VSYNC
-    
-    PC6  -> D0
-    PC7  -> D1
-    PC8  -> D2
-    PC9  -> D3
-    PC11 -> D4
-    PB6  -> D5
-    PB8  -> D6
-    PB9  -> D7
+    /* Initialize MFX */
+    BSP_IO_Init();
 
-    -----Unused-----
-    PC10 -> D8
-    PH7  -> D9
-    PB5  -> D10
-    PD2  -> D11
-    PC12 -> D12
-    PG7  -> D13
-    */
+    /* Reset and power down camera to be sure camera is Off prior start testing BSP */
+    BSP_CAMERA_HwReset();
+    BSP_CAMERA_PwrDown();
 
-    /* Enable GPIO clocks */
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    __HAL_RCC_GPIOB_CLK_ENABLE();
-    __HAL_RCC_GPIOC_CLK_ENABLE();
-    __HAL_RCC_GPIOG_CLK_ENABLE();
+    /*##-3- Camera Initialization and start capture ############################*/
+    /* Initialize the Camera in QVGA mode */
+    BSP_CAMERA_Init();
 
-    /*** Configure the GPIO ***/
-    /* Configure DCMI GPIO as alternate function */
-    gpio_init_structure.Pin = GPIO_PIN_4 | GPIO_PIN_6;
-    gpio_init_structure.Mode = GPIO_MODE_AF_PP;
-    gpio_init_structure.Pull = GPIO_PULLUP;
-    gpio_init_structure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    gpio_init_structure.Alternate = GPIO_AF13_DCMI;
-    HAL_GPIO_Init(GPIOA, &gpio_init_structure);
+    /* Wait 1s to let auto-loops in the camera module converge and lead to correct exposure */
+    HAL_Delay(1000);
 
-    gpio_init_structure.Pin = GPIO_PIN_6 | GPIO_PIN_8 | GPIO_PIN_9;
-    gpio_init_structure.Mode = GPIO_MODE_AF_PP;
-    gpio_init_structure.Pull = GPIO_PULLUP;
-    gpio_init_structure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    gpio_init_structure.Alternate = GPIO_AF13_DCMI;
-    HAL_GPIO_Init(GPIOB, &gpio_init_structure);
+    /* Start the Camera Snapshot Capture */
+    BSP_CAMERA_SnapshotStart((uint8_t *)CAMERA_FRAME_BUFFER);
 
-    gpio_init_structure.Pin = GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_11;
-    gpio_init_structure.Mode = GPIO_MODE_AF_PP;
-    gpio_init_structure.Pull = GPIO_PULLUP;
-    gpio_init_structure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    gpio_init_structure.Alternate = GPIO_AF13_DCMI;
-    HAL_GPIO_Init(GPIOC, &gpio_init_structure);
+    /* Wait until LCD frame buffer is ready */
+    HAL_Delay(200);
+    /* Stop the camera to avoid having the DMA2D work in parallel of Display */
+    /* which cause perturbation of LTDC                                      */
+    BSP_CAMERA_Stop();
 
-    gpio_init_structure.Pin = GPIO_PIN_9;
-    gpio_init_structure.Mode = GPIO_MODE_AF_PP;
-    gpio_init_structure.Pull = GPIO_PULLUP;
-    gpio_init_structure.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    gpio_init_structure.Alternate = GPIO_AF13_DCMI;
-    HAL_GPIO_Init(GPIOG, &gpio_init_structure);
-
-    camera_RST = 1;
-    camera_PWDN = 0;
-}
-
-void DMA_Config(void)
-{
-    DMA_HandleTypeDef dma_init_structure; // Create DMA configuration parameters structure
-
-    /*** Configure the DMA ***/
-
-    /* Enable DMA2 clock */
-    __HAL_RCC_DMA2_CLK_ENABLE();
-
-    /* Set the parameters to be configured */
-    dma_init_structure.Init.Channel = DMA_CHANNEL_1;
-    dma_init_structure.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    dma_init_structure.Init.PeriphInc = DMA_PINC_DISABLE;
-    dma_init_structure.Init.MemInc = DMA_MINC_ENABLE;
-    dma_init_structure.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
-    dma_init_structure.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
-    dma_init_structure.Init.Mode = DMA_CIRCULAR; // or DMA_NORMAL ?
-    dma_init_structure.Init.Priority = DMA_PRIORITY_HIGH;
-    dma_init_structure.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-    dma_init_structure.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_FULL;
-    dma_init_structure.Init.MemBurst = DMA_MBURST_SINGLE;
-    dma_init_structure.Init.PeriphBurst = DMA_PBURST_SINGLE;
-
-    dma_init_structure.Instance = DMA2_Stream1;
-
-    /* Associate the initialized DMA handle to the DCMI handle */
-    __HAL_LINKDMA(&dcmi_init_structure, DMA_Handle, dma_init_structure); // TODO what this do?
-
-    /*** Configure the NVIC for DCMI and DMA ***/
-    /* NVIC configuration for DCMI transfer complete interrupt */
-    HAL_NVIC_SetPriority(DCMI_IRQn, 0x07, 0);
-    HAL_NVIC_EnableIRQ(DCMI_IRQn); // Always seems to be 78
-
-    /* NVIC configuration for DMA2D transfer complete interrupt */
-    HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 0x07, 0);
-    HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn); // Always seems to be 57
-
-    /* Configure the DMA stream */
-    led3 = HAL_DMA_Init(&dma_init_structure);
-
-    __HAL_DCMI_ENABLE(&dma_init_structure);
-}
-
-void DCMI_Config(void)
-{
-    /*** Configures the DCMI to interface with the camera module ***/
-
-    /* Enable DCMI clock ------------------ MAYBE NOT NEEDED ??? */
-    __HAL_RCC_DCMI_CLK_ENABLE();
-
-    /* DCMI configuration */
-    dcmi_init_structure.Init.CaptureRate = DCMI_CR_ALL_FRAME;        // Capture rate
-    dcmi_init_structure.Init.HSPolarity = DCMI_HSPOLARITY_HIGH;      // Horizontal polarity
-    dcmi_init_structure.Init.SynchroMode = DCMI_SYNCHRO_HARDWARE;    // Synchronization mode
-    dcmi_init_structure.Init.VSPolarity = DCMI_VSPOLARITY_HIGH;      // Vertical polarity
-    dcmi_init_structure.Init.ExtendedDataMode = DCMI_EXTEND_DATA_8B; // Data width
-    dcmi_init_structure.Init.PCKPolarity = DCMI_PCKPOLARITY_RISING;  // Pixel clock polarity
-
-    dcmi_init_structure.Instance = DCMI;
-
-    led3 = HAL_DCMI_Init(&dcmi_init_structure); // Initialize DCMI with given parameter structure
-}
-
-void i2c_scan(void)
-{
-    int error, address;
-    int nDevices;
-
-    printf("Scanning I2C bus...\n");
-
-    nDevices = 0;
-
-    char write_data[1];
-    write_data[0] = 0x00;
-
-    for (address = 1; address < 127; address++)
+    while (1)
     {
-        i2c.start();
-        error = i2c.write(address << 1, write_data, 1, 0); //We shift it left because mbed takes in 8 bit addreses
-        i2c.stop();
-        if (error == 0)
-        {
-            printf("I2C device found at address 0x%X.", address); //Returns 7-bit addres
-            nDevices++;
-        }
-    }
-    printf("\nScan complete.\n");
-
-    if (nDevices == 0)
-    {
-        printf("No I2C devices found.\n");
     }
 }
+
+/**
+  * @brief  Camera line event callback
+  * @param  None
+  * @retval None
+  */
+// MIGHT NEED STUFF HERE FOR GETTING IMAGE DATA
+// void BSP_CAMERA_FrameEventCallback(void)
+// {
+//     static uint32_t camera_line_nb;
+//     if (offset_lcd == 0)
+//     {
+//         /* If Camera resolution is lower than LCD resolution, set display in the middle of the screen */
+//         offset_lcd = ((((LcdResY - CameraResY) / 2) * LcdResX) /* Middle of the screen on Y axis */
+//                       + ((LcdResX - CameraResX) / 2))          /* Middle of the screen on X axis */
+//                      * sizeof(uint32_t);
+//     }
+
+//     for (camera_line_nb = 0; camera_line_nb < CameraResY; camera_line_nb++)
+//     {
+//         LCD_LL_ConvertLineToARGB8888((uint32_t *)(CAMERA_FRAME_BUFFER + offset_cam),
+//                                      (uint32_t *)(LCD_FRAME_BUFFER + offset_lcd));
+
+//         offset_cam = offset_cam + (CameraResX * sizeof(uint16_t));
+//         offset_lcd = offset_lcd + (LcdResX * sizeof(uint32_t));
+//     }
+// }
 
 /**
   * @brief  System Clock Configuration
@@ -265,8 +164,8 @@ void i2c_scan(void)
   */
 static void SystemClock_Config(void)
 {
-    RCC_OscInitTypeDef RCC_OscInitStruct;
     RCC_ClkInitTypeDef RCC_ClkInitStruct;
+    RCC_OscInitTypeDef RCC_OscInitStruct;
     HAL_StatusTypeDef ret = HAL_OK;
 
     /* Enable Power Control clock */
@@ -280,7 +179,7 @@ static void SystemClock_Config(void)
     /* Enable HSE Oscillator and activate PLL with HSE as source */
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
     RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE; // Was originally RCC_PLL_ON, but ON or OFF cause error
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
     RCC_OscInitStruct.PLL.PLLM = 25;
     RCC_OscInitStruct.PLL.PLLN = 400;
@@ -293,8 +192,7 @@ static void SystemClock_Config(void)
     {
         while (1)
         {
-            led3 = !led3;
-            HAL_Delay(250);
+            ;
         }
     }
 
@@ -304,8 +202,7 @@ static void SystemClock_Config(void)
     {
         while (1)
         {
-            led3 = !led3;
-            HAL_Delay(250);
+            ;
         }
     }
 
@@ -321,44 +218,52 @@ static void SystemClock_Config(void)
     {
         while (1)
         {
-            led3 = !led3;
-            HAL_Delay(250);
             ;
         }
     }
 }
 
-void led1_heartbeat(void)
+/**
+  * @brief  CPU L1-Cache enable.
+  * @param  None
+  * @retval None
+  */
+static void CPU_CACHE_Enable(void)
 {
-    led1 = !led1;
-}
-
-int main()
-{
-    SystemClock_Config(); // Not entirely sure exactly what is needed here but this seems to work.
-
     /* Enable I-Cache */
     SCB_EnableICache();
 
     /* Enable D-Cache */
     SCB_EnableDCache();
-
-    // Output clock on MCO1 -> PA_8 (for OV2640 XCLK)
-    // This is needed for any communication with the camera, SCCB included
-    // TODO check frequency with scope
-    HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSE, RCC_MCODIV_1);
-
-    i2c.frequency(400000); // Can only use 100kHz and 400kHz for SCCB
-
-    GPIO_Config();
-
-    DMA_Config();
-
-    DCMI_Config();
-
-    // Enable DCMI, DMA and capture a frame
-    led3 = HAL_DCMI_Start_DMA(&dcmi_init_structure, DCMI_MODE_CONTINUOUS, DCMI_MEMORY_LOC, DCMI_MEMORY_LEN);
-
-    // Turn on heartbeat
-    heartbeat_ticker.attach(led1_heartbeat, 0.5);
 }
+
+#ifdef USE_FULL_ASSERT
+
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
+void assert_failed(uint8_t *file, uint32_t line)
+{
+    /* User can add his own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+
+    /* Infinite loop */
+    while (1)
+    {
+    }
+}
+#endif /* USE_FULL_ASSERT */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
