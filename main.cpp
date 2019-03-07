@@ -51,9 +51,52 @@ static uint32_t CameraResY = QVGA_RES_Y;
 static void SystemClock_Config(void);
 static void CPU_CACHE_Enable(void);
 
-#define CAMERA_FRAME_BUFFER 0xC0177000
+#define CAMERA_HORIZ_PIXELS 400
+#define CAMERA_VERT_PIXELS 296
+uint8_t buff[1024];
+uint8_t *CAMERA_FRAME_BUFFER = buff;
+
+// Status LEDs
+DigitalOut led1(LED1); // Green <- Good things LED
+DigitalOut led2(LED2); // Blue <- Debug LED
+DigitalOut led3(LED3); // Red <- Error LED
+
+// Serial communication at 115200 baud
+Serial pc(SERIAL_TX, SERIAL_RX, 115200);
 
 /* Exported functions ---------------------------------------------------------*/
+void i2c_scan(void)
+{
+  I2C i2c(PB_11, PB_10); // I2C2_SDA = PB_11, I2C2_SCL = PB_10
+  i2c.frequency(400000);
+  int error, address;
+  int nDevices;
+
+  pc.printf("Scanning I2C bus...\n");
+
+  nDevices = 0;
+
+  char write_data[1];
+  write_data[0] = 0x00;
+
+  for (address = 1; address < 127; address++)
+  {
+    i2c.start();
+    error = i2c.write(address << 1, write_data, 1, 0); //We shift it left because mbed takes in 8 bit addreses
+    i2c.stop();
+    if (error == 0)
+    {
+      pc.printf("I2C device found at address 0x%X.", address); //Returns 7-bit addres
+      nDevices++;
+    }
+  }
+  pc.printf("\nScan complete.\n");
+
+  if (nDevices == 0)
+  {
+    pc.printf("No I2C devices found.\n");
+  }
+}
 
 /**
   * @brief  Main program
@@ -70,10 +113,10 @@ int main(void)
 
   /* STM32F7xx HAL library initialization:
        - Configure the Flash prefetch
-       - Systick timer is configured by default as source of time base, but user 
-         can eventually implement his proper time base source (a general purpose 
-         timer for example or other time source), keeping in mind that Time base 
-         duration should be kept 1ms since PPP_TIMEOUT_VALUEs are defined and 
+       - Systick timer is configured by default as source of time base, but user
+         can eventually implement his proper time base source (a general purpose
+         timer for example or other time source), keeping in mind that Time base
+         duration should be kept 1ms since PPP_TIMEOUT_VALUEs are defined and
          handled in milliseconds basis.
        - Set NVIC Group Priority to 4
        - Low Level Initialization
@@ -82,11 +125,8 @@ int main(void)
 
   /* Configure the system clock to 200 MHz */
   SystemClock_Config();
-  /*##-2- Initialise the LCD #################################################*/
-  /* Proceed to LTDC, DSI and LCD screen initialization with the configuration filled in above */
-  /* for stageNb == 1 */
 
-  /* Initialize MFX */
+  /* Initialize GPIO */
   BSP_IO_Init();
 
   /* Reset and power down camera to be sure camera is Off prior start testing BSP */
@@ -94,8 +134,9 @@ int main(void)
   BSP_CAMERA_PwrDown();
 
   /*##-3- Camera Initialization and start capture ############################*/
-  /* Initialize the Camera in QVGA mode */
+  /* Initialize the Camera */
   BSP_CAMERA_Init();
+  i2c_scan();
 
   /* Wait 1s to let auto-loops in the camera module converge and lead to correct exposure */
   HAL_Delay(1000);
@@ -109,9 +150,9 @@ int main(void)
   /* which cause perturbation of LTDC                                      */
   BSP_CAMERA_Stop();
 
-  while (1)
-  {
-  }
+  pc.printf("\t%d", buff[100]);
+
+  led1 = 1;
 }
 
 /**
@@ -179,7 +220,7 @@ static void SystemClock_Config(void)
   /* Enable HSE Oscillator and activate PLL with HSE as source */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 25;
   RCC_OscInitStruct.PLL.PLLN = 400;
@@ -221,6 +262,10 @@ static void SystemClock_Config(void)
       ;
     }
   }
+
+  // Output clock on MCO1 -> PA_8 (for OV2640 XCLK)
+  // This is needed for any communication with the camera, SCCB included
+  HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSE, RCC_MCODIV_1);
 }
 
 /**
