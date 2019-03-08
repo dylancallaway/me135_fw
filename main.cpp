@@ -22,6 +22,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "mbed.h"
 #include "camera.h"
+#include "FastPWM.h"
 
 /** @addtogroup STM32F7xx_HAL_Examples
   * @{
@@ -68,7 +69,8 @@ Serial pc(SERIAL_TX, SERIAL_RX, 115200);
 void i2c_scan(void)
 {
   I2C i2c(PB_11, PB_10); // I2C2_SDA = PB_11, I2C2_SCL = PB_10
-  i2c.frequency(400000);
+  i2c.frequency(100000);
+
   int error, address;
   int nDevices;
 
@@ -98,18 +100,52 @@ void i2c_scan(void)
   }
 }
 
+#define CAM_ADDR 0x30
+char data;
+char send_addr = 0x30;
+char send_data = 0x05;
+int len;
+
+int i2c_reg_read(char addr)
+{
+  I2C i2c(PB_11, PB_10); // I2C2_SDA = PB_11, I2C2_SCL = PB_10
+  i2c.frequency(100000);
+
+  // i2c.start();
+  // wait_us(20);
+
+  len = i2c.write(0x30 << 1, &send_addr, 8, 0);
+  wait_us(20);
+
+  len = i2c.write(0x30 << 1, &send_data, 8, 0);
+  wait_us(20);
+
+  len = i2c.read(0x30 << 1, &data, 8, 0);
+  wait_us(20);
+
+  i2c.stop();
+
+  return len;
+}
+
 /**
   * @brief  Main program
   * @param  None
   * @retval None
   */
+
+FastPWM fpwm(PA_8, 1);
 int main(void)
 {
+  fpwm.period_ticks(10);
+  fpwm.pulsewidth_ticks(5);
+  led1.write(1);
+
   /* Enable the CPU Cache */
   CPU_CACHE_Enable();
 
-  CameraResX = QVGA_RES_X;
-  CameraResY = QVGA_RES_Y;
+  // CameraResX = QVGA_RES_X;
+  // CameraResY = QVGA_RES_Y;
 
   /* STM32F7xx HAL library initialization:
        - Configure the Flash prefetch
@@ -124,7 +160,7 @@ int main(void)
   HAL_Init();
 
   /* Configure the system clock to 200 MHz */
-  SystemClock_Config();
+  // SystemClock_Config();
 
   /* Initialize GPIO */
   BSP_IO_Init();
@@ -136,7 +172,6 @@ int main(void)
   /*##-3- Camera Initialization and start capture ############################*/
   /* Initialize the Camera */
   BSP_CAMERA_Init();
-  i2c_scan();
 
   /* Wait 1s to let auto-loops in the camera module converge and lead to correct exposure */
   HAL_Delay(1000);
@@ -148,11 +183,15 @@ int main(void)
   HAL_Delay(200);
   /* Stop the camera to avoid having the DMA2D work in parallel of Display */
   /* which cause perturbation of LTDC                                      */
-  BSP_CAMERA_Stop();
+  // BSP_CAMERA_Stop();
 
-  pc.printf("\t%d", buff[100]);
+  i2c_scan();
 
-  led1 = 1;
+  // char reg = 0x05;
+  // int d1 = i2c_reg_read(reg);
+  // pc.printf("\t%d", data);
+
+  // pc.printf("\t%d", buff[100]);
 }
 
 /**
