@@ -100,27 +100,23 @@ void i2c_scan(void)
   }
 }
 
-#define CAM_ADDR 0x30
 char data;
 char send_addr = 0x30;
 char send_data = 0x05;
 int len;
 
-int i2c_reg_read(char addr)
+int i2c_reg_read(const char *addr)
 {
   I2C i2c(PB_11, PB_10); // I2C2_SDA = PB_11, I2C2_SCL = PB_10
   i2c.frequency(100000);
 
-  // i2c.start();
-  // wait_us(20);
-
-  len = i2c.write(0x30 << 1, &send_addr, 8, 0);
+  i2c.start();
   wait_us(20);
 
-  len = i2c.write(0x30 << 1, &send_data, 8, 0);
+  len = i2c.write(0x30 << 1, addr, 1, 0);
   wait_us(20);
 
-  len = i2c.read(0x30 << 1, &data, 8, 0);
+  len = i2c.read(0x30 << 1, &data, 1, 0);
   wait_us(20);
 
   i2c.stop();
@@ -134,64 +130,69 @@ int i2c_reg_read(char addr)
   * @retval None
   */
 
-FastPWM fpwm(PA_8, 1);
+FastPWM fpwm(PE_13, 1);
 int main(void)
 {
-  fpwm.period_ticks(10);
-  fpwm.pulsewidth_ticks(5);
-  led1.write(1);
+  fpwm.period_ticks(36); // Uses 216MHz PLL clock
+  fpwm.pulsewidth_ticks(18);
 
   /* Enable the CPU Cache */
   CPU_CACHE_Enable();
 
-  // CameraResX = QVGA_RES_X;
-  // CameraResY = QVGA_RES_Y;
+  // // CameraResX = QVGA_RES_X;
+  // // CameraResY = QVGA_RES_Y;
 
-  /* STM32F7xx HAL library initialization:
-       - Configure the Flash prefetch
-       - Systick timer is configured by default as source of time base, but user
-         can eventually implement his proper time base source (a general purpose
-         timer for example or other time source), keeping in mind that Time base
-         duration should be kept 1ms since PPP_TIMEOUT_VALUEs are defined and
-         handled in milliseconds basis.
-       - Set NVIC Group Priority to 4
-       - Low Level Initialization
-     */
+  // /* STM32F7xx HAL library initialization:
+  //      - Configure the Flash prefetch
+  //      - Systick timer is configured by default as source of time base, but user
+  //        can eventually implement his proper time base source (a general purpose
+  //        timer for example or other time source), keeping in mind that Time base
+  //        duration should be kept 1ms since PPP_TIMEOUT_VALUEs are defined and
+  //        handled in milliseconds basis.
+  //      - Set NVIC Group Priority to 4
+  //      - Low Level Initialization
+  //    */
   HAL_Init();
 
-  /* Configure the system clock to 200 MHz */
-  // SystemClock_Config();
+  // /* Configure the system clock to 200 MHz */
+  // // SystemClock_Config();
 
-  /* Initialize GPIO */
-  BSP_IO_Init();
+  // /* Initialize GPIO */
+  // BSP_IO_Init();
 
-  /* Reset and power down camera to be sure camera is Off prior start testing BSP */
+  // /* Reset and power down camera to be sure camera is Off prior start testing BSP */
   BSP_CAMERA_HwReset();
   BSP_CAMERA_PwrDown();
 
-  /*##-3- Camera Initialization and start capture ############################*/
-  /* Initialize the Camera */
+  // /*##-3- Camera Initialization and start capture ############################*/
+  // /* Initialize the Camera */
   BSP_CAMERA_Init();
 
-  /* Wait 1s to let auto-loops in the camera module converge and lead to correct exposure */
-  HAL_Delay(1000);
+  // /* Wait 1s to let auto-loops in the camera module converge and lead to correct exposure */
+  // HAL_Delay(1000);
 
-  /* Start the Camera Snapshot Capture */
+  // /* Start the Camera Snapshot Capture */
   BSP_CAMERA_SnapshotStart((uint8_t *)CAMERA_FRAME_BUFFER);
 
-  /* Wait until LCD frame buffer is ready */
-  HAL_Delay(200);
-  /* Stop the camera to avoid having the DMA2D work in parallel of Display */
-  /* which cause perturbation of LTDC                                      */
-  // BSP_CAMERA_Stop();
+  // /* Wait until LCD frame buffer is ready */
+  // HAL_Delay(200);
+  // /* Stop the camera to avoid having the DMA2D work in parallel of Display */
+  // /* which cause perturbation of LTDC                                      */
+  // // BSP_CAMERA_Stop();
 
   i2c_scan();
 
-  // char reg = 0x05;
-  // int d1 = i2c_reg_read(reg);
-  // pc.printf("\t%d", data);
+  // const char reg = 0x05;
+  // const char *reg_ptr = &reg;
+  // int d1 = i2c_reg_read(reg_ptr);
+  // pc.printf("\t%d  %d", d1, data);
 
   // pc.printf("\t%d", buff[100]);
+
+  led1.write(1);
+  while (1)
+  {
+  }
 }
 
 /**
