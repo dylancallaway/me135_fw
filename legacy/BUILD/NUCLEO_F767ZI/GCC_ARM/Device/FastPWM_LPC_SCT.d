@@ -1,0 +1,2 @@
+BUILD/NUCLEO_F767ZI/GCC_ARM/Device/FastPWM_LPC_SCT.o: \
+ Device/FastPWM_LPC_SCT.cpp BUILD/NUCLEO_F767ZI/GCC_ARM/mbed_config.h

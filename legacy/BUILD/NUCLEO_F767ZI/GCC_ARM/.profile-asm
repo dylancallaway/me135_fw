@@ -1,0 +1,17 @@
+{
+    "flags": [
+        "-x", 
+        "assembler-with-cpp"
+    ], 
+    "macros": [], 
+    "symbols": [
+        "ARM_MATH_CM7", 
+        "MBED_TICKLESS", 
+        "TRANSACTION_QUEUE_SIZE_SPI=2", 
+        "USBHOST_OTHER", 
+        "__CMSIS_RTOS", 
+        "__CORTEX_M7", 
+        "__FPU_PRESENT=1", 
+        "__MBED_CMSIS_RTOS_CM"
+    ]
+}

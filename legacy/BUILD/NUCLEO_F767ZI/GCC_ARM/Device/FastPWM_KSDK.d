@@ -1,0 +1,2 @@
+BUILD/NUCLEO_F767ZI/GCC_ARM/Device/FastPWM_KSDK.o: \
+ Device/FastPWM_KSDK.cpp BUILD/NUCLEO_F767ZI/GCC_ARM/mbed_config.h
