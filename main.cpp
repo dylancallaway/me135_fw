@@ -2,24 +2,21 @@
 using namespace std;
 
 #include "opencv2/opencv.hpp"
-//#include "opencv2/imgproc.hpp"
-//#include "opencv2/imgcodecs.hpp"
-//#include "opencv2/highgui.hpp"
 using namespace cv;
 
-Mat src, planes[3];
+Mat src; Mat planes[3];
 
-
-
-int main( int argc, char** argv )
-{
+int main( int argc, char** argv ) {
 	String imageName("../data/stuff.jpg"); // by default
-	
+
 	if (argc > 1){imageName = argv[1];}
-	
-	src = imread(imageName.c_str(), IMREAD_COLOR); // Load an image
+
+	src = imread(imageName, IMREAD_COLOR); // Load an image
+
 	if(src.empty())
 		{cout << "Failed to read image file.\n"; return -1;}
+	else
+		{cout << "Image read successfully.\n";}
 
 	namedWindow("Src", WINDOW_NORMAL); // Create a window to display results
 	namedWindow("B", WINDOW_NORMAL); // Create a window to display results
@@ -30,7 +27,7 @@ int main( int argc, char** argv )
 	split(src, planes);
 
 	imshow("Src", src);
-	imshow("B", planes[0]);		
+	imshow("B", planes[0]);
 	imshow("G", planes[1]);
 	imshow("R", planes[2]);
 
