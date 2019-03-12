@@ -1,0 +1,21 @@
+#include <iostream>
+using namespace std;
+
+#include <opencv2/opencv.hpp>
+using namespace cv;
+
+int main(void)
+{
+	VideoCapture cap(0);
+	if(!cap.isOpened()) {return -1;}
+
+	Mat edges;
+	namedWindow("edges", 1);
+
+	Mat frame;
+	cap >> frame;
+//	if(waitKey(30) >= 0) {break;}
+
+	cout << "Hello, World!\n";
+	return 0;
+}
