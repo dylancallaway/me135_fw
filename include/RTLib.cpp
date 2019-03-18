@@ -1,6 +1,6 @@
 #include <RTLib.h>
 
-static void setprio(int prio, int sched)
+void setprio(int prio, int sched)
 {
     struct sched_param param;
     // Set realtime priority for this thread
@@ -11,7 +11,7 @@ static void setprio(int prio, int sched)
 
 void show_new_pagefault_count(const char *logtext, const char *allowed_maj, const char *allowed_min)
 {
-    static int last_majflt = 0, last_minflt = 0;
+    int last_majflt = 0, last_minflt = 0;
     struct rusage usage;
 
     getrusage(RUSAGE_SELF, &usage);
@@ -26,7 +26,7 @@ void show_new_pagefault_count(const char *logtext, const char *allowed_maj, cons
     last_minflt = usage.ru_minflt;
 }
 
-static void prove_thread_stack_use_is_safe(int stacksize)
+void prove_thread_stack_use_is_safe(int stacksize)
 {
     volatile char buffer[stacksize];
     int i;
@@ -43,7 +43,7 @@ static void prove_thread_stack_use_is_safe(int stacksize)
 
 /*************************************************************/
 /* The thread to start */
-static void *my_rt_thread(void *args)
+void *my_rt_thread(void *args)
 {
     struct timespec ts;
     ts.tv_sec = 30;
@@ -69,14 +69,14 @@ static void *my_rt_thread(void *args)
 
 /*************************************************************/
 
-static void error(int at)
+void error(int at)
 {
     /* Just exit on error */
     fprintf(stderr, "Some error occured at %d", at);
     exit(1);
 }
 
-static void start_rt_thread(void)
+void start_rt_thread(void)
 {
     pthread_t thread;
     pthread_attr_t attr;
@@ -91,7 +91,7 @@ static void start_rt_thread(void)
     pthread_create(&thread, &attr, my_rt_thread, NULL);
 }
 
-static void configure_malloc_behavior(void)
+void configure_malloc_behavior(void)
 {
     /* Now lock all current and future pages 
 	   from preventing of being paged */
@@ -105,7 +105,7 @@ static void configure_malloc_behavior(void)
     mallopt(M_MMAP_MAX, 0);
 }
 
-static void reserve_process_memory(int size)
+void reserve_process_memory(int size)
 {
     int i;
     char *buffer;
