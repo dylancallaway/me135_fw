@@ -65,8 +65,8 @@ int main(int argc, char **argv)
     cam.set(CAP_PROP_FPS, frm_rate);
     cout << "Frame rate: " << frm_rate << "\n";
 
-    string window_name = "Camera Feed";
-    namedWindow(window_name, WINDOW_NORMAL);
+    // string window_name = "Camera Feed";
+    // namedWindow(window_name, WINDOW_NORMAL);
 
     clock_t t1, t2, delta_t;
 
