@@ -12,7 +12,7 @@ using namespace cv;
 #include <RTLib.h>
 
 #define PRE_ALLOCATION_SIZE (100 * 1024 * 1024) /* 100MB - total amount of memory locked for this process */
-#define MY_STACK_SIZE (10 * 1024 * 1024)       /* 10MB - stack size for this process */
+#define MY_STACK_SIZE (10 * 1024 * 1024)        /* 10MB - stack size for this process */
 
 int main(int argc, char **argv)
 {
@@ -76,13 +76,12 @@ int main(int argc, char **argv)
         delta_t = t1 - t2;
         t2 = clock();
 
-        Mat src;
         bool read_success = cam.read(src);
 
         if (!read_success)
         {
             cout << "Unable to read frame.\n";
-            cin.get();
+            cin.get(); // Wait for keypress
             break;
         }
 
@@ -93,8 +92,10 @@ int main(int argc, char **argv)
         //     cout << "Esc key pressed, stopping feed.\n";
         //     break;
         // }
+
         cout << float(delta_t) / CLOCKS_PER_SEC << "\n";
-        delayMicroseconds(50);
+
+        delayMicroseconds(10); // Delay allows background processes to run at a fixed interval
     }
 
     return 0;
