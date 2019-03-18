@@ -11,8 +11,8 @@ using namespace cv;
 
 #include <RTLib.h>
 
-#define PRE_ALLOCATION_SIZE (256 * 1024 * 1024) /* 256MB */
-#define MY_STACK_SIZE (100 * 1024 * 1024)       /* 100MB */
+#define PRE_ALLOCATION_SIZE (100 * 1024 * 1024) /* 100MB - total amount of memory locked for this process */
+#define MY_STACK_SIZE (10 * 1024 * 1024)       /* 10MB - stack size for this process */
 
 int main(int argc, char **argv)
 {
