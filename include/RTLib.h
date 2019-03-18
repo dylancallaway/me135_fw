@@ -11,8 +11,13 @@
 #include <pthread.h>
 #include <limits.h>
 
+#ifndef PRE_ALLOCATION_SIZE
 #define PRE_ALLOCATION_SIZE (100 * 1024 * 1024) /* 100MB pagefault free buffer */
+#endif
+
+#ifndef MY_STACK_SIZE
 #define MY_STACK_SIZE (100 * 1024)              /* 100 kB is enough for now. */
+#endif
 
 void setprio(int prio, int sched);
 
