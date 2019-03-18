@@ -11,8 +11,8 @@ using namespace cv;
 
 #include <RTLib.h>
 
-#define PRE_ALLOCATION_SIZE (100 * 1024 * 1024) /* 100MB pagefault free buffer */
-#define MY_STACK_SIZE (100 * 1024)              /* 100 kB is enough for now. */
+#define PRE_ALLOCATION_SIZE (256 * 1024 * 1024) /* 256MB */
+#define MY_STACK_SIZE (100 * 1024 * 1024)       /* 100MB */
 
 int main(int argc, char **argv)
 {
@@ -88,11 +88,11 @@ int main(int argc, char **argv)
 
         // imshow(window_name, src);
 
-        if (waitKey(10) == 27)
-        {
-            cout << "Esc key pressed, stopping feed.\n";
-            break;
-        }
+        // if (waitKey(10) == 27)
+        // {
+        //     cout << "Esc key pressed, stopping feed.\n";
+        //     break;
+        // }
         cout << float(delta_t) / CLOCKS_PER_SEC << "\n";
         delayMicroseconds(50);
     }
