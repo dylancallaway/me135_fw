@@ -9,8 +9,6 @@ using namespace cv;
 #include <sched.h>
 #include <sys/mman.h>
 
-#include <include/RTLib.h>
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/mman.h> // Needed for mlockall()
