@@ -9,7 +9,7 @@ using namespace cv;
 #include <sched.h>
 #include <sys/mman.h>
 
-#include <RTLib.h>
+#include <include/RTLib.h>
 
 #define PRE_ALLOCATION_SIZE (100 * 1024 * 1024) /* 100MB pagefault free buffer */
 #define MY_STACK_SIZE (100 * 1024)              /* 100 kB is enough for now. */
