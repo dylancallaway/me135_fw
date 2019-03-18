@@ -1,3 +1,6 @@
+#ifndef RTLIB_INCLUDED
+#define RTLIB_INCLUDED
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/mman.h> // Needed for mlockall()
@@ -26,3 +29,5 @@ void start_rt_thread(void);
 void configure_malloc_behavior(void);
 
 void reserve_process_memory(int size);
+
+#endif
