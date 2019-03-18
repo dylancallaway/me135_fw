@@ -11,7 +11,6 @@
 #define PRE_ALLOCATION_SIZE (100 * 1024 * 1024) /* 100MB pagefault free buffer */
 #define MY_STACK_SIZE (100 * 1024)              /* 100 kB is enough for now. */
 
-public:
 static void setprio(int prio, int sched);
 
 void show_new_pagefault_count(const char *logtext, const char *allowed_maj, const char *allowed_min);
