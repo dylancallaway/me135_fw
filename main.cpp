@@ -12,6 +12,8 @@ using namespace cv;
 #include <chrono>
 #include <sys/mman.h>
 
+#include <RTLib.h>
+
 #define PRE_ALLOCATION_SIZE (100 * 1024 * 1024) /* 100MB pagefault free buffer */
 #define MY_STACK_SIZE (100 * 1024)              /* 100 kB is enough for now. */
 
@@ -34,46 +36,66 @@ int main()
     sp.sched_priority = sched_get_priority_max(SCHED_FIFO) - 1;
     pid_t pid = getpid();
     sched_setscheduler(pid, SCHED_FIFO, &sp);
-
     cout << pid << "\t" << sp.sched_priority << "\n";
+
+    configure_malloc_behavior();
+
+    show_new_pagefault_count("mlockall() generated", ">=0", ">=0");
+
+    reserve_process_memory(PRE_ALLOCATION_SIZE);
+
+    show_new_pagefault_count("malloc() and touch generated",
+                             ">=0", ">=0");
+
+    /* Now allocate the memory for the 2nd time and prove the number of
+	   pagefaults are zero */
+    reserve_process_memory(PRE_ALLOCATION_SIZE);
+    show_new_pagefault_count("2nd malloc() and use generated",
+                             "0", "0");
+
+    printf("\n\nLook at the output of ps -leyf, and see that the "
+           "RSS is now about %d [MB]\n",
+           PRE_ALLOCATION_SIZE / (1024 * 1024));
+
+    prove_thread_stack_use_is_safe(MY_STACK_SIZE);
 
     wiringPiSetup();
 
-    cam.set(CAP_PROP_FRAME_WIDTH, FRM_COLS);
-    cam.set(CAP_PROP_FRAME_HEIGHT, FRM_ROWS);
+    // cam.set(CAP_PROP_FRAME_WIDTH, FRM_COLS);
+    // cam.set(CAP_PROP_FRAME_HEIGHT, FRM_ROWS);
 
-    cout << "Frame resolution: " << FRM_COLS << "x" << FRM_ROWS << "\n";
+    // cout << "Frame resolution: " << FRM_COLS << "x" << FRM_ROWS << "\n";
 
-    cam.set(CAP_PROP_FPS, FRM_RATE);
-    cout << "Frame rate: " << FRM_RATE << "\n";
+    // cam.set(CAP_PROP_FPS, FRM_RATE);
+    // cout << "Frame rate: " << FRM_RATE << "\n";
 
-    // string window_name = "Camera Feed";
-    // namedWindow(window_name, WINDOW_NORMAL);
+    // // string window_name = "Camera Feed";
+    // // namedWindow(window_name, WINDOW_NORMAL);
 
-    auto t2 = chrono::steady_clock::now();
+    // auto t2 = chrono::steady_clock::now();
 
-    mlockall(MCL_CURRENT | MCL_FUTURE);
+    // mlockall(MCL_CURRENT | MCL_FUTURE);
 
-    while (true)
-    {
-        auto next_time = chrono::steady_clock::now() + chrono::milliseconds(CAP_INTERVAL);
-        auto t1 = chrono::steady_clock::now();
-        chrono::duration<float, milli> t_elapse = t1 - t2;
-        cout << t_elapse.count() << "\n";
-        t2 = chrono::steady_clock::now();
+    // while (true)
+    // {
+    //     auto next_time = chrono::steady_clock::now() + chrono::milliseconds(CAP_INTERVAL);
+    //     auto t1 = chrono::steady_clock::now();
+    //     chrono::duration<float, milli> t_elapse = t1 - t2;
+    //     cout << t_elapse.count() << "\n";
+    //     t2 = chrono::steady_clock::now();
 
-        cam.read(src);
-        split(src, bgr);
+    //     cam.read(src);
+    //     split(src, bgr);
 
-        // imshow(window_name, src);
-        // if (waitKey(10) == 27)
-        // {
-        // cout << "Esc key pressed, stopping feed.\n";
-        // break;
-        // }
+    //     // imshow(window_name, src);
+    //     // if (waitKey(10) == 27)
+    //     // {
+    //     // cout << "Esc key pressed, stopping feed.\n";
+    //     // break;
+    //     // }
 
-        this_thread::sleep_until(next_time);
-    }
+    //     this_thread::sleep_until(next_time);
+    // }
 
     return 0;
 }
