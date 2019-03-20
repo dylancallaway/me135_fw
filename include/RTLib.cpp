@@ -109,7 +109,6 @@ void reserve_process_memory(int size)
 {
     int i;
     char *buffer;
-
     buffer = (char *)malloc(size);
 
     /* Touch each page in this piece of memory to get it mapped into RAM */

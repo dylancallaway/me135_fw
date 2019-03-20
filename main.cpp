@@ -15,7 +15,6 @@ using namespace cv;
 #include <RTLib.h>
 
 #define PRE_ALLOCATION_SIZE (100 * 1024 * 1024) /* 100MB pagefault free buffer */
-#define MY_STACK_SIZE (100 * 1024)              /* 100 kB is enough for now. */
 
 #define FRM_COLS 640
 #define FRM_ROWS 480
@@ -56,8 +55,6 @@ int main()
     printf("\n\nLook at the output of ps -leyf, and see that the "
            "RSS is now about %d [MB]\n",
            PRE_ALLOCATION_SIZE / (1024 * 1024));
-
-    prove_thread_stack_use_is_safe(MY_STACK_SIZE);
 
     wiringPiSetup();
 
