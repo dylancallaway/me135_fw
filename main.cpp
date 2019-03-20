@@ -7,11 +7,6 @@ using namespace cv;
 #include <wiringPi.h>
 #include <thread>
 
-#define PRE_ALLOCATION_SIZE (100 * 1024 * 1024) /* 100MB - total amount of memory locked for this process */
-#define MY_STACK_SIZE (10 * 1024 * 1024)        /* 10MB - stack size for this process */
-
-#include <RTLib.h>
-
 #define FRM_COLS 640
 #define FRM_ROWS 480
 
@@ -27,29 +22,6 @@ int t1, t2, t_elapse;
 
 int main(int argc, char **argv)
 {
-    show_new_pagefault_count("Initial count", ">=0", ">=0");
-
-    configure_malloc_behavior();
-
-    show_new_pagefault_count("mlockall() generated", ">=0", ">=0");
-
-    reserve_process_memory(PRE_ALLOCATION_SIZE);
-
-    show_new_pagefault_count("malloc() and touch generated",
-                             ">=0", ">=0");
-
-    /* Now allocate the memory for the 2nd time and prove the number of
-	   pagefaults are zero */
-    reserve_process_memory(PRE_ALLOCATION_SIZE);
-    show_new_pagefault_count("2nd malloc() and use generated",
-                             "0", "0");
-
-    printf("\n\nLook at the output of ps -leyf, and see that the "
-           "RSS is now about %d [MB]\n",
-           PRE_ALLOCATION_SIZE / (1024 * 1024));
-
-    start_rt_thread();
-
     wiringPiSetup();
 
     double frm_width = FRM_COLS;
@@ -68,9 +40,9 @@ int main(int argc, char **argv)
 
     while (true)
     {
-        // t1 = micros();
+        t1 = clock();
         cam.read(src);
-        split(src, bgr);
+        // split(src, bgr);
 
         // imshow(window_name, src);
         // if (waitKey(10) == 27)
@@ -79,8 +51,8 @@ int main(int argc, char **argv)
         // break;
         // }
 
-        // t2 = micros();
-        // cout << (t2 - t1) << "\n";
+        t2 = clock();
+        cout << (t2 - t1) << "\n";
     }
 
     return 0;
