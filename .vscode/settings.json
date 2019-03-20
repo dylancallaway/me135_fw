@@ -5,6 +5,7 @@
         "string_view": "cpp",
         "iostream": "cpp",
         "initializer_list": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "chrono": "cpp"
     }
 }

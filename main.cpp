@@ -9,9 +9,16 @@ using namespace cv;
 #include <unistd.h>
 #include <wiringPi.h>
 #include <thread>
+#include <chrono>
+#include <sys/mman.h>
+
+#define PRE_ALLOCATION_SIZE (100 * 1024 * 1024) /* 100MB pagefault free buffer */
+#define MY_STACK_SIZE (100 * 1024)              /* 100 kB is enough for now. */
 
 #define FRM_COLS 640
 #define FRM_ROWS 480
+#define FRM_RATE 90
+#define CAP_INTERVAL 12
 
 Mat src(FRM_ROWS, FRM_COLS, CV_8UC3, Scalar(0, 0, 0));
 Mat b(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));
@@ -21,39 +28,40 @@ Mat bgr[3] = {b, g, r};
 
 VideoCapture cam(0);
 
-int t1, t2, t_elapse;
-
-int main(int argc, char **argv)
+int main()
 {
-    // cpu_set_t my_set;                                 /* Define your cpu_set bit mask. */
-    // CPU_ZERO(&my_set);                                /* Initialize it all to 0, i.e. no CPUs selected. */
-    // CPU_SET(0, &my_set);                              /* set the bit that represents core 0. */
-    // sched_setaffinity(0, sizeof(cpu_set_t), &my_set); /* Set affinity of this process to the defined mask, i.e. only 0. */
+    struct sched_param sp;
+    sp.sched_priority = sched_get_priority_max(SCHED_FIFO) - 1;
+    pid_t pid = getpid();
+    sched_setscheduler(pid, SCHED_FIFO, &sp);
 
-    // struct sched_param sp;
-    // sp.sched_priority = 99;
-    // pid_t pid = getpid();
-    // sched_setscheduler(pid, SCHED_RR, &sp);
+    cout << pid << "\t" << sp.sched_priority << "\n";
 
     wiringPiSetup();
 
-    double frm_width = FRM_COLS;
-    double frm_height = FRM_ROWS;
-    cam.set(CAP_PROP_FRAME_WIDTH, frm_width);
-    cam.set(CAP_PROP_FRAME_HEIGHT, frm_height);
+    cam.set(CAP_PROP_FRAME_WIDTH, FRM_COLS);
+    cam.set(CAP_PROP_FRAME_HEIGHT, FRM_ROWS);
 
-    cout << "Frame resolution: " << frm_width << "x" << frm_height << "\n";
+    cout << "Frame resolution: " << FRM_COLS << "x" << FRM_ROWS << "\n";
 
-    double frm_rate = 90;
-    cam.set(CAP_PROP_FPS, frm_rate);
-    cout << "Frame rate: " << frm_rate << "\n";
+    cam.set(CAP_PROP_FPS, FRM_RATE);
+    cout << "Frame rate: " << FRM_RATE << "\n";
 
     // string window_name = "Camera Feed";
     // namedWindow(window_name, WINDOW_NORMAL);
 
+    auto t2 = chrono::steady_clock::now();
+
+    mlockall(MCL_CURRENT | MCL_FUTURE);
+
     while (true)
     {
-        t1 = clock();
+        auto next_time = chrono::steady_clock::now() + chrono::milliseconds(CAP_INTERVAL);
+        auto t1 = chrono::steady_clock::now();
+        chrono::duration<float, milli> t_elapse = t1 - t2;
+        cout << t_elapse.count() << "\n";
+        t2 = chrono::steady_clock::now();
+
         cam.read(src);
         split(src, bgr);
 
@@ -64,9 +72,7 @@ int main(int argc, char **argv)
         // break;
         // }
 
-        t2 = clock();
-        cout << (t2 - t1) << "\n";
-        delayMicroseconds(10);
+        this_thread::sleep_until(next_time);
     }
 
     return 0;
