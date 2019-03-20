@@ -9,39 +9,16 @@ using namespace cv;
 #include <sched.h>
 #include <sys/mman.h>
 
-#include <RTLib.h>
-
-#define PRE_ALLOCATION_SIZE (100 * 1024 * 1024) /* 100MB - total amount of memory locked for this process */
-#define MY_STACK_SIZE (10 * 1024 * 1024)        /* 10MB - stack size for this process */
+#define FRM_WIDTH_COLS 640
+#define FRM_HEIGHT_ROWS 480
 
 int main(int argc, char **argv)
 {
-    show_new_pagefault_count("Initial count", ">=0", ">=0");
-
-    configure_malloc_behavior();
-
-    show_new_pagefault_count("mlockall() generated", ">=0", ">=0");
-
-    reserve_process_memory(PRE_ALLOCATION_SIZE);
-
-    show_new_pagefault_count("malloc() and touch generated",
-                             ">=0", ">=0");
-
-    /* Now allocate the memory for the 2nd time and prove the number of
-	   pagefaults are zero */
-    reserve_process_memory(PRE_ALLOCATION_SIZE);
-    show_new_pagefault_count("2nd malloc() and use generated",
-                             "0", "0");
-
-    printf("\n\nLook at the output of ps -leyf, and see that the "
-           "RSS is now about %d [MB]\n",
-           PRE_ALLOCATION_SIZE / (1024 * 1024));
-
-    start_rt_thread();
-
-    /*---------------------------------------------------*/
-
-    Mat src, planes[3];
+    Mat src(FRM_HEIGHT_ROWS, FRM_WIDTH_COLS, CV_8UC3, Scalar(0, 0, 0));
+    Mat b(FRM_HEIGHT_ROWS, FRM_WIDTH_COLS, CV_8UC1, Scalar(0));
+    Mat g(FRM_HEIGHT_ROWS, FRM_WIDTH_COLS, CV_8UC1, Scalar(0));
+    Mat r(FRM_HEIGHT_ROWS, FRM_WIDTH_COLS, CV_8UC1, Scalar(0));
+    Mat bgr[3] = {b, g, r};
 
     wiringPiSetup();
 
@@ -54,8 +31,8 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    double frm_width = 640;
-    double frm_height = 480;
+    double frm_width = FRM_WIDTH_COLS;
+    double frm_height = FRM_HEIGHT_ROWS;
     cam.set(CAP_PROP_FRAME_WIDTH, frm_width);
     cam.set(CAP_PROP_FRAME_HEIGHT, frm_height);
 
@@ -85,17 +62,19 @@ int main(int argc, char **argv)
             break;
         }
 
+        split(src, bgr);
+
         // imshow(window_name, src);
 
         // if (waitKey(10) == 27)
         // {
-        //     cout << "Esc key pressed, stopping feed.\n";
-        //     break;
+        // cout << "Esc key pressed, stopping feed.\n";
+        // break;
         // }
 
-        cout << float(delta_t) / CLOCKS_PER_SEC << "\n";
+        cout << delta_t << "\n"; // in clock ticks
 
-        delayMicroseconds(10); // Delay allows background processes to run at a fixed interval
+        // delayMicroseconds(10); // Delay allows background processes to run at a fixed interval
     }
 
     return 0;
