@@ -4,6 +4,9 @@ using namespace std;
 #include <opencv2/opencv.hpp>
 using namespace cv;
 
+#include <sched.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <wiringPi.h>
 #include <thread>
 
@@ -22,6 +25,16 @@ int t1, t2, t_elapse;
 
 int main(int argc, char **argv)
 {
+    // cpu_set_t my_set;                                 /* Define your cpu_set bit mask. */
+    // CPU_ZERO(&my_set);                                /* Initialize it all to 0, i.e. no CPUs selected. */
+    // CPU_SET(0, &my_set);                              /* set the bit that represents core 0. */
+    // sched_setaffinity(0, sizeof(cpu_set_t), &my_set); /* Set affinity of this process to the defined mask, i.e. only 0. */
+
+    // struct sched_param sp;
+    // sp.sched_priority = 99;
+    // pid_t pid = getpid();
+    // sched_setscheduler(pid, SCHED_RR, &sp);
+
     wiringPiSetup();
 
     double frm_width = FRM_COLS;
@@ -42,7 +55,7 @@ int main(int argc, char **argv)
     {
         t1 = clock();
         cam.read(src);
-        // split(src, bgr);
+        split(src, bgr);
 
         // imshow(window_name, src);
         // if (waitKey(10) == 27)
@@ -53,6 +66,7 @@ int main(int argc, char **argv)
 
         t2 = clock();
         cout << (t2 - t1) << "\n";
+        delayMicroseconds(10);
     }
 
     return 0;
