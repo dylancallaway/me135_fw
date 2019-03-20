@@ -10,7 +10,14 @@ using namespace cv;
 #include <wiringPi.h>
 #include <thread>
 #include <chrono>
-#include <sys/mman.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/mman.h> // Needed for mlockall()
+#include <unistd.h>   // needed for sysconf(int name);
+#include <malloc.h>
+#include <sys/time.h>     // needed for getrusage
+#include <sys/resource.h> // needed for getrusage
+#include <limits.h>
 
 #define FRM_COLS 640
 #define FRM_ROWS 480
@@ -19,26 +26,35 @@ using namespace cv;
 
 #define PRE_ALLOCATION_SIZE 100 * 1000 * 1000 /*Size of pagefault free buffer in bytes */
 void show_new_pagefault_count(const char *logtext, const char *allowed_maj, const char *allowed_min);
-void configure_malloc_behavior(void);
 void reserve_process_memory(int size);
 
-// Mat src(FRM_ROWS, FRM_COLS, CV_8UC3, Scalar(0, 0, 0));
-// Mat b(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));
-// Mat g(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));
-// Mat r(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));
-// Mat bgr[3] = {b, g, r};
+Mat src(FRM_ROWS, FRM_COLS, CV_8UC3, Scalar(0, 0, 0));
+Mat b(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));
+Mat g(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));
+Mat r(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));
+Mat bgr[3] = {b, g, r};
 
-// VideoCapture cam(0);
+VideoCapture cam(0);
 
 int main()
 {
+    printf("Memory configuration:\n");
     struct sched_param sp;
-    sp.sched_priority = sched_get_priority_max(SCHED_FIFO) - 1;
+    sp.sched_priority = sched_get_priority_max(SCHED_FIFO);
     pid_t pid = getpid();
     sched_setscheduler(pid, SCHED_FIFO, &sp);
-    cout << pid << "\t" << sp.sched_priority << "\n";
+    printf("PID: %d \t Priority: %d\n", pid, sp.sched_priority);
 
-    configure_malloc_behavior();
+    /* Now lock all current and future pages 
+	   from preventing of being paged */
+    if (mlockall(MCL_CURRENT | MCL_FUTURE))
+        perror("mlockall failed");
+
+    /* Turn off malloc trimming.*/
+    mallopt(M_TRIM_THRESHOLD, -1);
+
+    /* Turn off mmap usage. */
+    mallopt(M_MMAP_MAX, 0);
 
     show_new_pagefault_count("mlockall() generated", ">=0", ">=0");
 
@@ -53,59 +69,52 @@ int main()
     show_new_pagefault_count("2nd malloc() and use generated",
                              "0", "0");
 
-    printf("\n\nLook at the output of ps -leyf, and see that the "
+    printf("Look at the output of ps -leyf, and see that the "
            "RSS is now about %d [kB]\n",
            PRE_ALLOCATION_SIZE / (1000));
 
     // wiringPiSetup();
 
-    // cam.set(CAP_PROP_FRAME_WIDTH, FRM_COLS);
-    // cam.set(CAP_PROP_FRAME_HEIGHT, FRM_ROWS);
+    printf("\nCamera configration:");
+    cam.set(CAP_PROP_FRAME_WIDTH, FRM_COLS);
+    cam.set(CAP_PROP_FRAME_HEIGHT, FRM_ROWS);
+    printf("\nFrame Resolution: %d x %d\n", FRM_COLS, FRM_ROWS);
 
-    // cout << "Frame resolution: " << FRM_COLS << "x" << FRM_ROWS << "\n";
-
-    // cam.set(CAP_PROP_FPS, FRM_RATE);
-    // cout << "Frame rate: " << FRM_RATE << "\n";
+    cam.set(CAP_PROP_FPS, FRM_RATE);
+    printf("Frame rate: %d\n", FRM_RATE);
 
     // // string window_name = "Camera Feed";
     // // namedWindow(window_name, WINDOW_NORMAL);
 
-    // auto t2 = chrono::steady_clock::now();
-
-    // mlockall(MCL_CURRENT | MCL_FUTURE);
-
-    // while (true)
-    // {
-    //     auto next_time = chrono::steady_clock::now() + chrono::milliseconds(CAP_INTERVAL);
-    //     auto t1 = chrono::steady_clock::now();
-    //     chrono::duration<float, milli> t_elapse = t1 - t2;
-    //     cout << t_elapse.count() << "\n";
-    //     t2 = chrono::steady_clock::now();
-
-    //     cam.read(src);
-    //     split(src, bgr);
-
-    //     // imshow(window_name, src);
-    //     // if (waitKey(10) == 27)
-    //     // {
-    //     // cout << "Esc key pressed, stopping feed.\n";
-    //     // break;
-    //     // }
-
-    //     this_thread::sleep_until(next_time);
-    // }
+    printf("\nBegin program:\n");
+    auto t2 = chrono::steady_clock::now();
 
     while (true)
     {
-        delay(10);
-    }
+        auto next_time = chrono::steady_clock::now() + chrono::milliseconds(CAP_INTERVAL);
+        auto t1 = chrono::steady_clock::now();
+        chrono::duration<float, milli> t_elapse = t1 - t2;
+        cout << t_elapse.count() << "\n";
+        t2 = chrono::steady_clock::now();
 
+        cam.read(src);
+        split(src, bgr);
+
+        // imshow(window_name, src);
+        // if (waitKey(10) == 27)
+        // {
+        // cout << "Esc key pressed, stopping feed.\n";
+        // break;
+        // }
+
+        this_thread::sleep_until(next_time);
+    }
     return 0;
 }
 
+int last_majflt = 0, last_minflt = 0;
 void show_new_pagefault_count(const char *logtext, const char *allowed_maj, const char *allowed_min)
 {
-    int last_majflt = 0, last_minflt = 0;
     struct rusage usage;
 
     getrusage(RUSAGE_SELF, &usage);
@@ -118,20 +127,6 @@ void show_new_pagefault_count(const char *logtext, const char *allowed_maj, cons
 
     last_majflt = usage.ru_majflt;
     last_minflt = usage.ru_minflt;
-}
-
-void configure_malloc_behavior(void)
-{
-    /* Now lock all current and future pages 
-	   from preventing of being paged */
-    if (mlockall(MCL_CURRENT | MCL_FUTURE))
-        perror("mlockall failed:");
-
-    /* Turn off malloc trimming.*/
-    mallopt(M_TRIM_THRESHOLD, -1);
-
-    /* Turn off mmap usage. */
-    mallopt(M_MMAP_MAX, 0);
 }
 
 void reserve_process_memory(int size)
