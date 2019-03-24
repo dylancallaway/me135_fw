@@ -19,19 +19,13 @@ using namespace cv;
 #define CAP_INTERVAL 12
 
 Mat src(FRM_ROWS, FRM_COLS, CV_8UC3, Scalar(0, 0, 0));
-Mat b(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));
-Mat g(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));
-Mat r(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));
-Mat bgr[3] = {b, g, r};
+Mat bgr[3] = {Mat(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0)), Mat(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0)), Mat(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0))};
 
 VideoCapture cam(0);
 /* *************************************************************** */
 
 /* *********************************Memory configuration********************** */
-#define PRE_ALLOCATION_SIZE 100 * 1000 * 1000 /*Size of pagefault free buffer in bytes */
-void setMaxPriority(pid_t pid);
-void showNewPageFaultCount(const char *logtext, const char *allowed_maj, const char *allowed_min);
-void reserveProcessMemory(int size);
+#define PRE_ALLOCATION_SIZE 10 * 1000 * 1000 /* Size of pagefault free buffer in bytes */
 /* ************************************************************************ */
 
 /* **************************Image processing configuration************************** */
@@ -39,9 +33,16 @@ Mat homography_matrix(3, 3, CV_8UC1, Scalar(0));
 Mat table(FRM_ROWS, FRM_COLS, CV_8UC3, Scalar(0, 0, 0));
 /* **************************************************************************** */
 
+/* ********************Function prototypes*********************************** */
+void setMaxPriority(pid_t pid);
+void showNewPageFaultCount(const char *logtext, const char *allowed_maj, const char *allowed_min);
+void reserveProcessMemory(int size);
+void capTable(void);
+/* ********************************************************************** */
+
 int main()
 {
-    printf("Memory configuration:\n");
+    printf("\nMemory configuration:\n");
 
     pid_t primary_pid = getpid();
     setMaxPriority(primary_pid);
@@ -72,12 +73,27 @@ int main()
            "RSS is now about %d [kB]\n",
            PRE_ALLOCATION_SIZE / (1000));
 
+    printf("\nCPU Configuration:\n");
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    CPU_SET(0, &mask);
+    CPU_SET(1, &mask);
+    CPU_SET(2, &mask);
+    CPU_SET(3, &mask);
+    cout << "CPU affinity set to: ";
+    for (int i = 0; i < 4; i++)
+    {
+        cout << CPU_ISSET(i, &mask) << " ";
+    }
+    cout << "\n";
+    sched_setaffinity(primary_pid, sizeof(mask), &mask);
+
     // wiringPiSetup();
 
-    printf("\nCamera configration:");
+    printf("\nCamera configration:\n");
     cam.set(CAP_PROP_FRAME_WIDTH, FRM_COLS);
     cam.set(CAP_PROP_FRAME_HEIGHT, FRM_ROWS);
-    printf("\nFrame Resolution: %d x %d\n", FRM_COLS, FRM_ROWS);
+    printf("Frame Resolution: %d x %d\n", FRM_COLS, FRM_ROWS);
 
     cam.set(CAP_PROP_FPS, FRM_RATE);
     printf("Camera nominal frame rate: %d\n", FRM_RATE);
@@ -90,9 +106,21 @@ int main()
     auto t2 = chrono::steady_clock::now();
 
     vector<Point2f> table_corners(4);
+    Point2f table_corners_pixels[4] = {Point2f(100, 100), Point2f(100, 200), Point2f(300, 70), Point2f(300, 140)};
+
     vector<Point2f> desired_corners(4);
-    table_corners[0] = Point2f(100, 100);
-    // homography_matrix = findHomography(table_corners, desired_corners);
+    Point2f desired_corners_pixels[4] = {Point2f(100, 100), Point2f(100, 200), Point2f(300, 100), Point2f(300, 200)};
+
+    for (int i = 0; i < 4; i++)
+    {
+        table_corners[i] = table_corners_pixels[i];
+        desired_corners[i] = desired_corners_pixels[i];
+        cout << "Table Corner: " << table_corners[i] << "\tDesired Corner: " << desired_corners[i] << "\n";
+    }
+
+    homography_matrix = findHomography(table_corners, desired_corners);
+    cout << "Generated Homography Matrix:\n"
+         << homography_matrix << "\n\n";
 
     while (true)
     {
@@ -101,6 +129,8 @@ int main()
         chrono::duration<float, milli> t_elapse = t1 - t2;
         printf("Time between captures: %.3fms.\n", t_elapse.count());
         t2 = chrono::steady_clock::now();
+
+        capTable();
 
         // imshow(window_name, src);
         // if (waitKey(10) == 27)
@@ -114,13 +144,19 @@ int main()
     return 0;
 }
 
-// void capTable()
-// {
-//     cam.read(src);
-//     warpPerspective(src, table, H, src.size());
-//     delete src;
-//     bgr = split(table);
-// }
+Mat thresh;
+Scalar lowerb = Scalar(0, 0, 150);
+Scalar upperb = Scalar(20, 20, 256);
+void capTable(void)
+{
+
+    cam.read(src);
+    split(src, bgr);
+    inRange(src, lowerb, upperb, thresh);
+    cout << thresh.channels();
+
+    // warpPerspective(thresh, thresh, homography_matrix, thresh.size());
+}
 
 void setMaxPriority(pid_t pid)
 {
