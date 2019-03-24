@@ -4,29 +4,19 @@ using namespace std;
 #include <opencv2/opencv.hpp>
 using namespace cv;
 
-#include <sched.h>
-#include <sys/types.h>
-#include <unistd.h>
 #include <wiringPi.h>
 #include <thread>
-#include <chrono>
-#include <stdlib.h>
-#include <stdio.h>
 #include <sys/mman.h> // Needed for mlockall()
 #include <unistd.h>   // needed for sysconf(int name);
 #include <malloc.h>
 #include <sys/time.h>     // needed for getrusage
 #include <sys/resource.h> // needed for getrusage
-#include <limits.h>
 
+/* **************Camera and frame capture configuration***************** */
 #define FRM_COLS 640
 #define FRM_ROWS 480
 #define FRM_RATE 90
 #define CAP_INTERVAL 12
-
-#define PRE_ALLOCATION_SIZE 100 * 1000 * 1000 /*Size of pagefault free buffer in bytes */
-void show_new_pagefault_count(const char *logtext, const char *allowed_maj, const char *allowed_min);
-void reserve_process_memory(int size);
 
 Mat src(FRM_ROWS, FRM_COLS, CV_8UC3, Scalar(0, 0, 0));
 Mat b(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));
@@ -35,18 +25,28 @@ Mat r(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));
 Mat bgr[3] = {b, g, r};
 
 VideoCapture cam(0);
+/* *************************************************************** */
+
+/* *********************************Memory configuration********************** */
+#define PRE_ALLOCATION_SIZE 100 * 1000 * 1000 /*Size of pagefault free buffer in bytes */
+void setMaxPriority(pid_t pid);
+void showNewPageFaultCount(const char *logtext, const char *allowed_maj, const char *allowed_min);
+void reserveProcessMemory(int size);
+/* ************************************************************************ */
+
+/* **************************Image processing configuration************************** */
+Mat homography_matrix(3, 3, CV_8UC1, Scalar(0));
+Mat table(FRM_ROWS, FRM_COLS, CV_8UC3, Scalar(0, 0, 0));
+/* **************************************************************************** */
 
 int main()
 {
     printf("Memory configuration:\n");
-    struct sched_param sp;
-    sp.sched_priority = sched_get_priority_max(SCHED_FIFO);
-    pid_t pid = getpid();
-    sched_setscheduler(pid, SCHED_FIFO, &sp);
-    printf("PID: %d \t Priority: %d\n", pid, sp.sched_priority);
 
-    /* Now lock all current and future pages 
-	   from preventing of being paged */
+    pid_t primary_pid = getpid();
+    setMaxPriority(primary_pid);
+
+    /* Now lock all current and future pages from preventing of being paged */
     if (mlockall(MCL_CURRENT | MCL_FUTURE))
         perror("mlockall failed");
 
@@ -56,18 +56,17 @@ int main()
     /* Turn off mmap usage. */
     mallopt(M_MMAP_MAX, 0);
 
-    show_new_pagefault_count("mlockall() generated", ">=0", ">=0");
+    showNewPageFaultCount("mlockall() generated", ">=0", ">=0");
 
-    reserve_process_memory(PRE_ALLOCATION_SIZE);
+    reserveProcessMemory(PRE_ALLOCATION_SIZE);
 
-    show_new_pagefault_count("malloc() and touch generated",
-                             ">=0", ">=0");
+    showNewPageFaultCount("malloc() and touch generated",
+                          ">=0", ">=0");
 
-    /* Now allocate the memory for the 2nd time and prove the number of
-	   pagefaults are zero */
-    reserve_process_memory(PRE_ALLOCATION_SIZE);
-    show_new_pagefault_count("2nd malloc() and use generated",
-                             "0", "0");
+    /* Now allocate the memory for the 2nd time and prove the number of pagefaults is zero */
+    reserveProcessMemory(PRE_ALLOCATION_SIZE);
+    showNewPageFaultCount("2nd malloc() and use generated",
+                          "0", "0");
 
     printf("Look at the output of ps -leyf, and see that the "
            "RSS is now about %d [kB]\n",
@@ -81,24 +80,27 @@ int main()
     printf("\nFrame Resolution: %d x %d\n", FRM_COLS, FRM_ROWS);
 
     cam.set(CAP_PROP_FPS, FRM_RATE);
-    printf("Frame rate: %d\n", FRM_RATE);
+    printf("Camera nominal frame rate: %d\n", FRM_RATE);
+    printf("Program actual frame rate: %d\n", 1000 / CAP_INTERVAL);
 
-    // // string window_name = "Camera Feed";
-    // // namedWindow(window_name, WINDOW_NORMAL);
+    // string window_name = "Camera Feed";
+    // namedWindow(window_name, WINDOW_NORMAL);
 
     printf("\nBegin program:\n");
     auto t2 = chrono::steady_clock::now();
+
+    vector<Point2f> table_corners(4);
+    vector<Point2f> desired_corners(4);
+    table_corners[0] = Point2f(100, 100);
+    // homography_matrix = findHomography(table_corners, desired_corners);
 
     while (true)
     {
         auto next_time = chrono::steady_clock::now() + chrono::milliseconds(CAP_INTERVAL);
         auto t1 = chrono::steady_clock::now();
         chrono::duration<float, milli> t_elapse = t1 - t2;
-        cout << t_elapse.count() << "\n";
+        printf("Time between captures: %.3fms.\n", t_elapse.count());
         t2 = chrono::steady_clock::now();
-
-        cam.read(src);
-        split(src, bgr);
 
         // imshow(window_name, src);
         // if (waitKey(10) == 27)
@@ -112,11 +114,26 @@ int main()
     return 0;
 }
 
+// void capTable()
+// {
+//     cam.read(src);
+//     warpPerspective(src, table, H, src.size());
+//     delete src;
+//     bgr = split(table);
+// }
+
+void setMaxPriority(pid_t pid)
+{
+    struct sched_param sp;
+    sp.sched_priority = sched_get_priority_max(SCHED_FIFO);
+    sched_setscheduler(pid, SCHED_FIFO, &sp);
+    printf("PID: %d \t Priority: %d\n", pid, sp.sched_priority);
+}
+
 int last_majflt = 0, last_minflt = 0;
-void show_new_pagefault_count(const char *logtext, const char *allowed_maj, const char *allowed_min)
+void showNewPageFaultCount(const char *logtext, const char *allowed_maj, const char *allowed_min)
 {
     struct rusage usage;
-
     getrusage(RUSAGE_SELF, &usage);
 
     printf("%-30.30s: Pagefaults, Major:%ld (Allowed %s), "
@@ -129,7 +146,7 @@ void show_new_pagefault_count(const char *logtext, const char *allowed_maj, cons
     last_minflt = usage.ru_minflt;
 }
 
-void reserve_process_memory(int size)
+void reserveProcessMemory(int size)
 {
     int i;
     char *buffer;

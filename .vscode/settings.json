@@ -6,6 +6,7 @@
         "iostream": "cpp",
         "initializer_list": "cpp",
         "utility": "cpp",
-        "chrono": "cpp"
+        "chrono": "cpp",
+        "vector": "cpp"
     }
 }
