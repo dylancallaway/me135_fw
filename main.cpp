@@ -5,6 +5,7 @@ using namespace std;
 using namespace cv;
 
 #include <wiringPi.h>
+#include <wiringPiI2C.h>
 #include <thread>
 #include <sys/mman.h> // Needed for mlockall()
 #include <unistd.h>   // needed for sysconf(int name);
@@ -20,6 +21,7 @@ using namespace cv;
 
 Mat src(FRM_ROWS, FRM_COLS, CV_8UC3, Scalar(0, 0, 0));
 Mat bgr[3] = {Mat(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0)), Mat(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0)), Mat(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0))};
+Mat thresh(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));
 
 VideoCapture cam(0);
 /* *************************************************************** */
@@ -88,7 +90,9 @@ int main()
     cout << "\n";
     sched_setaffinity(primary_pid, sizeof(mask), &mask);
 
-    // wiringPiSetup();
+    wiringPiSetup(); // Required for I2C
+    int i2c_flag = wiringPiI2CSetup(0x55);
+    printf("\nI2C Initialization Result: %d\n", i2c_flag);
 
     printf("\nCamera configration:\n");
     cam.set(CAP_PROP_FRAME_WIDTH, FRM_COLS);
@@ -99,17 +103,17 @@ int main()
     printf("Camera nominal frame rate: %d\n", FRM_RATE);
     printf("Program actual frame rate: %d\n", 1000 / CAP_INTERVAL);
 
-    // string window_name = "Camera Feed";
-    // namedWindow(window_name, WINDOW_NORMAL);
+    string window_name = "Camera Feed";
+    namedWindow(window_name, WINDOW_NORMAL);
 
     printf("\nBegin program:\n");
     auto t2 = chrono::steady_clock::now();
 
     vector<Point2f> table_corners(4);
-    Point2f table_corners_pixels[4] = {Point2f(100, 100), Point2f(100, 200), Point2f(300, 70), Point2f(300, 140)};
+    Point2f table_corners_pixels[4] = {Point2f(225, 45), Point2f(428, 36), Point2f(560, 312), Point2f(108, 321)};
 
     vector<Point2f> desired_corners(4);
-    Point2f desired_corners_pixels[4] = {Point2f(100, 100), Point2f(100, 200), Point2f(300, 100), Point2f(300, 200)};
+    Point2f desired_corners_pixels[4] = {Point2f(200, 40), Point2f(400, 40), Point2f(400, 300), Point2f(200, 300)};
 
     for (int i = 0; i < 4; i++)
     {
@@ -127,35 +131,33 @@ int main()
         auto next_time = chrono::steady_clock::now() + chrono::milliseconds(CAP_INTERVAL);
         auto t1 = chrono::steady_clock::now();
         chrono::duration<float, milli> t_elapse = t1 - t2;
-        printf("Time between captures: %.3fms.\n", t_elapse.count());
+        // printf("Time between captures: %.3fms.\n", t_elapse.count());
         t2 = chrono::steady_clock::now();
 
         capTable();
 
-        // imshow(window_name, src);
-        // if (waitKey(10) == 27)
-        // {
-        // cout << "Esc key pressed, stopping feed.\n";
-        // break;
-        // }
+        imshow(window_name, thresh);
+
+        if (waitKey(10) == 27)
+        {
+            printf("Esc key pressed, stopping feed.\n");
+            break;
+        }
 
         this_thread::sleep_until(next_time);
     }
     return 0;
 }
 
-Mat thresh;
-Scalar lowerb = Scalar(0, 0, 150);
-Scalar upperb = Scalar(20, 20, 256);
+Scalar lowerb = Scalar(0, 0, 100);
+Scalar upperb = Scalar(100, 100, 225);
 void capTable(void)
 {
-
     cam.read(src);
     split(src, bgr);
     inRange(src, lowerb, upperb, thresh);
-    cout << thresh.channels();
 
-    // warpPerspective(thresh, thresh, homography_matrix, thresh.size());
+    // warpPerspective(thresh, thresh, homography_matrix, src.size());
 }
 
 void setMaxPriority(pid_t pid)
