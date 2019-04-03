@@ -110,10 +110,10 @@ int main()
     auto t2 = chrono::steady_clock::now();
 
     vector<Point2f> table_corners(4);
-    Point2f table_corners_pixels[4] = {Point2f(225, 45), Point2f(428, 36), Point2f(560, 312), Point2f(108, 321)};
+    Point2f table_corners_pixels[4] = {Point2f(232 - 50, 37), Point2f(406 - 50, 37), Point2f(469 - 50, 302), Point2f(166 - 50, 302)};
 
     vector<Point2f> desired_corners(4);
-    Point2f desired_corners_pixels[4] = {Point2f(200, 40), Point2f(400, 40), Point2f(400, 300), Point2f(200, 300)};
+    Point2f desired_corners_pixels[4] = {Point2f(200, 100), Point2f(400, 100), Point2f(400, 400), Point2f(200, 400)};
 
     for (int i = 0; i < 4; i++)
     {
@@ -128,7 +128,7 @@ int main()
 
     while (true)
     {
-        auto next_time = chrono::steady_clock::now() + chrono::milliseconds(CAP_INTERVAL);
+        // auto next_time = chrono::steady_clock::now() + chrono::milliseconds(CAP_INTERVAL);
         auto t1 = chrono::steady_clock::now();
         chrono::duration<float, milli> t_elapse = t1 - t2;
         // printf("Time between captures: %.3fms.\n", t_elapse.count());
@@ -136,7 +136,7 @@ int main()
 
         capTable();
 
-        imshow(window_name, thresh);
+        imshow(window_name, src);
 
         if (waitKey(10) == 27)
         {
@@ -151,13 +151,16 @@ int main()
 
 Scalar lowerb = Scalar(0, 0, 100);
 Scalar upperb = Scalar(100, 100, 225);
+Rect roi_1 = Rect(50, 0, 525, 420);
+Rect roi_2 = Rect(150, 30, 440 - 150, 460 - 30);
 void capTable(void)
 {
     cam.read(src);
-    split(src, bgr);
+    src = src(roi_1);
+    // split(src, bgr);
     inRange(src, lowerb, upperb, thresh);
-
-    // warpPerspective(thresh, thresh, homography_matrix, src.size());
+    warpPerspective(src, src, homography_matrix, Size(440, 460));
+    src = src(roi_2);
 }
 
 void setMaxPriority(pid_t pid)
