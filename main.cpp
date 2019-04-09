@@ -14,14 +14,17 @@ using namespace cv;
 #include <sys/resource.h> // needed for getrusage
 
 /* **************Camera and frame capture configuration***************** */
-#define FRM_COLS 640
-#define FRM_ROWS 480
+#define FRM_COLS 640 / 4
+#define FRM_ROWS 480 / 4
 #define FRM_RATE 90
 #define CAP_INTERVAL 12
 
 Mat src(FRM_ROWS, FRM_COLS, CV_8UC3, Scalar(0, 0, 0));
 Mat bgr[3] = {Mat(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0)), Mat(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0)), Mat(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0))};
 Mat thresh(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));
+vector<vector<Point>> contours;
+vector<Vec4i> hierarchy;
+vector<Vec3f> circles;
 
 VideoCapture cam(0);
 /* *************************************************************** */
@@ -110,10 +113,10 @@ int main()
     auto t2 = chrono::steady_clock::now();
 
     vector<Point2f> table_corners(4);
-    Point2f table_corners_pixels[4] = {Point2f(232 - 50, 37), Point2f(406 - 50, 37), Point2f(469 - 50, 302), Point2f(166 - 50, 302)};
+    Point2f table_corners_pixels[4] = {Point2f(48, 9), Point2f(91, 9), Point2f(107, 75), Point2f(31, 75)};
 
     vector<Point2f> desired_corners(4);
-    Point2f desired_corners_pixels[4] = {Point2f(200, 100), Point2f(400, 100), Point2f(400, 400), Point2f(200, 400)};
+    Point2f desired_corners_pixels[4] = {Point2f(50, 25), Point2f(100, 25), Point2f(100, 100), Point2f(50, 100)};
 
     for (int i = 0; i < 4; i++)
     {
@@ -131,10 +134,17 @@ int main()
         // auto next_time = chrono::steady_clock::now() + chrono::milliseconds(CAP_INTERVAL);
         auto t1 = chrono::steady_clock::now();
         chrono::duration<float, milli> t_elapse = t1 - t2;
-        // printf("Time between captures: %.3fms.\n", t_elapse.count());
+        printf("Time between captures: %.3fms.\n", t_elapse.count());
         t2 = chrono::steady_clock::now();
 
         capTable();
+
+        // Mat drawing = Mat::zeros(thresh.size(), CV_8UC3);
+        // for (size_t i = 0; i < contours.size(); i++)
+        // {
+        //     Scalar color = Scalar(0, 200, 0);
+        //     drawContours(drawing, contours, (int)i, color, 2, LINE_8, hierarchy, 0);
+        // }
 
         imshow(window_name, src);
 
@@ -144,23 +154,24 @@ int main()
             break;
         }
 
-        this_thread::sleep_until(next_time);
+        // this_thread::sleep_until(next_time);
     }
     return 0;
 }
 
-Scalar lowerb = Scalar(0, 0, 100);
-Scalar upperb = Scalar(100, 100, 225);
-Rect roi_1 = Rect(50, 0, 525, 420);
-Rect roi_2 = Rect(150, 30, 440 - 150, 460 - 30);
+Scalar lowerb = Scalar(0, 0, 40);
+Scalar upperb = Scalar(40, 60, 150);
+Rect roi_1 = Rect(10, 2, 140, 110);
+Rect roi_2 = Rect(39, 8, 73, 108);
 void capTable(void)
 {
     cam.read(src);
     src = src(roi_1);
-    // split(src, bgr);
-    inRange(src, lowerb, upperb, thresh);
-    warpPerspective(src, src, homography_matrix, Size(440, 460));
+    warpPerspective(src, src, homography_matrix, Size(FRM_COLS, FRM_ROWS));
     src = src(roi_2);
+    // inRange(src, lowerb, upperb, thresh);
+    // // medianBlur(thresh, thresh, 5);
+    // findContours(thresh, contours, hierarchy, RETR_LIST, CHAIN_APPROX_NONE);
 }
 
 void setMaxPriority(pid_t pid)
