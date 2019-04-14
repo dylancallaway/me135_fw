@@ -5,7 +5,8 @@ using namespace std;
 using namespace cv;
 
 #include <wiringPi.h>
-#include <wiringPiI2C.h>
+// #include <wiringPiI2C.h>
+#include <wiringSerial.h>
 #include <thread>
 #include <sys/mman.h> // Needed for mlockall()
 #include <unistd.h>   // needed for sysconf(int name);
@@ -17,7 +18,7 @@ using namespace cv;
 #define FRM_COLS 640 / 4
 #define FRM_ROWS 480 / 4
 #define FRM_RATE 90
-#define CAP_INTERVAL 12
+#define CAP_INTERVAL 20
 
 Mat src(FRM_ROWS, FRM_COLS, CV_8UC3, Scalar(0, 0, 0));
 Mat bgr[3] = {Mat(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0)), Mat(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0)), Mat(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0))};
@@ -40,7 +41,7 @@ Mat table(FRM_ROWS, FRM_COLS, CV_8UC3, Scalar(0, 0, 0));
 
 /* ********************Function prototypes*********************************** */
 void setMaxPriority(pid_t pid);
-void showNewPageFaultCount(const char *logtext, const char *allowed_maj, const char *allowed_min);
+void showNewPageFaultcoord(const char *logtext, const char *allowed_maj, const char *allowed_min);
 void reserveProcessMemory(int size);
 void capTable(void);
 /* ********************************************************************** */
@@ -62,16 +63,16 @@ int main()
     /* Turn off mmap usage. */
     mallopt(M_MMAP_MAX, 0);
 
-    showNewPageFaultCount("mlockall() generated", ">=0", ">=0");
+    showNewPageFaultcoord("mlockall() generated", ">=0", ">=0");
 
     reserveProcessMemory(PRE_ALLOCATION_SIZE);
 
-    showNewPageFaultCount("malloc() and touch generated",
+    showNewPageFaultcoord("malloc() and touch generated",
                           ">=0", ">=0");
 
     /* Now allocate the memory for the 2nd time and prove the number of pagefaults is zero */
     reserveProcessMemory(PRE_ALLOCATION_SIZE);
-    showNewPageFaultCount("2nd malloc() and use generated",
+    showNewPageFaultcoord("2nd malloc() and use generated",
                           "0", "0");
 
     printf("Look at the output of ps -leyf, and see that the "
@@ -93,10 +94,6 @@ int main()
     cout << "\n";
     sched_setaffinity(primary_pid, sizeof(mask), &mask);
 
-    wiringPiSetup(); // Required for I2C
-    int i2c_flag = wiringPiI2CSetup(0x55);
-    printf("\nI2C Initialization Result: %d\n", i2c_flag);
-
     printf("\nCamera configration:\n");
     cam.set(CAP_PROP_FRAME_WIDTH, FRM_COLS);
     cam.set(CAP_PROP_FRAME_HEIGHT, FRM_ROWS);
@@ -107,7 +104,7 @@ int main()
     printf("Program actual frame rate: %d\n", 1000 / CAP_INTERVAL);
 
     string window_name = "Camera Feed";
-    namedWindow(window_name, WINDOW_NORMAL);
+    // namedWindow(window_name, WINDOW_NORMAL);
 
     printf("\nBegin program:\n");
     auto t2 = chrono::steady_clock::now();
@@ -129,33 +126,66 @@ int main()
     cout << "Generated Homography Matrix:\n"
          << homography_matrix << "\n\n";
 
-    while (true)
+    /******************** UART Testing ****************************/
+    int fd;
+    uint16_t coord[2] = {1000, 1500};
+
+    if ((fd = serialOpen("/dev/serial0", 115200)) < 0)
     {
-        // auto next_time = chrono::steady_clock::now() + chrono::milliseconds(CAP_INTERVAL);
-        auto t1 = chrono::steady_clock::now();
-        chrono::duration<float, milli> t_elapse = t1 - t2;
-        printf("Time between captures: %.3fms.\n", t_elapse.count());
-        t2 = chrono::steady_clock::now();
-
-        capTable();
-
-        // Mat drawing = Mat::zeros(thresh.size(), CV_8UC3);
-        // for (size_t i = 0; i < contours.size(); i++)
-        // {
-        //     Scalar color = Scalar(0, 200, 0);
-        //     drawContours(drawing, contours, (int)i, color, 2, LINE_8, hierarchy, 0);
-        // }
-
-        imshow(window_name, src);
-
-        if (waitKey(10) == 27)
-        {
-            printf("Esc key pressed, stopping feed.\n");
-            break;
-        }
-
-        // this_thread::sleep_until(next_time);
+        fprintf(stderr, "Unable to open serial device: %s\n", strerror(errno));
+        return 1;
     }
+
+    if (wiringPiSetup() == -1)
+    {
+        fprintf(stdout, "Unable to start wiringPi: %s\n", strerror(errno));
+        return 1;
+    }
+
+    cout << sizeof(coord) << "\n";
+    printf("\nOut: %3d, %3d ", coord[0], coord[1]);
+    fflush(stdout);
+    write(fd, &coord, 4);
+
+    delay(3);
+
+    uint16_t read_val[2];
+    uint16_t(*read_pointer)[2];
+    read_pointer = &read_val;
+
+    read(fd, read_pointer, 4);
+    printf(" -> %3d, %3d", read_val[0], read_val[1]);
+    fflush(stdout);
+
+    printf("\n");
+
+    // while (true)
+    // {
+    //     auto next_time = chrono::steady_clock::now() + chrono::milliseconds(CAP_INTERVAL);
+    //     auto t1 = chrono::steady_clock::now();
+    //     chrono::duration<float, milli> t_elapse = t1 - t2;
+    //     printf("Time between captures: %.3fms.\n", t_elapse.coord());
+    //     t2 = chrono::steady_clock::now();
+
+    //     // capTable();
+
+    //     // Mat drawing = Mat::zeros(thresh.size(), CV_8UC3);
+    //     // for (size_t i = 0; i < contours.size(); i++)
+    //     // {
+    //     //     Scalar color = Scalar(0, 200, 0);
+    //     //     drawContours(drawing, contours, (int)i, color, 2, LINE_8, hierarchy, 0);
+    //     // }
+
+    //     // imshow(window_name, src);
+
+    //     // if (waitKey(10) == 27)
+    //     // {
+    //     // printf("Esc key pressed, stopping feed.\n");
+    //     // break;
+    //     // }
+
+    //     this_thread::sleep_until(next_time);
+    // }
     return 0;
 }
 
@@ -183,7 +213,7 @@ void setMaxPriority(pid_t pid)
 }
 
 int last_majflt = 0, last_minflt = 0;
-void showNewPageFaultCount(const char *logtext, const char *allowed_maj, const char *allowed_min)
+void showNewPageFaultcoord(const char *logtext, const char *allowed_maj, const char *allowed_min)
 {
     struct rusage usage;
     getrusage(RUSAGE_SELF, &usage);
