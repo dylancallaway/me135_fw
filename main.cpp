@@ -5,7 +5,6 @@ using namespace std;
 using namespace cv;
 
 #include <wiringPi.h>
-// #include <wiringPiI2C.h>
 #include <wiringSerial.h>
 #include <thread>
 #include <sys/mman.h> // Needed for mlockall()
@@ -15,8 +14,8 @@ using namespace cv;
 #include <sys/resource.h> // needed for getrusage
 
 /* **************Camera and frame capture configuration***************** */
-#define FRM_COLS 640 / 4
-#define FRM_ROWS 480 / 4
+#define FRM_COLS 640
+#define FRM_ROWS 480
 #define FRM_RATE 90
 #define CAP_INTERVAL 20
 
@@ -41,9 +40,8 @@ Mat table(FRM_ROWS, FRM_COLS, CV_8UC3, Scalar(0, 0, 0));
 
 /* ********************Function prototypes*********************************** */
 void setMaxPriority(pid_t pid);
-void showNewPageFaultcoord(const char *logtext, const char *allowed_maj, const char *allowed_min);
+void showNewPageFaultCount(const char *logtext, const char *allowed_maj, const char *allowed_min);
 void reserveProcessMemory(int size);
-void capTable(void);
 /* ********************************************************************** */
 
 int main()
@@ -63,16 +61,16 @@ int main()
     /* Turn off mmap usage. */
     mallopt(M_MMAP_MAX, 0);
 
-    showNewPageFaultcoord("mlockall() generated", ">=0", ">=0");
+    showNewPageFaultCount("mlockall() generated", ">=0", ">=0");
 
     reserveProcessMemory(PRE_ALLOCATION_SIZE);
 
-    showNewPageFaultcoord("malloc() and touch generated",
+    showNewPageFaultCount("malloc() and touch generated",
                           ">=0", ">=0");
 
     /* Now allocate the memory for the 2nd time and prove the number of pagefaults is zero */
     reserveProcessMemory(PRE_ALLOCATION_SIZE);
-    showNewPageFaultcoord("2nd malloc() and use generated",
+    showNewPageFaultCount("2nd malloc() and use generated",
                           "0", "0");
 
     printf("Look at the output of ps -leyf, and see that the "
@@ -103,17 +101,17 @@ int main()
     printf("Camera nominal frame rate: %d\n", FRM_RATE);
     printf("Program actual frame rate: %d\n", 1000 / CAP_INTERVAL);
 
-    string window_name = "Camera Feed";
-    // namedWindow(window_name, WINDOW_NORMAL);
+    namedWindow("SRC", WINDOW_NORMAL);
+    namedWindow("THRESH", WINDOW_NORMAL);
 
     printf("\nBegin program:\n");
     auto t2 = chrono::steady_clock::now();
 
     vector<Point2f> table_corners(4);
-    Point2f table_corners_pixels[4] = {Point2f(48, 9), Point2f(91, 9), Point2f(107, 75), Point2f(31, 75)};
+    Point2f table_corners_pixels[4] = {Point2f(189, 37), Point2f(361, 37), Point2f(424, 299), Point2f(121, 299)};
 
     vector<Point2f> desired_corners(4);
-    Point2f desired_corners_pixels[4] = {Point2f(50, 25), Point2f(100, 25), Point2f(100, 100), Point2f(50, 100)};
+    Point2f desired_corners_pixels[4] = {Point2f(200, 100), Point2f(400, 100), Point2f(400, 400), Point2f(200, 400)};
 
     for (int i = 0; i < 4; i++)
     {
@@ -126,9 +124,8 @@ int main()
     cout << "Generated Homography Matrix:\n"
          << homography_matrix << "\n\n";
 
-    /******************** UART Testing ****************************/
+    /******************** UART ****************************/
     int fd;
-    uint16_t coord[2] = {1000, 1500};
 
     if ((fd = serialOpen("/dev/serial0", 115200)) < 0)
     {
@@ -142,66 +139,88 @@ int main()
         return 1;
     }
 
-    cout << sizeof(coord) << "\n";
-    printf("\nOut: %3d, %3d ", coord[0], coord[1]);
-    fflush(stdout);
-    write(fd, &coord, 4);
+    // uint16_t coord[2] = {500, 1000};
+    char coord = 'd';
 
-    delay(3);
+    // printf("\nOut: %3d, %3d ", coord[0], coord[1]);
+    write(fd, &coord, 1);
+    printf("UART Wrote %c.\n", coord);
 
-    uint16_t read_val[2];
-    uint16_t(*read_pointer)[2];
-    read_pointer = &read_val;
+    delay(5);
 
-    read(fd, read_pointer, 4);
-    printf(" -> %3d, %3d", read_val[0], read_val[1]);
-    fflush(stdout);
+    // uint16_t read_val[2];
+    // uint16_t(*read_pointer)[2];
+    // read_pointer = &read_val;
+
+    // read(fd, read_pointer, 4);
+    // printf(" -> %3d, %3d", read_val[0], read_val[1]);
 
     printf("\n");
+    /******************** UART ****************************/
 
-    // while (true)
-    // {
-    //     auto next_time = chrono::steady_clock::now() + chrono::milliseconds(CAP_INTERVAL);
-    //     auto t1 = chrono::steady_clock::now();
-    //     chrono::duration<float, milli> t_elapse = t1 - t2;
-    //     printf("Time between captures: %.3fms.\n", t_elapse.coord());
-    //     t2 = chrono::steady_clock::now();
+    Scalar lowerb = Scalar(0, 0, 150);
+    Scalar upperb = Scalar(100, 100, 255);
+    Rect roi_1 = Rect(40, 30, 540, 420);
+    Rect roi_2 = Rect(155, 35, 290, 430);
 
-    //     // capTable();
+    while (true)
+    {
+        // auto next_time = chrono::steady_clock::now() + chrono::milliseconds(CAP_INTERVAL);
+        auto t1 = chrono::steady_clock::now();
+        chrono::duration<float, milli> t_elapse = t1 - t2;
+        // printf("Time between captures: %.3fms.\n", t_elapse.count());
+        t2 = chrono::steady_clock::now();
 
-    //     // Mat drawing = Mat::zeros(thresh.size(), CV_8UC3);
-    //     // for (size_t i = 0; i < contours.size(); i++)
-    //     // {
-    //     //     Scalar color = Scalar(0, 200, 0);
-    //     //     drawContours(drawing, contours, (int)i, color, 2, LINE_8, hierarchy, 0);
-    //     // }
+        cam.read(src);
+        src = src(roi_1);
+        warpPerspective(src, src, homography_matrix, Size(FRM_COLS, FRM_ROWS));
+        src = src(roi_2);
+        normalize(src, src, 0, 500, NORM_MINMAX);
+        inRange(src, lowerb, upperb, thresh);
+        medianBlur(thresh, thresh, 5);
 
-    //     // imshow(window_name, src);
+        findContours(thresh, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0));
 
-    //     // if (waitKey(10) == 27)
-    //     // {
-    //     // printf("Esc key pressed, stopping feed.\n");
-    //     // break;
-    //     // }
+        Scalar color = Scalar(0, 200, 0);
+        uint8_t max_ind;
 
-    //     this_thread::sleep_until(next_time);
-    // }
+        vector<Moments> mu(contours.size());
+        vector<Point> mc(contours.size());
+        double max_area = 0;
+
+        for (uint8_t i = 0; i < contours.size(); i++)
+        {
+            mu[i] = moments(contours[i], true);
+            if (mu[i].m00 > max_area)
+            {
+                max_area = mu[i].m00;
+                max_ind = i;
+            }
+            mc[i] = Point(mu[i].m10 / mu[i].m00, mu[i].m01 / mu[i].m00);
+        }
+
+        circle(src, mc[max_ind], 4, color, -1, 8, 0);
+        cout << "Center of puck: " << mc[max_ind] << "\n"
+             << endl;
+
+        // for (size_t i = 0; i < contours.size(); i++)
+        // {
+        // Scalar color = Scalar(0, 200, 0);
+        // drawContours(src, contours, (int)i, color, 2, LINE_8, hierarchy, 0);
+        // }
+
+        imshow("SRC", src);
+        imshow("THRESH", thresh);
+
+        if (waitKey(10) == 27)
+        {
+            printf("Esc key pressed, stopping feed.\n");
+            break;
+        }
+
+        // this_thread::sleep_until(next_time);
+    }
     return 0;
-}
-
-Scalar lowerb = Scalar(0, 0, 40);
-Scalar upperb = Scalar(40, 60, 150);
-Rect roi_1 = Rect(10, 2, 140, 110);
-Rect roi_2 = Rect(39, 8, 73, 108);
-void capTable(void)
-{
-    cam.read(src);
-    src = src(roi_1);
-    warpPerspective(src, src, homography_matrix, Size(FRM_COLS, FRM_ROWS));
-    src = src(roi_2);
-    // inRange(src, lowerb, upperb, thresh);
-    // // medianBlur(thresh, thresh, 5);
-    // findContours(thresh, contours, hierarchy, RETR_LIST, CHAIN_APPROX_NONE);
 }
 
 void setMaxPriority(pid_t pid)
@@ -213,7 +232,7 @@ void setMaxPriority(pid_t pid)
 }
 
 int last_majflt = 0, last_minflt = 0;
-void showNewPageFaultcoord(const char *logtext, const char *allowed_maj, const char *allowed_min)
+void showNewPageFaultCount(const char *logtext, const char *allowed_maj, const char *allowed_min)
 {
     struct rusage usage;
     getrusage(RUSAGE_SELF, &usage);
