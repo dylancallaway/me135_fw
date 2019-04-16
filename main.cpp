@@ -146,9 +146,11 @@ int main()
         // cout << "Sending 'd''s...\n";
         // write(fd, &coord, 1);
         serialPutchar(fd, 'd');
-        delay(10);
-        int t = serialGetchar(fd);
-        cout << t << "\n";
+        // char t = serialGetchar(fd);
+        fflush(stdout);
+        delay(100);
+
+        // cout << t << "\n";
     }
     // printf("UART Out: %c.\n", coord);
 
@@ -207,6 +209,9 @@ int main()
 
         static Scalar color = Scalar(0, 225, 0);
         circle(src, puck_center, 4, color, -1, 8, 0);
+
+        
+
 
 #if DEBUG == 1
         imshow("SRC", src);
