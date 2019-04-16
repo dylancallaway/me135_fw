@@ -101,9 +101,6 @@ int main()
     printf("Camera nominal frame rate: %d\n", FRM_RATE);
     printf("Program actual frame rate: %d\n", 1000 / CAP_INTERVAL);
 
-    namedWindow("SRC", WINDOW_NORMAL);
-    namedWindow("THRESH", WINDOW_NORMAL);
-
     printf("\nBegin program:\n");
     auto t2 = chrono::steady_clock::now();
 
@@ -124,7 +121,8 @@ int main()
     cout << "Generated Homography Matrix:\n"
          << homography_matrix << "\n\n";
 
-    /******************** UART ****************************/
+#define UART_TEST 0
+#if UART_TEST == 1
     int fd;
 
     if ((fd = serialOpen("/dev/serial0", 115200)) < 0)
@@ -143,10 +141,16 @@ int main()
     char coord = 'd';
 
     // printf("\nOut: %3d, %3d ", coord[0], coord[1]);
-    write(fd, &coord, 1);
-    printf("UART Wrote %c.\n", coord);
-
-    delay(5);
+    while (true)
+    {
+        // cout << "Sending 'd''s...\n";
+        // write(fd, &coord, 1);
+        serialPutchar(fd, 'd');
+        delay(10);
+        int t = serialGetchar(fd);
+        cout << t << "\n";
+    }
+    // printf("UART Out: %c.\n", coord);
 
     // uint16_t read_val[2];
     // uint16_t(*read_pointer)[2];
@@ -156,12 +160,19 @@ int main()
     // printf(" -> %3d, %3d", read_val[0], read_val[1]);
 
     printf("\n");
-    /******************** UART ****************************/
+#endif
 
-    Scalar lowerb = Scalar(0, 0, 150);
-    Scalar upperb = Scalar(100, 100, 255);
+    Scalar lowerb = Scalar(0, 0, 50);
+    Scalar upperb = Scalar(20, 60, 255);
     Rect roi_1 = Rect(40, 30, 540, 420);
     Rect roi_2 = Rect(155, 35, 290, 430);
+
+#define DEBUG 1
+
+#if DEBUG == 1
+    namedWindow("SRC", WINDOW_NORMAL);
+    namedWindow("THRESH", WINDOW_NORMAL);
+#endif
 
     while (true)
     {
@@ -175,40 +186,29 @@ int main()
         src = src(roi_1);
         warpPerspective(src, src, homography_matrix, Size(FRM_COLS, FRM_ROWS));
         src = src(roi_2);
-        normalize(src, src, 0, 500, NORM_MINMAX);
+        // normalize(src, src, 0, 400, NORM_MINMAX); // $$$
         inRange(src, lowerb, upperb, thresh);
-        medianBlur(thresh, thresh, 5);
+        // medianBlur(thresh, thresh, 5); // $$
+        morphologyEx(thresh, thresh, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(5, 5)));
 
         findContours(thresh, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0));
-
-        Scalar color = Scalar(0, 200, 0);
-        uint8_t max_ind;
-
-        vector<Moments> mu(contours.size());
-        vector<Point> mc(contours.size());
-        double max_area = 0;
-
+        Point puck_center;
         for (uint8_t i = 0; i < contours.size(); i++)
         {
-            mu[i] = moments(contours[i], true);
-            if (mu[i].m00 > max_area)
+            Rect rect = boundingRect(contours[i]);
+            double peri = arcLength(contours[i], 1);
+
+            if (rect.width >= 25 && rect.width <= 33 && rect.height >= 17 && rect.height <= 25 && peri >= 70 && peri <= 120)
             {
-                max_area = mu[i].m00;
-                max_ind = i;
+                puck_center = Point(rect.x + rect.width / 2, rect.y + rect.height / 2);
+                break;
             }
-            mc[i] = Point(mu[i].m10 / mu[i].m00, mu[i].m01 / mu[i].m00);
         }
 
-        circle(src, mc[max_ind], 4, color, -1, 8, 0);
-        cout << "Center of puck: " << mc[max_ind] << "\n"
-             << endl;
+        static Scalar color = Scalar(0, 225, 0);
+        circle(src, puck_center, 4, color, -1, 8, 0);
 
-        // for (size_t i = 0; i < contours.size(); i++)
-        // {
-        // Scalar color = Scalar(0, 200, 0);
-        // drawContours(src, contours, (int)i, color, 2, LINE_8, hierarchy, 0);
-        // }
-
+#if DEBUG == 1
         imshow("SRC", src);
         imshow("THRESH", thresh);
 
@@ -217,6 +217,7 @@ int main()
             printf("Esc key pressed, stopping feed.\n");
             break;
         }
+#endif
 
         // this_thread::sleep_until(next_time);
     }
