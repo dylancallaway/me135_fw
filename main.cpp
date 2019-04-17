@@ -121,11 +121,11 @@ int main()
     cout << "Generated Homography Matrix:\n"
          << homography_matrix << "\n\n";
 
-#define UART_TEST 0
+#define UART_TEST 1
 #if UART_TEST == 1
     int fd;
 
-    if ((fd = serialOpen("/dev/serial0", 115200)) < 0)
+    if ((fd = serialOpen("/dev/ttyS0", 115200)) < 0)
     {
         fprintf(stderr, "Unable to open serial device: %s\n", strerror(errno));
         return 1;
@@ -138,19 +138,21 @@ int main()
     }
 
     // uint16_t coord[2] = {500, 1000};
-    char coord = 'd';
+    int coord = 'd';
 
     // printf("\nOut: %3d, %3d ", coord[0], coord[1]);
     while (true)
     {
         // cout << "Sending 'd''s...\n";
+        serialFlush(fd);
         // write(fd, &coord, 1);
-        serialPutchar(fd, 'd');
-        // char t = serialGetchar(fd);
-        fflush(stdout);
-        delay(100);
 
+        serialPutchar(fd, coord);
+        // delay(10);
+        // char t = serialGetchar(fd);
+        // serialFlush(fd);
         // cout << t << "\n";
+        delay(100);
     }
     // printf("UART Out: %c.\n", coord);
 
@@ -209,9 +211,6 @@ int main()
 
         static Scalar color = Scalar(0, 225, 0);
         circle(src, puck_center, 4, color, -1, 8, 0);
-
-        
-
 
 #if DEBUG == 1
         imshow("SRC", src);
