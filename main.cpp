@@ -44,6 +44,7 @@ void showNewPageFaultCount(const char *logtext, const char *allowed_maj, const c
 void reserveProcessMemory(int size);
 /* ********************************************************************** */
 
+/************** START MAIN ***************/
 int main()
 {
     printf("\nMemory configuration:\n");
@@ -121,58 +122,37 @@ int main()
     cout << "Generated Homography Matrix:\n"
          << homography_matrix << "\n\n";
 
-#define UART_TEST 1
+#define UART_TEST 0
 #if UART_TEST == 1
     int fd;
-
     if ((fd = serialOpen("/dev/ttyS0", 115200)) < 0)
     {
         fprintf(stderr, "Unable to open serial device: %s\n", strerror(errno));
         return 1;
     }
-
     if (wiringPiSetup() == -1)
     {
         fprintf(stdout, "Unable to start wiringPi: %s\n", strerror(errno));
         return 1;
     }
 
-    // uint16_t coord[2] = {500, 1000};
-    int coord = 'd';
+    uint8_t coord = 50;
 
-    // printf("\nOut: %3d, %3d ", coord[0], coord[1]);
+    cout << "Sending UART test data...\n";
     while (true)
     {
-        // cout << "Sending 'd''s...\n";
-        serialFlush(fd);
-        // write(fd, &coord, 1);
+        write(fd, &coord, 1);
 
-        serialPutchar(fd, coord);
-        // delay(10);
-        // char t = serialGetchar(fd);
-        // serialFlush(fd);
-        // cout << t << "\n";
-        delay(100);
+        delay(1000);
     }
-    // printf("UART Out: %c.\n", coord);
-
-    // uint16_t read_val[2];
-    // uint16_t(*read_pointer)[2];
-    // read_pointer = &read_val;
-
-    // read(fd, read_pointer, 4);
-    // printf(" -> %3d, %3d", read_val[0], read_val[1]);
-
-    printf("\n");
 #endif
 
-    Scalar lowerb = Scalar(0, 0, 50);
-    Scalar upperb = Scalar(20, 60, 255);
+    Scalar lowerb = Scalar(0, 0, 70);
+    Scalar upperb = Scalar(40, 60, 255);
     Rect roi_1 = Rect(40, 30, 540, 420);
     Rect roi_2 = Rect(155, 35, 290, 430);
 
 #define DEBUG 1
-
 #if DEBUG == 1
     namedWindow("SRC", WINDOW_NORMAL);
     namedWindow("THRESH", WINDOW_NORMAL);
@@ -183,7 +163,7 @@ int main()
         // auto next_time = chrono::steady_clock::now() + chrono::milliseconds(CAP_INTERVAL);
         auto t1 = chrono::steady_clock::now();
         chrono::duration<float, milli> t_elapse = t1 - t2;
-        // printf("Time between captures: %.3fms.\n", t_elapse.count());
+        printf("Time between captures: %.3fms.\n", t_elapse.count());
         t2 = chrono::steady_clock::now();
 
         cam.read(src);
@@ -192,8 +172,11 @@ int main()
         src = src(roi_2);
         // normalize(src, src, 0, 400, NORM_MINMAX); // $$$
         inRange(src, lowerb, upperb, thresh);
+        blur(thresh, thresh, Size(5, 5));
+        inRange(thresh, Scalar(100), Scalar(255), thresh);
+
         // medianBlur(thresh, thresh, 5); // $$
-        morphologyEx(thresh, thresh, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(5, 5)));
+        // morphologyEx(thresh, thresh, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(5, 5)));
 
         findContours(thresh, contours, hierarchy, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0));
         Point puck_center;
@@ -209,8 +192,28 @@ int main()
             }
         }
 
-        static Scalar color = Scalar(0, 225, 0);
+        static Scalar color = Scalar(0, 255, 0);
         circle(src, puck_center, 4, color, -1, 8, 0);
+
+#define TRAJECTORY_PREDICTION 1
+#if TRAJECTORY_PREDICTION == 1
+        int16_t x0, y0, x1, y1;
+        int16_t x_pred, y_pred;
+
+        // Current point
+        x1 = puck_center.x, y1 = puck_center.y;
+
+        int16_t delta_x = x1 - x0, delta_y = y1 - y0;
+
+        x_pred = x1 + 10 * delta_x, y_pred = y1 + 10 * delta_y;
+        if (delta_x <= 40 && delta_y <= 40)
+        {
+            line(src, puck_center, Point(x_pred, y_pred), Scalar(255, 255, 0), 2, LINE_8);
+        }
+
+        // Past point
+        x0 = x1, y0 = y1;
+#endif
 
 #if DEBUG == 1
         imshow("SRC", src);
@@ -227,6 +230,7 @@ int main()
     }
     return 0;
 }
+/*********** END MAIN *****************/
 
 void setMaxPriority(pid_t pid)
 {
