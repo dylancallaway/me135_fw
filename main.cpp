@@ -122,7 +122,18 @@ int main()
     cout << "Generated Homography Matrix:\n"
          << homography_matrix << "\n\n";
 
-#define UART_TEST 0
+    Scalar lowerb = Scalar(0, 0, 70);
+    Scalar upperb = Scalar(40, 60, 255);
+    Rect roi_1 = Rect(40, 30, 540, 420);
+    Rect roi_2 = Rect(155, 35, 290, 430);
+
+#define DEBUG 1
+#if DEBUG == 1
+    namedWindow("SRC", WINDOW_NORMAL);
+    namedWindow("THRESH", WINDOW_NORMAL);
+#endif
+
+#define UART_TEST 1
 #if UART_TEST == 1
     int fd;
     if ((fd = serialOpen("/dev/ttyS0", 115200)) < 0)
@@ -136,34 +147,22 @@ int main()
         return 1;
     }
 
-    uint8_t coord = 50;
+    uint16_t coord = 2500;
 
     cout << "Sending UART test data...\n";
+#endif
+
     while (true)
     {
+
+#if UART_TEST == 1
         write(fd, &coord, 1);
-
-        delay(1000);
-    }
 #endif
 
-    Scalar lowerb = Scalar(0, 0, 70);
-    Scalar upperb = Scalar(40, 60, 255);
-    Rect roi_1 = Rect(40, 30, 540, 420);
-    Rect roi_2 = Rect(155, 35, 290, 430);
-
-#define DEBUG 1
-#if DEBUG == 1
-    namedWindow("SRC", WINDOW_NORMAL);
-    namedWindow("THRESH", WINDOW_NORMAL);
-#endif
-
-    while (true)
-    {
         // auto next_time = chrono::steady_clock::now() + chrono::milliseconds(CAP_INTERVAL);
         auto t1 = chrono::steady_clock::now();
         chrono::duration<float, milli> t_elapse = t1 - t2;
-        printf("Time between captures: %.3fms.\n", t_elapse.count());
+        // printf("Time between captures: %.3fms.\n", t_elapse.count());
         t2 = chrono::steady_clock::now();
 
         cam.read(src);
@@ -197,21 +196,21 @@ int main()
 
 #define TRAJECTORY_PREDICTION 1
 #if TRAJECTORY_PREDICTION == 1
-        int16_t x0, y0, x1, y1;
-        int16_t x_pred, y_pred;
+        int16_t x0, y0, x1, y1, delta_x, delta_y, x_pred, y_pred;
 
-        // Current point
+        // Current point x1, y1
         x1 = puck_center.x, y1 = puck_center.y;
 
-        int16_t delta_x = x1 - x0, delta_y = y1 - y0;
+        delta_x = x1 - x0, delta_y = y1 - y0;
 
         x_pred = x1 + 10 * delta_x, y_pred = y1 + 10 * delta_y;
-        if (delta_x <= 40 && delta_y <= 40)
+
+        if (delta_x <= 30 && delta_y <= 30)
         {
             line(src, puck_center, Point(x_pred, y_pred), Scalar(255, 255, 0), 2, LINE_8);
         }
 
-        // Past point
+        // Update past point
         x0 = x1, y0 = y1;
 #endif
 
