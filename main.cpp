@@ -185,8 +185,8 @@ int main()
                 circle(src, puck_center, 4, color, -1, 8, 0);
 
                 // Initialize prediction variables
-                int16_t x0, y0, x1, y1, x_pred, y_pred;
-                int8_t v_x, v_y;
+                int16_t x0, y0, x1, y1, x_pred[4], y_pred[4];
+                float v_x, v_y, t_pred[4];
 
                 // Current point x1, y1
                 x1 = puck_center.x, y1 = puck_center.y;
@@ -195,14 +195,33 @@ int main()
                 auto t1 = chrono::steady_clock::now();            // Update current time
                 chrono::duration<float, milli> t_delta = t1 - t0; // Update t_delta
 
-                v_x = 100 * (x1 - x0) / (uint16_t)t_delta.count(), v_y = 100 * (y1 - y0) / (uint16_t)t_delta.count();
+                v_x = (x1 - x0) / t_delta.count(), v_y = (y1 - y0) / t_delta.count();
 
                 t0 = t1; // Update past time
                 printf("Time between captures: %.3fms.\n", t_delta.count());
                 /*************************************************/
 
                 // printf("v_x: %d\t v_y: %d\n", v_x, v_y);
-                x_pred = x1 + 2 * v_x, y_pred = y1 + 2 * v_y;
+                x_pred[0] = x1, y_pred[0] = y1, t_pred[0] = 0;
+                for(short j = 1; j < 5; j++)
+                {
+                    //How long it takes to hit boundary in each direction
+                    float t_x = max((x_min-x_pred[j-1])/v_x, (x_max-x_pred[j-1])/v_x), t_y = max((y_min-y_pred[j-1])/v_y, (y_max-y_pred[j-1])/v_y);
+                    if(t_x<t_y) //Hits x first
+                    {
+                        x_pred[j] = x_pred[j-1]+(int16_t)(v_x*t_x);
+                        y_pred[j] = y_pred[j-1]+(int16_t)(v_y*t_x);
+                        t_pred[j] = t_pred[j-1]+t_x;
+                        v_x *= -1;
+                    }
+                    else //Hits y first
+                    {
+                        x_pred[j] = x_pred[j-1]+(int16_t)(v_x*t_y);
+                        y_pred[j] = y_pred[j-1]+(int16_t)(v_y*t_y);
+                        t_pred[j] = t_pred[j-1]+t_y;
+                        v_y *= -1;
+                    }
+                }
 
                 if (abs(v_x) <= 100 && abs(v_y) <= 100)
                 {
