@@ -137,7 +137,7 @@ int main()
     /*******************************************************/
 
     /****************** IMAGE DISPLAY SETUP ******************/
-#define DISP_IMGS 1
+#define DISP_IMGS 0
 #if DISP_IMGS == 1
     namedWindow("SRC", WINDOW_NORMAL);    // src image window
     namedWindow("THRESH", WINDOW_NORMAL); // thresh image window
@@ -257,9 +257,10 @@ int main()
                 x0 = x1, y0 = y1;
 
                 // printf("X: %d\tY: %d\n", puck_center.x, puck_center.y);
-                int16_t coord[2] = {(int16_t)puck_center.x, (int16_t)puck_center.y};
+                // int16_t coord[2] = {(int16_t)x_pred[4], (int16_t)y_pred[4]};
+                int16_t coord[2] = {750, 500};
                 write(fd, &coord, 4);
-
+                delay(6000);
                 break;
             }
         }
