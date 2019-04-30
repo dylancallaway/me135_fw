@@ -157,6 +157,11 @@ int main()
         return 1;
     }
 
+    /*************** BEHAVIOR *****************/
+    short int difficulty = 0; //[0, 1, 2] = [Easy, Medium, Hard]
+    short int state = 0; //[0, 1, 2, 3, 4] = [Wait, Catch, Bank Left, Straight, Bank Right]
+    float v_x_0, v_y_0;
+
     /*************** MAIN LOOP ****************/
     printf("\nProgram started...\n");
     auto t0 = chrono::steady_clock::now(); // Initialize timer
@@ -215,7 +220,12 @@ int main()
 
                 v_x = (x1 - x0) / t_delta.count(), v_y = (y1 - y0) / t_delta.count();
 
-                t0 = t1; // Update past time
+                //TODO: Handle switching states here
+
+                // Update past values
+                x0 = x1, y0 = y1; //point
+                v_x_0 = v_x, v_y_0 = v_y; //velocity
+                t0 = t1; //time
                 printf("Time between captures: %.3fms.\n", 1000 * t_delta.count());
                 /*************************************************/
 
@@ -246,15 +256,14 @@ int main()
                     }
                 }
 
+                //TODO: Given state and trajectory, choose motor destination
+                
                 // if (abs(v_x) <= 50 && abs(v_y) <= 50)
                 // {
                 for (int j = 1; j < 5; j++)
                 {
                     line(src, Point(x_pred[j - 1], y_pred[j - 1]), Point(x_pred[j], y_pred[j]), Scalar(255, 255, 0), 2, LINE_8);
                 }
-
-                // Update past point
-                x0 = x1, y0 = y1;
 
                 // printf("X: %d\tY: %d\n", puck_center.x, puck_center.y);
                 // int16_t coord[2] = {(int16_t)x_pred[4], (int16_t)y_pred[4]};
