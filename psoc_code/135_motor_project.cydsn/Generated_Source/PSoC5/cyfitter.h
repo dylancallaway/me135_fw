@@ -424,7 +424,7 @@
 #define isr_rx__INTC_CLR_PD_REG CYREG_NVIC_CLRPEND0
 #define isr_rx__INTC_MASK 0x01u
 #define isr_rx__INTC_NUMBER 0u
-#define isr_rx__INTC_PRIOR_NUM 7u
+#define isr_rx__INTC_PRIOR_NUM 6u
 #define isr_rx__INTC_PRIOR_REG CYREG_NVIC_PRI_0
 #define isr_rx__INTC_SET_EN_REG CYREG_NVIC_SETENA0
 #define isr_rx__INTC_SET_PD_REG CYREG_NVIC_SETPEND0
@@ -775,7 +775,7 @@
 #define pulse_ready_isr__INTC_CLR_PD_REG CYREG_NVIC_CLRPEND0
 #define pulse_ready_isr__INTC_MASK 0x02u
 #define pulse_ready_isr__INTC_NUMBER 1u
-#define pulse_ready_isr__INTC_PRIOR_NUM 7u
+#define pulse_ready_isr__INTC_PRIOR_NUM 6u
 #define pulse_ready_isr__INTC_PRIOR_REG CYREG_NVIC_PRI_1
 #define pulse_ready_isr__INTC_SET_EN_REG CYREG_NVIC_SETENA0
 #define pulse_ready_isr__INTC_SET_PD_REG CYREG_NVIC_SETPEND0

@@ -85,7 +85,7 @@ int main(void)
     
     UART_Start(); // Obvi must call before next line
     printf("Program started...");
-    
+
     /****************** PWM INIT **************************/
     /* Must happen before PULSE CLOCK INIT or might miss pulses */
     PWM_1_Start();

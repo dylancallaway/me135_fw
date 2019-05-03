@@ -424,7 +424,7 @@
 .set isr_rx__INTC_CLR_PD_REG, CYREG_NVIC_CLRPEND0
 .set isr_rx__INTC_MASK, 0x01
 .set isr_rx__INTC_NUMBER, 0
-.set isr_rx__INTC_PRIOR_NUM, 7
+.set isr_rx__INTC_PRIOR_NUM, 6
 .set isr_rx__INTC_PRIOR_REG, CYREG_NVIC_PRI_0
 .set isr_rx__INTC_SET_EN_REG, CYREG_NVIC_SETENA0
 .set isr_rx__INTC_SET_PD_REG, CYREG_NVIC_SETPEND0
@@ -775,7 +775,7 @@
 .set pulse_ready_isr__INTC_CLR_PD_REG, CYREG_NVIC_CLRPEND0
 .set pulse_ready_isr__INTC_MASK, 0x02
 .set pulse_ready_isr__INTC_NUMBER, 1
-.set pulse_ready_isr__INTC_PRIOR_NUM, 7
+.set pulse_ready_isr__INTC_PRIOR_NUM, 6
 .set pulse_ready_isr__INTC_PRIOR_REG, CYREG_NVIC_PRI_1
 .set pulse_ready_isr__INTC_SET_EN_REG, CYREG_NVIC_SETENA0
 .set pulse_ready_isr__INTC_SET_PD_REG, CYREG_NVIC_SETPEND0
