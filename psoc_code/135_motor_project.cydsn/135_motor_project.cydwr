@@ -251,7 +251,10 @@
   <Data key="DataVersionKey" value="2" />
   <Group key="DWRInstGuidMapping">
     <Group key="Interrupt">
+      <Data key="0c4dc484-bdce-4d1a-8f6b-ba71924b7ce8" value="pos_reset" />
+      <Data key="4609a62d-1acd-43f2-bf53-17513e65a130" value="pulse_ready_isr" />
       <Data key="564756f7-f1c7-4b77-be82-78e94f858678" value="isr_rx" />
+      <Data key="d59666be-1cb0-438b-babe-b7960342f69f" value="isr_rx" />
       <Data key="d9995538-e4a0-417a-9dcb-4bf2f8040ef9" value="isr_1" />
       <Data key="dfb150b6-a1d0-4b57-8da1-792937f4caac/eb34254f-7e25-4f08-a75f-35746c277a91" value="EZI2C_isr" />
     </Group>
@@ -3354,7 +3357,21 @@
     </Group>
   </Group>
   <Group key="Interrupt">
+    <Group key="4609a62d-1acd-43f2-bf53-17513e65a130">
+      <Group key="CortexM3">
+        <Data key="Assigned" value="True" />
+        <Data key="Priority" value="6" />
+        <Data key="Vector" value="-1" />
+      </Group>
+    </Group>
     <Group key="564756f7-f1c7-4b77-be82-78e94f858678">
+      <Group key="CortexM3">
+        <Data key="Assigned" value="True" />
+        <Data key="Priority" value="6" />
+        <Data key="Vector" value="-1" />
+      </Group>
+    </Group>
+    <Group key="d59666be-1cb0-438b-babe-b7960342f69f">
       <Group key="CortexM3">
         <Data key="Assigned" value="True" />
         <Data key="Priority" value="6" />
