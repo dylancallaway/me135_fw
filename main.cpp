@@ -131,13 +131,13 @@ int main()
 
     /*************** THRESHOLDING AND CROPPING SETUP ****************/
     Scalar lowerb = Scalar(0, 0, 50);              // Lower bound for thresholding
-    Scalar upperb = Scalar(40, 70, 150);           // Upper bound for thresholding
+    Scalar upperb = Scalar(30, 70, 150);           // Upper bound for thresholding
     Rect roi_1 = Rect(28, 14, 257, 206);           // Initial crop
     Rect roi_2 = Rect(77, 14, 225 - 77, 235 - 14); // Crop after perspective correction
     /*******************************************************/
 
     /****************** IMAGE DISPLAY SETUP ******************/
-#define DISP_IMGS 0
+#define DISP_IMGS 1
 #if DISP_IMGS == 1
     namedWindow("SRC", WINDOW_NORMAL);    // src image window
     namedWindow("THRESH", WINDOW_NORMAL); // thresh image window
@@ -173,23 +173,11 @@ int main()
         warpPerspective(src, src, homography_matrix, Size(230, 250));
         src = src(roi_2);
 
-        // split(src, bgr);
-        // for (int i = 0; i < 3; i++)
-        // {
-        //     normalize(bgr[i], bgr[i], 1, 0, NORM_L2);
-        // }
-        // merge(bgr, 3, src);
-
-        // multiply(src, Scalar(0.5, 0.5, 1), src);
         // normalize(src, src, 0, 255, NORM_MINMAX); // $$$
-
         inRange(src, lowerb, upperb, thresh);
-        medianBlur(thresh, thresh, 5); // $$
+        medianBlur(thresh, thresh, 7); // $$
 
-        // blur(thresh, thresh, Size(5, 5));
-        // inRange(thresh, Scalar(100), Scalar(255), thresh);
-
-        // morphologyEx(thresh, thresh, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(5, 5)));
+        morphologyEx(thresh, thresh, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(7, 7)));
 
         findContours(thresh, contours, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0));
         Point puck_center;
@@ -200,78 +188,62 @@ int main()
 
             // cout << rect << "\t" << peri << "\n";
 
-            if (rect.width >= 11 && rect.width <= 19 && rect.height >= 6 && rect.height <= 14 && peri >= 30 && peri <= 45)
+            if (rect.width >= 7 && rect.width <= 15 && rect.height >= 5 && rect.height <= 13 && peri >= 28 && peri <= 40)
             {
                 puck_center = Point(rect.x + rect.width / 2, rect.y + rect.height / 2);
 
-                static Scalar color = Scalar(0, 255, 0);
-                circle(src, puck_center, 2, color, -1, 8, 0);
+                circle(src, puck_center, 2, Scalar(0, 255, 0), -1, 8, 0);
 
                 // Initialize prediction variables
-                float x0, y0, x1, y1;
+                float x_0, y_0, x_1, y_1;
                 float v_x, v_y;
 
-                // Current point x1, y1
-                x1 = puck_center.x, y1 = puck_center.y;
+                // Current point x_1, y_1
+                x_1 = puck_center.x, y_1 = puck_center.y;
 
-                /************** VELOCITY CALCULATION **************/
                 auto t1 = chrono::steady_clock::now();     // Update current time
                 chrono::duration<float> t_delta = t1 - t0; // Update t_delta
+                t0 = t1;                                   // Update past time
+                                                           // printf("Time between captures: %.3fms.\n", 1000 * t_delta.count());
 
-                v_x = (x1 - x0) / t_delta.count(), v_y = (y1 - y0) / t_delta.count();
-
-                //TODO: Handle switching states here
-
-                // Update past values
-                x0 = x1, y0 = y1; //point
-                v_x_0 = v_x, v_y_0 = v_y; //velocity
-                t0 = t1; //time
-                printf("Time between captures: %.3fms.\n", 1000 * t_delta.count());
-                /*************************************************/
-
-                float x_min = 10, y_min = 5;
-                float x_max = 136, y_max = 210;
-                float x_pred[5] = {x1}, y_pred[5] = {y1};
-                float delta_t_pred[5] = {0};
-
-                for (int j = 1; j < 5; j++)
+                if (y_1 >= 112)
                 {
-                    //How long it takes to hit boundary in each direction
-                    float delta_t_x = max((x_min - x_pred[j - 1]) / v_x, (x_max - x_pred[j - 1]) / v_x);
-                    float delta_t_y = max((y_min - y_pred[j - 1]) / v_y, (y_max - y_pred[j - 1]) / v_y);
+                    v_x = (x_1 - x_0) / t_delta.count();
+                    v_y = (y_1 - y_0) / t_delta.count();
+                    x_0 = x_1, y_0 = y_1; // Update past point
 
-                    if (delta_t_x < delta_t_y) //Hits x first
+                    if (abs(v_x) > 300)
                     {
-                        x_pred[j] = x_pred[j - 1] + (int16_t)(v_x * delta_t_x);
-                        y_pred[j] = y_pred[j - 1] + (int16_t)(v_y * delta_t_x);
-                        delta_t_pred[j] = delta_t_pred[j - 1] + delta_t_x;
-                        v_x *= -1;
+                        v_x = 0;
                     }
-                    else //Hits y first
+                    if (abs(v_y) > 300)
                     {
-                        x_pred[j] = x_pred[j - 1] + (int16_t)(v_x * delta_t_y);
-                        y_pred[j] = y_pred[j - 1] + (int16_t)(v_y * delta_t_y);
-                        delta_t_pred[j] = delta_t_pred[j - 1] + delta_t_y;
-                        v_y *= -1;
+                        v_y = 0;
                     }
-                }
 
-                //TODO: Given state and trajectory, choose motor destination
-                
-                // if (abs(v_x) <= 50 && abs(v_y) <= 50)
-                // {
-                for (int j = 1; j < 5; j++)
-                {
-                    line(src, Point(x_pred[j - 1], y_pred[j - 1]), Point(x_pred[j], y_pred[j]), Scalar(255, 255, 0), 2, LINE_8);
-                }
+                    // float x_min = 8, y_min = 3;
+                    // float x_max = 139, y_max = 175;
+                    float x_pred = x_1 + 20 * v_x * t_delta.count();
+                    float y_pred = y_1 + 20 * v_y * t_delta.count();
 
-                // printf("X: %d\tY: %d\n", puck_center.x, puck_center.y);
-                // int16_t coord[2] = {(int16_t)x_pred[4], (int16_t)y_pred[4]};
-                int16_t coord[2] = {750, 500};
-                write(fd, &coord, 4);
-                delay(6000);
-                break;
+                    // cout << v_x << "\t" << v_y << "\n";
+
+                    line(src, Point(x_1, y_1), Point(x_pred, y_pred), Scalar(255, 255, 0), 1, LINE_8);
+
+                    // Puck goes from
+                    // X = 8 to X = 139
+                    // Y = 3 to Y = 175
+                    // Middle of table is Y = 112
+
+                    // cout << puck_center.x << "\t" << puck_center.y << "\n";
+
+                    // Send to predicted position
+                    int16_t coord[2] = {100, 10};
+                    serialFlush(fd);
+                    write(fd, &coord, 4);
+                }
             }
+            break;
         }
 
 #if DISP_IMGS == 1
