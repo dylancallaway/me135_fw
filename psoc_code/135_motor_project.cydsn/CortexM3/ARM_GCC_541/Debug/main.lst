@@ -1,0 +1,2063 @@
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"main.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text.isr_rx,"ax",%progbits
+  20              		.align	2
+  21              		.global	isr_rx
+  22              		.thumb
+  23              		.thumb_func
+  24              		.type	isr_rx, %function
+  25              	isr_rx:
+  26              	.LFB63:
+  27              		.file 1 "main.c"
+   1:main.c        **** #include "project.h"
+   2:main.c        **** #include "stdlib.h"
+   3:main.c        **** 
+   4:main.c        **** /************* PIN DEFINITONS **************
+   5:main.c        **** Motor 1 Step: Reg 5
+   6:main.c        **** Motor 1 Direction: Reg 1, 0 is pos, 1 is neg
+   7:main.c        **** Motor 1 Sleep: Reg 4
+   8:main.c        **** ********************************************
+   9:main.c        **** Motor 2 Step: Reg 6
+  10:main.c        **** Motor 2 Direction: Reg 2, 0 is pos, 1 is neg
+  11:main.c        **** Motor 2 Sleep: Reg 4
+  12:main.c        **** ********************************************
+  13:main.c        **** LED: Reg 3
+  14:main.c        **** *******************************************/
+  15:main.c        **** /******************************************/
+  16:main.c        **** 
+  17:main.c        **** // Gantry MAX travels
+  18:main.c        **** // 1200 steps
+  19:main.c        **** 
+  20:main.c        **** // Camera coord MAX
+  21:main.c        **** // X = 8 to X = 139
+  22:main.c        **** // Y = 3 to Y = 175
+  23:main.c        **** 
+  24:main.c        **** #define steps_per_pixel 9.16
+  25:main.c        **** 
+  26:main.c        **** /************ FUNCTION PROTOTYPES *******************/
+  27:main.c        **** int printf(const char * format, ...);
+  28:main.c        **** double fabs(double);
+  29:main.c        **** double floor(double);
+  30:main.c        **** /**************************************************/
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 2
+
+
+  31:main.c        **** 
+  32:main.c        **** /************ UART RX INTERRUPT *********************/
+  33:main.c        **** volatile int uart_recv_buf[4];
+  34:main.c        **** volatile int uart_recv_count = 0;
+  35:main.c        **** int x_1 = 0; // New point
+  36:main.c        **** int y_1 = 0;
+  37:main.c        **** 
+  38:main.c        **** CY_ISR(isr_rx)
+  39:main.c        **** {
+  28              		.loc 1 39 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32 0000 38B5     		push	{r3, r4, r5, lr}
+  33              		.cfi_def_cfa_offset 16
+  34              		.cfi_offset 3, -16
+  35              		.cfi_offset 4, -12
+  36              		.cfi_offset 5, -8
+  37              		.cfi_offset 14, -4
+  40:main.c        ****     uart_recv_buf[uart_recv_count] = UART_GetChar();
+  38              		.loc 1 40 0
+  39 0002 0D4C     		ldr	r4, .L4
+  40 0004 2568     		ldr	r5, [r4]
+  41 0006 FFF7FEFF 		bl	UART_GetChar
+  42              	.LVL0:
+  43 000a 0C4B     		ldr	r3, .L4+4
+  44 000c 43F82500 		str	r0, [r3, r5, lsl #2]
+  41:main.c        ****     uart_recv_count += 1;
+  45              		.loc 1 41 0
+  46 0010 2368     		ldr	r3, [r4]
+  47 0012 0133     		adds	r3, r3, #1
+  48 0014 2360     		str	r3, [r4]
+  42:main.c        **** 
+  43:main.c        ****     if (uart_recv_count > 3)
+  49              		.loc 1 43 0
+  50 0016 2368     		ldr	r3, [r4]
+  51 0018 032B     		cmp	r3, #3
+  52 001a 0CDD     		ble	.L1
+  44:main.c        ****     {
+  45:main.c        ****         x_1 = (uart_recv_buf[1] << 8) + uart_recv_buf[0]; // new coords
+  53              		.loc 1 45 0
+  54 001c 074B     		ldr	r3, .L4+4
+  55 001e 5968     		ldr	r1, [r3, #4]
+  56 0020 1A68     		ldr	r2, [r3]
+  57 0022 02EB0121 		add	r1, r2, r1, lsl #8
+  58 0026 6160     		str	r1, [r4, #4]
+  46:main.c        ****         y_1 = (uart_recv_buf[3] << 8) + uart_recv_buf[2];
+  59              		.loc 1 46 0
+  60 0028 D968     		ldr	r1, [r3, #12]
+  61 002a 9B68     		ldr	r3, [r3, #8]
+  62 002c 03EB0123 		add	r3, r3, r1, lsl #8
+  63 0030 A360     		str	r3, [r4, #8]
+  47:main.c        ****         uart_recv_count = 0;
+  64              		.loc 1 47 0
+  65 0032 0023     		movs	r3, #0
+  66 0034 2360     		str	r3, [r4]
+  67              	.L1:
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 3
+
+
+  68 0036 38BD     		pop	{r3, r4, r5, pc}
+  69              	.L5:
+  70              		.align	2
+  71              	.L4:
+  72 0038 00000000 		.word	.LANCHOR0
+  73 003c 00000000 		.word	uart_recv_buf
+  74              		.cfi_endproc
+  75              	.LFE63:
+  76              		.size	isr_rx, .-isr_rx
+  77              		.global	__aeabi_i2f
+  78              		.global	__aeabi_fadd
+  79              		.global	__aeabi_f2d
+  80              		.global	__aeabi_ddiv
+  81              		.global	__aeabi_dadd
+  82              		.global	__aeabi_d2f
+  83              		.global	__aeabi_fsub
+  84              		.section	.text.pulse_ready_isr,"ax",%progbits
+  85              		.align	2
+  86              		.global	pulse_ready_isr
+  87              		.thumb
+  88              		.thumb_func
+  89              		.type	pulse_ready_isr, %function
+  90              	pulse_ready_isr:
+  91              	.LFB64:
+  48:main.c        ****     }
+  49:main.c        **** }
+  50:main.c        **** /*************************************************/
+  51:main.c        **** 
+  52:main.c        **** /************** MOTOR PULSE INTERRUPT ***************/
+  53:main.c        **** float x_0 = 0, y_0 = 0, dx = 0, dy = 0; // always start at (0, 0)
+  54:main.c        **** float m1_steps = 0, m2_steps = 0;
+  55:main.c        **** int m1_dir = 0, m2_dir = 0;
+  56:main.c        **** int m1_dir_pin = 0, m2_dir_pin = 0;
+  57:main.c        **** int m1_step_pin = 0, m2_step_pin = 0;
+  58:main.c        **** 
+  59:main.c        **** CY_ISR(pulse_ready_isr)
+  60:main.c        **** {
+  92              		.loc 1 60 0
+  93              		.cfi_startproc
+  94              		@ args = 0, pretend = 0, frame = 0
+  95              		@ frame_needed = 0, uses_anonymous_args = 0
+  96 0000 2DE9F843 		push	{r3, r4, r5, r6, r7, r8, r9, lr}
+  97              		.cfi_def_cfa_offset 32
+  98              		.cfi_offset 3, -32
+  99              		.cfi_offset 4, -28
+ 100              		.cfi_offset 5, -24
+ 101              		.cfi_offset 6, -20
+ 102              		.cfi_offset 7, -16
+ 103              		.cfi_offset 8, -12
+ 104              		.cfi_offset 9, -8
+ 105              		.cfi_offset 14, -4
+  61:main.c        ****     Control_Reg_5_Write(m1_step_pin); // Motor step
+ 106              		.loc 1 61 0
+ 107 0004 264C     		ldr	r4, .L8+8
+ 108 0006 207B     		ldrb	r0, [r4, #12]	@ zero_extendqisi2
+ 109 0008 FFF7FEFF 		bl	Control_Reg_5_Write
+ 110              	.LVL1:
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 4
+
+
+  62:main.c        ****     Control_Reg_6_Write(m2_step_pin);
+ 111              		.loc 1 62 0
+ 112 000c 207C     		ldrb	r0, [r4, #16]	@ zero_extendqisi2
+ 113 000e FFF7FEFF 		bl	Control_Reg_6_Write
+ 114              	.LVL2:
+  63:main.c        ****     
+  64:main.c        ****     x_0 += -((float)m1_dir + (float)m2_dir) / (2 * steps_per_pixel);
+ 115              		.loc 1 64 0
+ 116 0012 6069     		ldr	r0, [r4, #20]
+ 117 0014 FFF7FEFF 		bl	__aeabi_i2f
+ 118              	.LVL3:
+ 119 0018 0546     		mov	r5, r0
+ 120 001a A069     		ldr	r0, [r4, #24]
+ 121 001c FFF7FEFF 		bl	__aeabi_i2f
+ 122              	.LVL4:
+ 123 0020 0646     		mov	r6, r0
+ 124 0022 0146     		mov	r1, r0
+ 125 0024 2846     		mov	r0, r5
+ 126 0026 FFF7FEFF 		bl	__aeabi_fadd
+ 127              	.LVL5:
+ 128 002a 00F10040 		add	r0, r0, #-2147483648
+ 129 002e FFF7FEFF 		bl	__aeabi_f2d
+ 130              	.LVL6:
+ 131 0032 19A3     		adr	r3, .L8
+ 132 0034 D3E90023 		ldrd	r2, [r3]
+ 133 0038 FFF7FEFF 		bl	__aeabi_ddiv
+ 134              	.LVL7:
+ 135 003c 8046     		mov	r8, r0
+ 136 003e 8946     		mov	r9, r1
+ 137 0040 E069     		ldr	r0, [r4, #28]	@ float
+ 138 0042 FFF7FEFF 		bl	__aeabi_f2d
+ 139              	.LVL8:
+ 140 0046 4246     		mov	r2, r8
+ 141 0048 4B46     		mov	r3, r9
+ 142 004a FFF7FEFF 		bl	__aeabi_dadd
+ 143              	.LVL9:
+ 144 004e FFF7FEFF 		bl	__aeabi_d2f
+ 145              	.LVL10:
+ 146 0052 E061     		str	r0, [r4, #28]	@ float
+  65:main.c        ****     y_0 += ((float)m1_dir - (float)m2_dir) / (2 * steps_per_pixel);
+ 147              		.loc 1 65 0
+ 148 0054 3146     		mov	r1, r6
+ 149 0056 2846     		mov	r0, r5
+ 150 0058 FFF7FEFF 		bl	__aeabi_fsub
+ 151              	.LVL11:
+ 152 005c FFF7FEFF 		bl	__aeabi_f2d
+ 153              	.LVL12:
+ 154 0060 0DA3     		adr	r3, .L8
+ 155 0062 D3E90023 		ldrd	r2, [r3]
+ 156 0066 FFF7FEFF 		bl	__aeabi_ddiv
+ 157              	.LVL13:
+ 158 006a 0646     		mov	r6, r0
+ 159 006c 0F46     		mov	r7, r1
+ 160 006e 206A     		ldr	r0, [r4, #32]	@ float
+ 161 0070 FFF7FEFF 		bl	__aeabi_f2d
+ 162              	.LVL14:
+ 163 0074 3246     		mov	r2, r6
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 5
+
+
+ 164 0076 3B46     		mov	r3, r7
+ 165 0078 FFF7FEFF 		bl	__aeabi_dadd
+ 166              	.LVL15:
+ 167 007c FFF7FEFF 		bl	__aeabi_d2f
+ 168              	.LVL16:
+ 169 0080 2062     		str	r0, [r4, #32]	@ float
+  66:main.c        ****     
+  67:main.c        ****     Control_Reg_5_Write(0); // Motor reset
+ 170              		.loc 1 67 0
+ 171 0082 0020     		movs	r0, #0
+ 172 0084 FFF7FEFF 		bl	Control_Reg_5_Write
+ 173              	.LVL17:
+  68:main.c        ****     Control_Reg_6_Write(0);
+ 174              		.loc 1 68 0
+ 175 0088 0020     		movs	r0, #0
+ 176 008a FFF7FEFF 		bl	Control_Reg_6_Write
+ 177              	.LVL18:
+ 178 008e BDE8F883 		pop	{r3, r4, r5, r6, r7, r8, r9, pc}
+ 179              	.L9:
+ 180 0092 00BFAFF3 		.align	3
+ 180      0080
+ 181              	.L8:
+ 182 0098 52B81E85 		.word	-2061584302
+ 183 009c EB513240 		.word	1077039595
+ 184 00a0 00000000 		.word	.LANCHOR0
+ 185              		.cfi_endproc
+ 186              	.LFE64:
+ 187              		.size	pulse_ready_isr, .-pulse_ready_isr
+ 188              		.section	.text.pos_reset,"ax",%progbits
+ 189              		.align	2
+ 190              		.global	pos_reset
+ 191              		.thumb
+ 192              		.thumb_func
+ 193              		.type	pos_reset, %function
+ 194              	pos_reset:
+ 195              	.LFB65:
+  69:main.c        **** }    
+  70:main.c        ****    
+  71:main.c        **** /***********************************************/
+  72:main.c        **** 
+  73:main.c        **** /****************** (0, 0) ROUTINE ****************/
+  74:main.c        **** CY_ISR(pos_reset)
+  75:main.c        **** {
+ 196              		.loc 1 75 0
+ 197              		.cfi_startproc
+ 198              		@ args = 0, pretend = 0, frame = 0
+ 199              		@ frame_needed = 0, uses_anonymous_args = 0
+ 200 0000 08B5     		push	{r3, lr}
+ 201              		.cfi_def_cfa_offset 8
+ 202              		.cfi_offset 3, -8
+ 203              		.cfi_offset 14, -4
+  76:main.c        ****     x_0 = 0;
+ 204              		.loc 1 76 0
+ 205 0002 034B     		ldr	r3, .L12
+ 206 0004 0022     		movs	r2, #0
+ 207 0006 DA61     		str	r2, [r3, #28]	@ float
+  77:main.c        ****     y_0 = 0;
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 6
+
+
+ 208              		.loc 1 77 0
+ 209 0008 1A62     		str	r2, [r3, #32]	@ float
+  78:main.c        ****     Pin_1_ClearInterrupt();
+ 210              		.loc 1 78 0
+ 211 000a FFF7FEFF 		bl	Pin_1_ClearInterrupt
+ 212              	.LVL19:
+ 213 000e 08BD     		pop	{r3, pc}
+ 214              	.L13:
+ 215              		.align	2
+ 216              	.L12:
+ 217 0010 00000000 		.word	.LANCHOR0
+ 218              		.cfi_endproc
+ 219              	.LFE65:
+ 220              		.size	pos_reset, .-pos_reset
+ 221              		.global	__aeabi_fcmpeq
+ 222              		.global	__aeabi_dmul
+ 223              		.global	__aeabi_d2iz
+ 224              		.global	__aeabi_dsub
+ 225              		.global	__aeabi_dcmpgt
+ 226              		.global	__aeabi_dcmplt
+ 227              		.section	.text.main,"ax",%progbits
+ 228              		.align	2
+ 229              		.global	main
+ 230              		.thumb
+ 231              		.thumb_func
+ 232              		.type	main, %function
+ 233              	main:
+ 234              	.LFB66:
+  79:main.c        **** }
+  80:main.c        **** /************************************************/
+  81:main.c        **** 
+  82:main.c        **** int main(void)
+  83:main.c        **** {
+ 235              		.loc 1 83 0
+ 236              		.cfi_startproc
+ 237              		@ Volatile: function does not return.
+ 238              		@ args = 0, pretend = 0, frame = 0
+ 239              		@ frame_needed = 0, uses_anonymous_args = 0
+ 240 0000 80B5     		push	{r7, lr}
+ 241              		.cfi_def_cfa_offset 8
+ 242              		.cfi_offset 7, -8
+ 243              		.cfi_offset 14, -4
+  84:main.c        ****     CyDelay(1000); // Wait 1 second for "safety"
+ 244              		.loc 1 84 0
+ 245 0002 4FF47A70 		mov	r0, #1000
+ 246 0006 FFF7FEFF 		bl	CyDelay
+ 247              	.LVL20:
+  85:main.c        ****     
+  86:main.c        ****     UART_Start(); // Obvi must call before next line
+ 248              		.loc 1 86 0
+ 249 000a FFF7FEFF 		bl	UART_Start
+ 250              	.LVL21:
+  87:main.c        ****     printf("Program started...");
+ 251              		.loc 1 87 0
+ 252 000e 9648     		ldr	r0, .L40+16
+ 253 0010 FFF7FEFF 		bl	printf
+ 254              	.LVL22:
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 7
+
+
+  88:main.c        ****     
+  89:main.c        ****     /****************** PWM INIT **************************/
+  90:main.c        ****     /* Must happen before PULSE CLOCK INIT or might miss pulses */
+  91:main.c        ****     PWM_1_Start();
+ 255              		.loc 1 91 0
+ 256 0014 FFF7FEFF 		bl	PWM_1_Start
+ 257              	.LVL23:
+  92:main.c        ****     PWM_2_Start();
+ 258              		.loc 1 92 0
+ 259 0018 FFF7FEFF 		bl	PWM_2_Start
+ 260              	.LVL24:
+  93:main.c        ****     
+  94:main.c        ****     /****************** PULSE CLOCK INIT *********************/
+  95:main.c        ****     /* The period between motor pulses is set according to:
+  96:main.c        ****     PULSE_PERIOD = BUS_CLK_FREQUENCY_HZ * DESIRED_PERIOD_SEC */
+  97:main.c        ****     Timer_1_Start(); // PULSE_PERIOD is set in Timer_1 block
+ 261              		.loc 1 97 0
+ 262 001c FFF7FEFF 		bl	Timer_1_Start
+ 263              	.LVL25:
+  98:main.c        ****     pulse_ready_isr_StartEx(pulse_ready_isr);
+ 264              		.loc 1 98 0
+ 265 0020 9248     		ldr	r0, .L40+20
+ 266 0022 FFF7FEFF 		bl	pulse_ready_isr_StartEx
+ 267              	.LVL26:
+  99:main.c        ****     pulse_ready_isr_Enable();
+ 268              		.loc 1 99 0
+ 269 0026 FFF7FEFF 		bl	pulse_ready_isr_Enable
+ 270              	.LVL27:
+ 100:main.c        ****     /*********************************************************/
+ 101:main.c        ****     
+ 102:main.c        ****     /****************** UART INTERRUPT INIT *********************/
+ 103:main.c        ****     isr_rx_StartEx(isr_rx); /* set up UART interrupt vector*/
+ 271              		.loc 1 103 0
+ 272 002a 9148     		ldr	r0, .L40+24
+ 273 002c FFF7FEFF 		bl	isr_rx_StartEx
+ 274              	.LVL28:
+ 104:main.c        ****     isr_rx_Enable();        /* arm the UART interrupt*/
+ 275              		.loc 1 104 0
+ 276 0030 FFF7FEFF 		bl	isr_rx_Enable
+ 277              	.LVL29:
+ 105:main.c        ****     /**************************************************/
+ 106:main.c        ****     
+ 107:main.c        ****     /********************** (0, 0) INIT ***********************/
+ 108:main.c        ****     pos_reset_StartEx(pos_reset);
+ 278              		.loc 1 108 0
+ 279 0034 8F48     		ldr	r0, .L40+28
+ 280 0036 FFF7FEFF 		bl	pos_reset_StartEx
+ 281              	.LVL30:
+ 109:main.c        ****     pos_reset_Enable();
+ 282              		.loc 1 109 0
+ 283 003a FFF7FEFF 		bl	pos_reset_Enable
+ 284              	.LVL31:
+ 110:main.c        ****     /************************************************/
+ 111:main.c        ****     
+ 112:main.c        ****     CyGlobalIntEnable;      // Enable global interrupts
+ 285              		.loc 1 112 0
+ 286              		.syntax unified
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 8
+
+
+ 287              	@ 112 "main.c" 1
+ 288 003e 62B6     		CPSIE   i
+ 289              	@ 0 "" 2
+ 113:main.c        ****     
+ 114:main.c        ****     Control_Reg_3_Write(0); // Start with LED off
+ 290              		.loc 1 114 0
+ 291              		.thumb
+ 292              		.syntax unified
+ 293 0040 0020     		movs	r0, #0
+ 294 0042 FFF7FEFF 		bl	Control_Reg_3_Write
+ 295              	.LVL32:
+ 296              	.L15:
+ 115:main.c        **** 
+ 116:main.c        ****     while (1)
+ 117:main.c        ****     {
+ 118:main.c        ****         // printf("\t(%.2f, %.2f)\t", x_0, y_0);
+ 119:main.c        ****         dx = (float)x_1 - x_0;
+ 297              		.loc 1 119 0
+ 298 0046 8C4C     		ldr	r4, .L40+32
+ 299 0048 D4F80480 		ldr	r8, [r4, #4]
+ 300 004c 4046     		mov	r0, r8
+ 301 004e FFF7FEFF 		bl	__aeabi_i2f
+ 302              	.LVL33:
+ 303 0052 E169     		ldr	r1, [r4, #28]	@ float
+ 304 0054 FFF7FEFF 		bl	__aeabi_fsub
+ 305              	.LVL34:
+ 306 0058 0546     		mov	r5, r0
+ 307 005a 6062     		str	r0, [r4, #36]	@ float
+ 120:main.c        ****         dy = (float)y_1 - y_0;
+ 308              		.loc 1 120 0
+ 309 005c A768     		ldr	r7, [r4, #8]
+ 310 005e 3846     		mov	r0, r7
+ 311 0060 FFF7FEFF 		bl	__aeabi_i2f
+ 312              	.LVL35:
+ 313 0064 216A     		ldr	r1, [r4, #32]	@ float
+ 314 0066 FFF7FEFF 		bl	__aeabi_fsub
+ 315              	.LVL36:
+ 316 006a 0646     		mov	r6, r0
+ 317 006c A062     		str	r0, [r4, #40]	@ float
+ 121:main.c        ****         if ( (dx != 0 && x_1 <= 131) || (dy != 0 && y_1 <= 100) )
+ 318              		.loc 1 121 0
+ 319 006e 0021     		movs	r1, #0
+ 320 0070 2846     		mov	r0, r5
+ 321 0072 FFF7FEFF 		bl	__aeabi_fcmpeq
+ 322              	.LVL37:
+ 323 0076 10B9     		cbnz	r0, .L16
+ 324              		.loc 1 121 0 is_stmt 0 discriminator 1
+ 325 0078 B8F1830F 		cmp	r8, #131
+ 326 007c 09DD     		ble	.L18
+ 327              	.L16:
+ 328              		.loc 1 121 0 discriminator 3
+ 329 007e 0021     		movs	r1, #0
+ 330 0080 3046     		mov	r0, r6
+ 331 0082 FFF7FEFF 		bl	__aeabi_fcmpeq
+ 332              	.LVL38:
+ 333 0086 0028     		cmp	r0, #0
+ 334 0088 40F0D780 		bne	.L19
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 9
+
+
+ 335              		.loc 1 121 0 discriminator 4
+ 336 008c 642F     		cmp	r7, #100
+ 337 008e 00F3D480 		bgt	.L19
+ 338              	.L18:
+ 122:main.c        ****         {   
+ 123:main.c        ****             Control_Reg_4_Write(m1_step_pin || m2_step_pin); // Motor wake/sleep
+ 339              		.loc 1 123 0 is_stmt 1
+ 340 0092 794B     		ldr	r3, .L40+32
+ 341 0094 DB68     		ldr	r3, [r3, #12]
+ 342 0096 23B9     		cbnz	r3, .L30
+ 343              		.loc 1 123 0 is_stmt 0 discriminator 2
+ 344 0098 774B     		ldr	r3, .L40+32
+ 345 009a 1869     		ldr	r0, [r3, #16]
+ 346 009c 10B1     		cbz	r0, .L21
+ 347              		.loc 1 123 0
+ 348 009e 0120     		movs	r0, #1
+ 349 00a0 00E0     		b	.L21
+ 350              	.L30:
+ 351 00a2 0120     		movs	r0, #1
+ 352              	.L21:
+ 353              		.loc 1 123 0 discriminator 6
+ 354 00a4 C0B2     		uxtb	r0, r0
+ 355 00a6 FFF7FEFF 		bl	Control_Reg_4_Write
+ 356              	.LVL39:
+ 124:main.c        ****             Control_Reg_3_Write(1); // LED on
+ 357              		.loc 1 124 0 is_stmt 1 discriminator 6
+ 358 00aa 0120     		movs	r0, #1
+ 359 00ac FFF7FEFF 		bl	Control_Reg_3_Write
+ 360              	.LVL40:
+ 125:main.c        ****             
+ 126:main.c        ****             m1_steps = -(dx - dy) * steps_per_pixel; // Negative because 0 is pos rotation
+ 361              		.loc 1 126 0 discriminator 6
+ 362 00b0 714C     		ldr	r4, .L40+32
+ 363 00b2 666A     		ldr	r6, [r4, #36]	@ float
+ 364 00b4 A76A     		ldr	r7, [r4, #40]	@ float
+ 365 00b6 3946     		mov	r1, r7
+ 366 00b8 3046     		mov	r0, r6
+ 367 00ba FFF7FEFF 		bl	__aeabi_fsub
+ 368              	.LVL41:
+ 369 00be 00F10040 		add	r0, r0, #-2147483648
+ 370 00c2 FFF7FEFF 		bl	__aeabi_f2d
+ 371              	.LVL42:
+ 372 00c6 64A3     		adr	r3, .L40
+ 373 00c8 D3E90023 		ldrd	r2, [r3]
+ 374 00cc FFF7FEFF 		bl	__aeabi_dmul
+ 375              	.LVL43:
+ 376 00d0 FFF7FEFF 		bl	__aeabi_d2f
+ 377              	.LVL44:
+ 378 00d4 0546     		mov	r5, r0
+ 379 00d6 E062     		str	r0, [r4, #44]	@ float
+ 127:main.c        ****             m2_steps = -(dx + dy) * steps_per_pixel; // and 1 is neg rotation (use RHR)
+ 380              		.loc 1 127 0 discriminator 6
+ 381 00d8 3946     		mov	r1, r7
+ 382 00da 3046     		mov	r0, r6
+ 383 00dc FFF7FEFF 		bl	__aeabi_fadd
+ 384              	.LVL45:
+ 385 00e0 00F10040 		add	r0, r0, #-2147483648
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 10
+
+
+ 386 00e4 FFF7FEFF 		bl	__aeabi_f2d
+ 387              	.LVL46:
+ 388 00e8 5BA3     		adr	r3, .L40
+ 389 00ea D3E90023 		ldrd	r2, [r3]
+ 390 00ee FFF7FEFF 		bl	__aeabi_dmul
+ 391              	.LVL47:
+ 392 00f2 FFF7FEFF 		bl	__aeabi_d2f
+ 393              	.LVL48:
+ 394 00f6 0646     		mov	r6, r0
+ 395 00f8 2063     		str	r0, [r4, #48]	@ float
+ 128:main.c        ****                 
+ 129:main.c        ****             m1_dir = m1_steps / fabs(m1_steps); // Dir for increment; -1, 0, 1
+ 396              		.loc 1 129 0 discriminator 6
+ 397 00fa 25F00040 		bic	r0, r5, #-2147483648
+ 398 00fe FFF7FEFF 		bl	__aeabi_f2d
+ 399              	.LVL49:
+ 400 0102 8046     		mov	r8, r0
+ 401 0104 8946     		mov	r9, r1
+ 402 0106 2846     		mov	r0, r5
+ 403 0108 FFF7FEFF 		bl	__aeabi_f2d
+ 404              	.LVL50:
+ 405 010c 4246     		mov	r2, r8
+ 406 010e 4B46     		mov	r3, r9
+ 407 0110 FFF7FEFF 		bl	__aeabi_ddiv
+ 408              	.LVL51:
+ 409 0114 FFF7FEFF 		bl	__aeabi_d2iz
+ 410              	.LVL52:
+ 411 0118 0546     		mov	r5, r0
+ 412 011a 6061     		str	r0, [r4, #20]
+ 130:main.c        ****             m2_dir = m2_steps / fabs(m2_steps);
+ 413              		.loc 1 130 0 discriminator 6
+ 414 011c 26F00040 		bic	r0, r6, #-2147483648
+ 415 0120 FFF7FEFF 		bl	__aeabi_f2d
+ 416              	.LVL53:
+ 417 0124 8046     		mov	r8, r0
+ 418 0126 8946     		mov	r9, r1
+ 419 0128 3046     		mov	r0, r6
+ 420 012a FFF7FEFF 		bl	__aeabi_f2d
+ 421              	.LVL54:
+ 422 012e 4246     		mov	r2, r8
+ 423 0130 4B46     		mov	r3, r9
+ 424 0132 FFF7FEFF 		bl	__aeabi_ddiv
+ 425              	.LVL55:
+ 426 0136 FFF7FEFF 		bl	__aeabi_d2iz
+ 427              	.LVL56:
+ 428 013a 0346     		mov	r3, r0
+ 429 013c A061     		str	r0, [r4, #24]
+ 131:main.c        ****             
+ 132:main.c        ****             m1_dir_pin = 1 == m1_dir; // Dir pin; 0, 1
+ 430              		.loc 1 132 0 discriminator 6
+ 431 013e 012D     		cmp	r5, #1
+ 432 0140 14BF     		ite	ne
+ 433 0142 0020     		movne	r0, #0
+ 434 0144 0120     		moveq	r0, #1
+ 435 0146 6063     		str	r0, [r4, #52]
+ 133:main.c        ****             m2_dir_pin = 1 == m2_dir;
+ 436              		.loc 1 133 0 discriminator 6
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 11
+
+
+ 437 0148 012B     		cmp	r3, #1
+ 438 014a 14BF     		ite	ne
+ 439 014c 0022     		movne	r2, #0
+ 440 014e 0122     		moveq	r2, #1
+ 441 0150 A263     		str	r2, [r4, #56]
+ 134:main.c        ****             
+ 135:main.c        ****             m1_step_pin = 1 == m1_dir || -1 == m1_dir; // Step pin; 0, 1
+ 442              		.loc 1 135 0 discriminator 6
+ 443 0152 012D     		cmp	r5, #1
+ 444 0154 05D0     		beq	.L22
+ 445              		.loc 1 135 0 is_stmt 0 discriminator 2
+ 446 0156 B5F1FF3F 		cmp	r5, #-1
+ 447 015a 01D1     		bne	.L31
+ 448              		.loc 1 135 0
+ 449 015c 0125     		movs	r5, #1
+ 450 015e 00E0     		b	.L22
+ 451              	.L31:
+ 452 0160 0025     		movs	r5, #0
+ 453              	.L22:
+ 454              		.loc 1 135 0 discriminator 6
+ 455 0162 454A     		ldr	r2, .L40+32
+ 456 0164 D560     		str	r5, [r2, #12]
+ 136:main.c        ****             m2_step_pin = 1 == m2_dir || -1 == m2_dir;
+ 457              		.loc 1 136 0 is_stmt 1 discriminator 6
+ 458 0166 012B     		cmp	r3, #1
+ 459 0168 05D0     		beq	.L23
+ 460              		.loc 1 136 0 is_stmt 0 discriminator 2
+ 461 016a B3F1FF3F 		cmp	r3, #-1
+ 462 016e 01D1     		bne	.L32
+ 463              		.loc 1 136 0
+ 464 0170 0123     		movs	r3, #1
+ 465 0172 00E0     		b	.L23
+ 466              	.L32:
+ 467 0174 0023     		movs	r3, #0
+ 468              	.L23:
+ 469              		.loc 1 136 0 discriminator 6
+ 470 0176 404C     		ldr	r4, .L40+32
+ 471 0178 2361     		str	r3, [r4, #16]
+ 137:main.c        ****             
+ 138:main.c        ****             // Dir pins
+ 139:main.c        ****             Control_Reg_1_Write(m1_dir_pin);
+ 472              		.loc 1 139 0 is_stmt 1 discriminator 6
+ 473 017a FFF7FEFF 		bl	Control_Reg_1_Write
+ 474              	.LVL57:
+ 140:main.c        ****             Control_Reg_2_Write(m2_dir_pin);
+ 475              		.loc 1 140 0 discriminator 6
+ 476 017e 94F83800 		ldrb	r0, [r4, #56]	@ zero_extendqisi2
+ 477 0182 FFF7FEFF 		bl	Control_Reg_2_Write
+ 478              	.LVL58:
+ 141:main.c        **** 
+ 142:main.c        ****             #define FP_TOL 0.01 // Fixes floating point imprecision
+ 143:main.c        ****             if (x_0 > (float)x_1 - FP_TOL && x_0 < (float)x_1 + FP_TOL)
+ 479              		.loc 1 143 0 discriminator 6
+ 480 0186 E069     		ldr	r0, [r4, #28]	@ float
+ 481 0188 FFF7FEFF 		bl	__aeabi_f2d
+ 482              	.LVL59:
+ 483 018c 0646     		mov	r6, r0
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 12
+
+
+ 484 018e 0F46     		mov	r7, r1
+ 485 0190 6068     		ldr	r0, [r4, #4]
+ 486 0192 FFF7FEFF 		bl	__aeabi_i2f
+ 487              	.LVL60:
+ 488 0196 8046     		mov	r8, r0
+ 489 0198 FFF7FEFF 		bl	__aeabi_f2d
+ 490              	.LVL61:
+ 491 019c 0446     		mov	r4, r0
+ 492 019e 0D46     		mov	r5, r1
+ 493 01a0 2FA3     		adr	r3, .L40+8
+ 494 01a2 D3E90023 		ldrd	r2, [r3]
+ 495 01a6 FFF7FEFF 		bl	__aeabi_dsub
+ 496              	.LVL62:
+ 497 01aa 0246     		mov	r2, r0
+ 498 01ac 0B46     		mov	r3, r1
+ 499 01ae 3046     		mov	r0, r6
+ 500 01b0 3946     		mov	r1, r7
+ 501 01b2 FFF7FEFF 		bl	__aeabi_dcmpgt
+ 502              	.LVL63:
+ 503 01b6 80B1     		cbz	r0, .L24
+ 504              		.loc 1 143 0 is_stmt 0 discriminator 1
+ 505 01b8 29A3     		adr	r3, .L40+8
+ 506 01ba D3E90023 		ldrd	r2, [r3]
+ 507 01be 2046     		mov	r0, r4
+ 508 01c0 2946     		mov	r1, r5
+ 509 01c2 FFF7FEFF 		bl	__aeabi_dadd
+ 510              	.LVL64:
+ 511 01c6 0246     		mov	r2, r0
+ 512 01c8 0B46     		mov	r3, r1
+ 513 01ca 3046     		mov	r0, r6
+ 514 01cc 3946     		mov	r1, r7
+ 515 01ce FFF7FEFF 		bl	__aeabi_dcmplt
+ 516              	.LVL65:
+ 517 01d2 10B1     		cbz	r0, .L24
+ 144:main.c        ****             {
+ 145:main.c        ****                 x_0 = x_1;
+ 518              		.loc 1 145 0 is_stmt 1
+ 519 01d4 284B     		ldr	r3, .L40+32
+ 520 01d6 C3F81C80 		str	r8, [r3, #28]	@ float
+ 521              	.L24:
+ 146:main.c        ****             }
+ 147:main.c        ****             if (y_0 > (float)y_1 - FP_TOL && y_0 < (float)y_1 + FP_TOL)
+ 522              		.loc 1 147 0
+ 523 01da 274C     		ldr	r4, .L40+32
+ 524 01dc 206A     		ldr	r0, [r4, #32]	@ float
+ 525 01de FFF7FEFF 		bl	__aeabi_f2d
+ 526              	.LVL66:
+ 527 01e2 0646     		mov	r6, r0
+ 528 01e4 0F46     		mov	r7, r1
+ 529 01e6 A068     		ldr	r0, [r4, #8]
+ 530 01e8 FFF7FEFF 		bl	__aeabi_i2f
+ 531              	.LVL67:
+ 532 01ec 8046     		mov	r8, r0
+ 533 01ee FFF7FEFF 		bl	__aeabi_f2d
+ 534              	.LVL68:
+ 535 01f2 0446     		mov	r4, r0
+ 536 01f4 0D46     		mov	r5, r1
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 13
+
+
+ 537 01f6 1AA3     		adr	r3, .L40+8
+ 538 01f8 D3E90023 		ldrd	r2, [r3]
+ 539 01fc FFF7FEFF 		bl	__aeabi_dsub
+ 540              	.LVL69:
+ 541 0200 0246     		mov	r2, r0
+ 542 0202 0B46     		mov	r3, r1
+ 543 0204 3046     		mov	r0, r6
+ 544 0206 3946     		mov	r1, r7
+ 545 0208 FFF7FEFF 		bl	__aeabi_dcmpgt
+ 546              	.LVL70:
+ 547 020c 0028     		cmp	r0, #0
+ 548 020e 3FF41AAF 		beq	.L15
+ 549              		.loc 1 147 0 is_stmt 0 discriminator 1
+ 550 0212 13A3     		adr	r3, .L40+8
+ 551 0214 D3E90023 		ldrd	r2, [r3]
+ 552 0218 2046     		mov	r0, r4
+ 553 021a 2946     		mov	r1, r5
+ 554 021c FFF7FEFF 		bl	__aeabi_dadd
+ 555              	.LVL71:
+ 556 0220 0246     		mov	r2, r0
+ 557 0222 0B46     		mov	r3, r1
+ 558 0224 3046     		mov	r0, r6
+ 559 0226 3946     		mov	r1, r7
+ 560 0228 FFF7FEFF 		bl	__aeabi_dcmplt
+ 561              	.LVL72:
+ 562 022c 0028     		cmp	r0, #0
+ 563 022e 3FF40AAF 		beq	.L15
+ 148:main.c        ****             {
+ 149:main.c        ****                 y_0 = y_1;
+ 564              		.loc 1 149 0 is_stmt 1
+ 565 0232 114B     		ldr	r3, .L40+32
+ 566 0234 C3F82080 		str	r8, [r3, #32]	@ float
+ 567 0238 05E7     		b	.L15
+ 568              	.L19:
+ 150:main.c        ****             }
+ 151:main.c        ****         }
+ 152:main.c        ****         else
+ 153:main.c        ****         {
+ 154:main.c        ****             m1_dir = 0; m2_dir = 0;
+ 569              		.loc 1 154 0
+ 570 023a 0F4B     		ldr	r3, .L40+32
+ 571 023c 0024     		movs	r4, #0
+ 572 023e 5C61     		str	r4, [r3, #20]
+ 573 0240 9C61     		str	r4, [r3, #24]
+ 155:main.c        ****             m1_step_pin = 0, m2_step_pin = 0;
+ 574              		.loc 1 155 0
+ 575 0242 DC60     		str	r4, [r3, #12]
+ 576 0244 1C61     		str	r4, [r3, #16]
+ 156:main.c        ****             Control_Reg_4_Write(0); // Motor sleep
+ 577              		.loc 1 156 0
+ 578 0246 2046     		mov	r0, r4
+ 579 0248 FFF7FEFF 		bl	Control_Reg_4_Write
+ 580              	.LVL73:
+ 157:main.c        ****             Control_Reg_3_Write(0); // LED off if no movement
+ 581              		.loc 1 157 0
+ 582 024c 2046     		mov	r0, r4
+ 583 024e FFF7FEFF 		bl	Control_Reg_3_Write
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 14
+
+
+ 584              	.LVL74:
+ 585 0252 F8E6     		b	.L15
+ 586              	.L41:
+ 587 0254 AFF30080 		.align	3
+ 588              	.L40:
+ 589 0258 52B81E85 		.word	-2061584302
+ 590 025c EB512240 		.word	1075991019
+ 591 0260 7B14AE47 		.word	1202590843
+ 592 0264 E17A843F 		.word	1065646817
+ 593 0268 00000000 		.word	.LC0
+ 594 026c 00000000 		.word	pulse_ready_isr
+ 595 0270 00000000 		.word	isr_rx
+ 596 0274 00000000 		.word	pos_reset
+ 597 0278 00000000 		.word	.LANCHOR0
+ 598              		.cfi_endproc
+ 599              	.LFE66:
+ 600              		.size	main, .-main
+ 601              		.global	m2_step_pin
+ 602              		.global	m1_step_pin
+ 603              		.global	m2_dir_pin
+ 604              		.global	m1_dir_pin
+ 605              		.global	m2_dir
+ 606              		.global	m1_dir
+ 607              		.global	m2_steps
+ 608              		.global	m1_steps
+ 609              		.global	dy
+ 610              		.global	dx
+ 611              		.global	y_0
+ 612              		.global	x_0
+ 613              		.global	y_1
+ 614              		.global	x_1
+ 615              		.global	uart_recv_count
+ 616              		.comm	uart_recv_buf,16,4
+ 617              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 618              		.align	2
+ 619              	.LC0:
+ 620 0000 50726F67 		.ascii	"Program started...\000"
+ 620      72616D20 
+ 620      73746172 
+ 620      7465642E 
+ 620      2E2E00
+ 621              		.bss
+ 622              		.align	2
+ 623              		.set	.LANCHOR0,. + 0
+ 624              		.type	uart_recv_count, %object
+ 625              		.size	uart_recv_count, 4
+ 626              	uart_recv_count:
+ 627 0000 00000000 		.space	4
+ 628              		.type	x_1, %object
+ 629              		.size	x_1, 4
+ 630              	x_1:
+ 631 0004 00000000 		.space	4
+ 632              		.type	y_1, %object
+ 633              		.size	y_1, 4
+ 634              	y_1:
+ 635 0008 00000000 		.space	4
+ 636              		.type	m1_step_pin, %object
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 15
+
+
+ 637              		.size	m1_step_pin, 4
+ 638              	m1_step_pin:
+ 639 000c 00000000 		.space	4
+ 640              		.type	m2_step_pin, %object
+ 641              		.size	m2_step_pin, 4
+ 642              	m2_step_pin:
+ 643 0010 00000000 		.space	4
+ 644              		.type	m1_dir, %object
+ 645              		.size	m1_dir, 4
+ 646              	m1_dir:
+ 647 0014 00000000 		.space	4
+ 648              		.type	m2_dir, %object
+ 649              		.size	m2_dir, 4
+ 650              	m2_dir:
+ 651 0018 00000000 		.space	4
+ 652              		.type	x_0, %object
+ 653              		.size	x_0, 4
+ 654              	x_0:
+ 655 001c 00000000 		.space	4
+ 656              		.type	y_0, %object
+ 657              		.size	y_0, 4
+ 658              	y_0:
+ 659 0020 00000000 		.space	4
+ 660              		.type	dx, %object
+ 661              		.size	dx, 4
+ 662              	dx:
+ 663 0024 00000000 		.space	4
+ 664              		.type	dy, %object
+ 665              		.size	dy, 4
+ 666              	dy:
+ 667 0028 00000000 		.space	4
+ 668              		.type	m1_steps, %object
+ 669              		.size	m1_steps, 4
+ 670              	m1_steps:
+ 671 002c 00000000 		.space	4
+ 672              		.type	m2_steps, %object
+ 673              		.size	m2_steps, 4
+ 674              	m2_steps:
+ 675 0030 00000000 		.space	4
+ 676              		.type	m1_dir_pin, %object
+ 677              		.size	m1_dir_pin, 4
+ 678              	m1_dir_pin:
+ 679 0034 00000000 		.space	4
+ 680              		.type	m2_dir_pin, %object
+ 681              		.size	m2_dir_pin, 4
+ 682              	m2_dir_pin:
+ 683 0038 00000000 		.space	4
+ 684              		.text
+ 685              	.Letext0:
+ 686              		.file 2 "c:\\program files (x86)\\cypress\\psoc creator\\4.2\\psoc creator\\import\\gnu\\arm\\5.4.
+ 687              		.file 3 "c:\\program files (x86)\\cypress\\psoc creator\\4.2\\psoc creator\\import\\gnu\\arm\\5.4.
+ 688              		.file 4 "Generated_Source\\PSoC5/core_cm3.h"
+ 689              		.file 5 "Generated_Source\\PSoC5/UART.h"
+ 690              		.file 6 "Generated_Source\\PSoC5/Control_Reg_5.h"
+ 691              		.file 7 "Generated_Source\\PSoC5/Control_Reg_6.h"
+ 692              		.file 8 "Generated_Source\\PSoC5/Pin_1.h"
+ 693              		.file 9 "Generated_Source\\PSoC5/CyLib.h"
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 16
+
+
+ 694              		.file 10 "Generated_Source\\PSoC5/PWM_1.h"
+ 695              		.file 11 "Generated_Source\\PSoC5/PWM_2.h"
+ 696              		.file 12 "Generated_Source\\PSoC5/Timer_1.h"
+ 697              		.file 13 "Generated_Source\\PSoC5/pulse_ready_isr.h"
+ 698              		.file 14 "Generated_Source\\PSoC5/isr_rx.h"
+ 699              		.file 15 "Generated_Source\\PSoC5/pos_reset.h"
+ 700              		.file 16 "Generated_Source\\PSoC5/Control_Reg_3.h"
+ 701              		.file 17 "Generated_Source\\PSoC5/Control_Reg_4.h"
+ 702              		.file 18 "Generated_Source\\PSoC5/Control_Reg_1.h"
+ 703              		.file 19 "Generated_Source\\PSoC5/Control_Reg_2.h"
+ 704              		.section	.debug_info,"",%progbits
+ 705              	.Ldebug_info0:
+ 706 0000 6D040000 		.4byte	0x46d
+ 707 0004 0400     		.2byte	0x4
+ 708 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 709 000a 04       		.byte	0x4
+ 710 000b 01       		.uleb128 0x1
+ 711 000c FB000000 		.4byte	.LASF50
+ 712 0010 0C       		.byte	0xc
+ 713 0011 BD020000 		.4byte	.LASF51
+ 714 0015 19000000 		.4byte	.LASF52
+ 715 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 716 001d 00000000 		.4byte	0
+ 717 0021 00000000 		.4byte	.Ldebug_line0
+ 718 0025 02       		.uleb128 0x2
+ 719 0026 01       		.byte	0x1
+ 720 0027 06       		.byte	0x6
+ 721 0028 63020000 		.4byte	.LASF0
+ 722 002c 02       		.uleb128 0x2
+ 723 002d 01       		.byte	0x1
+ 724 002e 08       		.byte	0x8
+ 725 002f ED000000 		.4byte	.LASF1
+ 726 0033 02       		.uleb128 0x2
+ 727 0034 02       		.byte	0x2
+ 728 0035 05       		.byte	0x5
+ 729 0036 F7020000 		.4byte	.LASF2
+ 730 003a 02       		.uleb128 0x2
+ 731 003b 02       		.byte	0x2
+ 732 003c 07       		.byte	0x7
+ 733 003d 7F000000 		.4byte	.LASF3
+ 734 0041 03       		.uleb128 0x3
+ 735 0042 5E000000 		.4byte	.LASF9
+ 736 0046 02       		.byte	0x2
+ 737 0047 3F       		.byte	0x3f
+ 738 0048 4C000000 		.4byte	0x4c
+ 739 004c 02       		.uleb128 0x2
+ 740 004d 04       		.byte	0x4
+ 741 004e 05       		.byte	0x5
+ 742 004f 12030000 		.4byte	.LASF4
+ 743 0053 02       		.uleb128 0x2
+ 744 0054 04       		.byte	0x4
+ 745 0055 07       		.byte	0x7
+ 746 0056 89010000 		.4byte	.LASF5
+ 747 005a 02       		.uleb128 0x2
+ 748 005b 08       		.byte	0x8
+ 749 005c 05       		.byte	0x5
+ 750 005d A3020000 		.4byte	.LASF6
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 17
+
+
+ 751 0061 02       		.uleb128 0x2
+ 752 0062 08       		.byte	0x8
+ 753 0063 07       		.byte	0x7
+ 754 0064 2A020000 		.4byte	.LASF7
+ 755 0068 04       		.uleb128 0x4
+ 756 0069 04       		.byte	0x4
+ 757 006a 05       		.byte	0x5
+ 758 006b 696E7400 		.ascii	"int\000"
+ 759 006f 02       		.uleb128 0x2
+ 760 0070 04       		.byte	0x4
+ 761 0071 07       		.byte	0x7
+ 762 0072 0A020000 		.4byte	.LASF8
+ 763 0076 03       		.uleb128 0x3
+ 764 0077 BE000000 		.4byte	.LASF10
+ 765 007b 03       		.byte	0x3
+ 766 007c 2C       		.byte	0x2c
+ 767 007d 41000000 		.4byte	0x41
+ 768 0081 02       		.uleb128 0x2
+ 769 0082 04       		.byte	0x4
+ 770 0083 04       		.byte	0x4
+ 771 0084 CF000000 		.4byte	.LASF11
+ 772 0088 02       		.uleb128 0x2
+ 773 0089 08       		.byte	0x8
+ 774 008a 04       		.byte	0x4
+ 775 008b BF010000 		.4byte	.LASF12
+ 776 008f 02       		.uleb128 0x2
+ 777 0090 01       		.byte	0x1
+ 778 0091 08       		.byte	0x8
+ 779 0092 C4020000 		.4byte	.LASF13
+ 780 0096 02       		.uleb128 0x2
+ 781 0097 08       		.byte	0x8
+ 782 0098 04       		.byte	0x4
+ 783 0099 2F030000 		.4byte	.LASF14
+ 784 009d 02       		.uleb128 0x2
+ 785 009e 04       		.byte	0x4
+ 786 009f 07       		.byte	0x7
+ 787 00a0 86020000 		.4byte	.LASF15
+ 788 00a4 05       		.uleb128 0x5
+ 789 00a5 23020000 		.4byte	.LASF16
+ 790 00a9 01       		.byte	0x1
+ 791 00aa 26       		.byte	0x26
+ 792 00ab 00000000 		.4byte	.LFB63
+ 793 00af 40000000 		.4byte	.LFE63-.LFB63
+ 794 00b3 01       		.uleb128 0x1
+ 795 00b4 9C       		.byte	0x9c
+ 796 00b5 C3000000 		.4byte	0xc3
+ 797 00b9 06       		.uleb128 0x6
+ 798 00ba 0A000000 		.4byte	.LVL0
+ 799 00be 94030000 		.4byte	0x394
+ 800 00c2 00       		.byte	0
+ 801 00c3 07       		.uleb128 0x7
+ 802 00c4 E0010000 		.4byte	.LASF17
+ 803 00c8 01       		.byte	0x1
+ 804 00c9 3B       		.byte	0x3b
+ 805 00ca 00000000 		.4byte	.LFB64
+ 806 00ce A4000000 		.4byte	.LFE64-.LFB64
+ 807 00d2 01       		.uleb128 0x1
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 18
+
+
+ 808 00d3 9C       		.byte	0x9c
+ 809 00d4 0D010000 		.4byte	0x10d
+ 810 00d8 06       		.uleb128 0x6
+ 811 00d9 0C000000 		.4byte	.LVL1
+ 812 00dd 9F030000 		.4byte	0x39f
+ 813 00e1 06       		.uleb128 0x6
+ 814 00e2 12000000 		.4byte	.LVL2
+ 815 00e6 AA030000 		.4byte	0x3aa
+ 816 00ea 08       		.uleb128 0x8
+ 817 00eb 88000000 		.4byte	.LVL17
+ 818 00ef 9F030000 		.4byte	0x39f
+ 819 00f3 FD000000 		.4byte	0xfd
+ 820 00f7 09       		.uleb128 0x9
+ 821 00f8 01       		.uleb128 0x1
+ 822 00f9 50       		.byte	0x50
+ 823 00fa 01       		.uleb128 0x1
+ 824 00fb 30       		.byte	0x30
+ 825 00fc 00       		.byte	0
+ 826 00fd 0A       		.uleb128 0xa
+ 827 00fe 8E000000 		.4byte	.LVL18
+ 828 0102 AA030000 		.4byte	0x3aa
+ 829 0106 09       		.uleb128 0x9
+ 830 0107 01       		.uleb128 0x1
+ 831 0108 50       		.byte	0x50
+ 832 0109 01       		.uleb128 0x1
+ 833 010a 30       		.byte	0x30
+ 834 010b 00       		.byte	0
+ 835 010c 00       		.byte	0
+ 836 010d 05       		.uleb128 0x5
+ 837 010e D5000000 		.4byte	.LASF18
+ 838 0112 01       		.byte	0x1
+ 839 0113 4A       		.byte	0x4a
+ 840 0114 00000000 		.4byte	.LFB65
+ 841 0118 14000000 		.4byte	.LFE65-.LFB65
+ 842 011c 01       		.uleb128 0x1
+ 843 011d 9C       		.byte	0x9c
+ 844 011e 2C010000 		.4byte	0x12c
+ 845 0122 06       		.uleb128 0x6
+ 846 0123 0E000000 		.4byte	.LVL19
+ 847 0127 B5030000 		.4byte	0x3b5
+ 848 012b 00       		.byte	0
+ 849 012c 0B       		.uleb128 0xb
+ 850 012d DB010000 		.4byte	.LASF53
+ 851 0131 01       		.byte	0x1
+ 852 0132 52       		.byte	0x52
+ 853 0133 68000000 		.4byte	0x68
+ 854 0137 00000000 		.4byte	.LFB66
+ 855 013b 7C020000 		.4byte	.LFE66-.LFB66
+ 856 013f 01       		.uleb128 0x1
+ 857 0140 9C       		.byte	0x9c
+ 858 0141 5B020000 		.4byte	0x25b
+ 859 0145 08       		.uleb128 0x8
+ 860 0146 0A000000 		.4byte	.LVL20
+ 861 014a C0030000 		.4byte	0x3c0
+ 862 014e 5A010000 		.4byte	0x15a
+ 863 0152 09       		.uleb128 0x9
+ 864 0153 01       		.uleb128 0x1
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 19
+
+
+ 865 0154 50       		.byte	0x50
+ 866 0155 03       		.uleb128 0x3
+ 867 0156 0A       		.byte	0xa
+ 868 0157 E803     		.2byte	0x3e8
+ 869 0159 00       		.byte	0
+ 870 015a 06       		.uleb128 0x6
+ 871 015b 0E000000 		.4byte	.LVL21
+ 872 015f CB030000 		.4byte	0x3cb
+ 873 0163 08       		.uleb128 0x8
+ 874 0164 14000000 		.4byte	.LVL22
+ 875 0168 D6030000 		.4byte	0x3d6
+ 876 016c 7A010000 		.4byte	0x17a
+ 877 0170 09       		.uleb128 0x9
+ 878 0171 01       		.uleb128 0x1
+ 879 0172 50       		.byte	0x50
+ 880 0173 05       		.uleb128 0x5
+ 881 0174 03       		.byte	0x3
+ 882 0175 00000000 		.4byte	.LC0
+ 883 0179 00       		.byte	0
+ 884 017a 06       		.uleb128 0x6
+ 885 017b 18000000 		.4byte	.LVL23
+ 886 017f E1030000 		.4byte	0x3e1
+ 887 0183 06       		.uleb128 0x6
+ 888 0184 1C000000 		.4byte	.LVL24
+ 889 0188 EC030000 		.4byte	0x3ec
+ 890 018c 06       		.uleb128 0x6
+ 891 018d 20000000 		.4byte	.LVL25
+ 892 0191 F7030000 		.4byte	0x3f7
+ 893 0195 08       		.uleb128 0x8
+ 894 0196 26000000 		.4byte	.LVL26
+ 895 019a 02040000 		.4byte	0x402
+ 896 019e AC010000 		.4byte	0x1ac
+ 897 01a2 09       		.uleb128 0x9
+ 898 01a3 01       		.uleb128 0x1
+ 899 01a4 50       		.byte	0x50
+ 900 01a5 05       		.uleb128 0x5
+ 901 01a6 03       		.byte	0x3
+ 902 01a7 00000000 		.4byte	pulse_ready_isr
+ 903 01ab 00       		.byte	0
+ 904 01ac 06       		.uleb128 0x6
+ 905 01ad 2A000000 		.4byte	.LVL27
+ 906 01b1 0D040000 		.4byte	0x40d
+ 907 01b5 08       		.uleb128 0x8
+ 908 01b6 30000000 		.4byte	.LVL28
+ 909 01ba 18040000 		.4byte	0x418
+ 910 01be CC010000 		.4byte	0x1cc
+ 911 01c2 09       		.uleb128 0x9
+ 912 01c3 01       		.uleb128 0x1
+ 913 01c4 50       		.byte	0x50
+ 914 01c5 05       		.uleb128 0x5
+ 915 01c6 03       		.byte	0x3
+ 916 01c7 00000000 		.4byte	isr_rx
+ 917 01cb 00       		.byte	0
+ 918 01cc 06       		.uleb128 0x6
+ 919 01cd 34000000 		.4byte	.LVL29
+ 920 01d1 23040000 		.4byte	0x423
+ 921 01d5 08       		.uleb128 0x8
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 20
+
+
+ 922 01d6 3A000000 		.4byte	.LVL30
+ 923 01da 2E040000 		.4byte	0x42e
+ 924 01de EC010000 		.4byte	0x1ec
+ 925 01e2 09       		.uleb128 0x9
+ 926 01e3 01       		.uleb128 0x1
+ 927 01e4 50       		.byte	0x50
+ 928 01e5 05       		.uleb128 0x5
+ 929 01e6 03       		.byte	0x3
+ 930 01e7 00000000 		.4byte	pos_reset
+ 931 01eb 00       		.byte	0
+ 932 01ec 06       		.uleb128 0x6
+ 933 01ed 3E000000 		.4byte	.LVL31
+ 934 01f1 39040000 		.4byte	0x439
+ 935 01f5 08       		.uleb128 0x8
+ 936 01f6 46000000 		.4byte	.LVL32
+ 937 01fa 44040000 		.4byte	0x444
+ 938 01fe 08020000 		.4byte	0x208
+ 939 0202 09       		.uleb128 0x9
+ 940 0203 01       		.uleb128 0x1
+ 941 0204 50       		.byte	0x50
+ 942 0205 01       		.uleb128 0x1
+ 943 0206 30       		.byte	0x30
+ 944 0207 00       		.byte	0
+ 945 0208 06       		.uleb128 0x6
+ 946 0209 AA000000 		.4byte	.LVL39
+ 947 020d 4F040000 		.4byte	0x44f
+ 948 0211 08       		.uleb128 0x8
+ 949 0212 B0000000 		.4byte	.LVL40
+ 950 0216 44040000 		.4byte	0x444
+ 951 021a 24020000 		.4byte	0x224
+ 952 021e 09       		.uleb128 0x9
+ 953 021f 01       		.uleb128 0x1
+ 954 0220 50       		.byte	0x50
+ 955 0221 01       		.uleb128 0x1
+ 956 0222 31       		.byte	0x31
+ 957 0223 00       		.byte	0
+ 958 0224 06       		.uleb128 0x6
+ 959 0225 7E010000 		.4byte	.LVL57
+ 960 0229 5A040000 		.4byte	0x45a
+ 961 022d 06       		.uleb128 0x6
+ 962 022e 86010000 		.4byte	.LVL58
+ 963 0232 65040000 		.4byte	0x465
+ 964 0236 08       		.uleb128 0x8
+ 965 0237 4C020000 		.4byte	.LVL73
+ 966 023b 4F040000 		.4byte	0x44f
+ 967 023f 4A020000 		.4byte	0x24a
+ 968 0243 09       		.uleb128 0x9
+ 969 0244 01       		.uleb128 0x1
+ 970 0245 50       		.byte	0x50
+ 971 0246 02       		.uleb128 0x2
+ 972 0247 74       		.byte	0x74
+ 973 0248 00       		.sleb128 0
+ 974 0249 00       		.byte	0
+ 975 024a 0A       		.uleb128 0xa
+ 976 024b 52020000 		.4byte	.LVL74
+ 977 024f 44040000 		.4byte	0x444
+ 978 0253 09       		.uleb128 0x9
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 21
+
+
+ 979 0254 01       		.uleb128 0x1
+ 980 0255 50       		.byte	0x50
+ 981 0256 02       		.uleb128 0x2
+ 982 0257 74       		.byte	0x74
+ 983 0258 00       		.sleb128 0
+ 984 0259 00       		.byte	0
+ 985 025a 00       		.byte	0
+ 986 025b 0C       		.uleb128 0xc
+ 987 025c B2010000 		.4byte	.LASF19
+ 988 0260 04       		.byte	0x4
+ 989 0261 1207     		.2byte	0x712
+ 990 0263 67020000 		.4byte	0x267
+ 991 0267 0D       		.uleb128 0xd
+ 992 0268 76000000 		.4byte	0x76
+ 993 026c 0E       		.uleb128 0xe
+ 994 026d 7C020000 		.4byte	0x27c
+ 995 0271 7C020000 		.4byte	0x27c
+ 996 0275 0F       		.uleb128 0xf
+ 997 0276 9D000000 		.4byte	0x9d
+ 998 027a 03       		.byte	0x3
+ 999 027b 00       		.byte	0
+ 1000 027c 0D       		.uleb128 0xd
+ 1001 027d 68000000 		.4byte	0x68
+ 1002 0281 10       		.uleb128 0x10
+ 1003 0282 55020000 		.4byte	.LASF20
+ 1004 0286 01       		.byte	0x1
+ 1005 0287 21       		.byte	0x21
+ 1006 0288 92020000 		.4byte	0x292
+ 1007 028c 05       		.uleb128 0x5
+ 1008 028d 03       		.byte	0x3
+ 1009 028e 00000000 		.4byte	uart_recv_buf
+ 1010 0292 0D       		.uleb128 0xd
+ 1011 0293 6C020000 		.4byte	0x26c
+ 1012 0297 10       		.uleb128 0x10
+ 1013 0298 76020000 		.4byte	.LASF21
+ 1014 029c 01       		.byte	0x1
+ 1015 029d 22       		.byte	0x22
+ 1016 029e 7C020000 		.4byte	0x27c
+ 1017 02a2 05       		.uleb128 0x5
+ 1018 02a3 03       		.byte	0x3
+ 1019 02a4 00000000 		.4byte	uart_recv_count
+ 1020 02a8 11       		.uleb128 0x11
+ 1021 02a9 785F3100 		.ascii	"x_1\000"
+ 1022 02ad 01       		.byte	0x1
+ 1023 02ae 23       		.byte	0x23
+ 1024 02af 68000000 		.4byte	0x68
+ 1025 02b3 05       		.uleb128 0x5
+ 1026 02b4 03       		.byte	0x3
+ 1027 02b5 00000000 		.4byte	x_1
+ 1028 02b9 11       		.uleb128 0x11
+ 1029 02ba 795F3100 		.ascii	"y_1\000"
+ 1030 02be 01       		.byte	0x1
+ 1031 02bf 24       		.byte	0x24
+ 1032 02c0 68000000 		.4byte	0x68
+ 1033 02c4 05       		.uleb128 0x5
+ 1034 02c5 03       		.byte	0x3
+ 1035 02c6 00000000 		.4byte	y_1
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 22
+
+
+ 1036 02ca 11       		.uleb128 0x11
+ 1037 02cb 785F3000 		.ascii	"x_0\000"
+ 1038 02cf 01       		.byte	0x1
+ 1039 02d0 35       		.byte	0x35
+ 1040 02d1 81000000 		.4byte	0x81
+ 1041 02d5 05       		.uleb128 0x5
+ 1042 02d6 03       		.byte	0x3
+ 1043 02d7 00000000 		.4byte	x_0
+ 1044 02db 11       		.uleb128 0x11
+ 1045 02dc 795F3000 		.ascii	"y_0\000"
+ 1046 02e0 01       		.byte	0x1
+ 1047 02e1 35       		.byte	0x35
+ 1048 02e2 81000000 		.4byte	0x81
+ 1049 02e6 05       		.uleb128 0x5
+ 1050 02e7 03       		.byte	0x3
+ 1051 02e8 00000000 		.4byte	y_0
+ 1052 02ec 11       		.uleb128 0x11
+ 1053 02ed 647800   		.ascii	"dx\000"
+ 1054 02f0 01       		.byte	0x1
+ 1055 02f1 35       		.byte	0x35
+ 1056 02f2 81000000 		.4byte	0x81
+ 1057 02f6 05       		.uleb128 0x5
+ 1058 02f7 03       		.byte	0x3
+ 1059 02f8 00000000 		.4byte	dx
+ 1060 02fc 11       		.uleb128 0x11
+ 1061 02fd 647900   		.ascii	"dy\000"
+ 1062 0300 01       		.byte	0x1
+ 1063 0301 35       		.byte	0x35
+ 1064 0302 81000000 		.4byte	0x81
+ 1065 0306 05       		.uleb128 0x5
+ 1066 0307 03       		.byte	0x3
+ 1067 0308 00000000 		.4byte	dy
+ 1068 030c 10       		.uleb128 0x10
+ 1069 030d C6000000 		.4byte	.LASF22
+ 1070 0311 01       		.byte	0x1
+ 1071 0312 36       		.byte	0x36
+ 1072 0313 81000000 		.4byte	0x81
+ 1073 0317 05       		.uleb128 0x5
+ 1074 0318 03       		.byte	0x3
+ 1075 0319 00000000 		.4byte	m1_steps
+ 1076 031d 10       		.uleb128 0x10
+ 1077 031e D2010000 		.4byte	.LASF23
+ 1078 0322 01       		.byte	0x1
+ 1079 0323 36       		.byte	0x36
+ 1080 0324 81000000 		.4byte	0x81
+ 1081 0328 05       		.uleb128 0x5
+ 1082 0329 03       		.byte	0x3
+ 1083 032a 00000000 		.4byte	m2_steps
+ 1084 032e 10       		.uleb128 0x10
+ 1085 032f 6F020000 		.4byte	.LASF24
+ 1086 0333 01       		.byte	0x1
+ 1087 0334 37       		.byte	0x37
+ 1088 0335 68000000 		.4byte	0x68
+ 1089 0339 05       		.uleb128 0x5
+ 1090 033a 03       		.byte	0x3
+ 1091 033b 00000000 		.4byte	m1_dir
+ 1092 033f 10       		.uleb128 0x10
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 23
+
+
+ 1093 0340 3B030000 		.4byte	.LASF25
+ 1094 0344 01       		.byte	0x1
+ 1095 0345 37       		.byte	0x37
+ 1096 0346 68000000 		.4byte	0x68
+ 1097 034a 05       		.uleb128 0x5
+ 1098 034b 03       		.byte	0x3
+ 1099 034c 00000000 		.4byte	m2_dir
+ 1100 0350 10       		.uleb128 0x10
+ 1101 0351 F0010000 		.4byte	.LASF26
+ 1102 0355 01       		.byte	0x1
+ 1103 0356 38       		.byte	0x38
+ 1104 0357 68000000 		.4byte	0x68
+ 1105 035b 05       		.uleb128 0x5
+ 1106 035c 03       		.byte	0x3
+ 1107 035d 00000000 		.4byte	m1_dir_pin
+ 1108 0361 10       		.uleb128 0x10
+ 1109 0362 00000000 		.4byte	.LASF27
+ 1110 0366 01       		.byte	0x1
+ 1111 0367 38       		.byte	0x38
+ 1112 0368 68000000 		.4byte	0x68
+ 1113 036c 05       		.uleb128 0x5
+ 1114 036d 03       		.byte	0x3
+ 1115 036e 00000000 		.4byte	m2_dir_pin
+ 1116 0372 10       		.uleb128 0x10
+ 1117 0373 B1020000 		.4byte	.LASF28
+ 1118 0377 01       		.byte	0x1
+ 1119 0378 39       		.byte	0x39
+ 1120 0379 68000000 		.4byte	0x68
+ 1121 037d 05       		.uleb128 0x5
+ 1122 037e 03       		.byte	0x3
+ 1123 037f 00000000 		.4byte	m1_step_pin
+ 1124 0383 10       		.uleb128 0x10
+ 1125 0384 17020000 		.4byte	.LASF29
+ 1126 0388 01       		.byte	0x1
+ 1127 0389 39       		.byte	0x39
+ 1128 038a 68000000 		.4byte	0x68
+ 1129 038e 05       		.uleb128 0x5
+ 1130 038f 03       		.byte	0x3
+ 1131 0390 00000000 		.4byte	m2_step_pin
+ 1132 0394 12       		.uleb128 0x12
+ 1133 0395 42030000 		.4byte	.LASF30
+ 1134 0399 42030000 		.4byte	.LASF30
+ 1135 039d 05       		.byte	0x5
+ 1136 039e 71       		.byte	0x71
+ 1137 039f 12       		.uleb128 0x12
+ 1138 03a0 57030000 		.4byte	.LASF31
+ 1139 03a4 57030000 		.4byte	.LASF31
+ 1140 03a8 06       		.byte	0x6
+ 1141 03a9 2F       		.byte	0x2f
+ 1142 03aa 12       		.uleb128 0x12
+ 1143 03ab 4A000000 		.4byte	.LASF32
+ 1144 03af 4A000000 		.4byte	.LASF32
+ 1145 03b3 07       		.byte	0x7
+ 1146 03b4 2F       		.byte	0x2f
+ 1147 03b5 12       		.uleb128 0x12
+ 1148 03b6 C9020000 		.4byte	.LASF33
+ 1149 03ba C9020000 		.4byte	.LASF33
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 24
+
+
+ 1150 03be 08       		.byte	0x8
+ 1151 03bf 2B       		.byte	0x2b
+ 1152 03c0 12       		.uleb128 0x12
+ 1153 03c1 4F030000 		.4byte	.LASF34
+ 1154 03c5 4F030000 		.4byte	.LASF34
+ 1155 03c9 09       		.byte	0x9
+ 1156 03ca 76       		.byte	0x76
+ 1157 03cb 12       		.uleb128 0x12
+ 1158 03cc A7010000 		.4byte	.LASF35
+ 1159 03d0 A7010000 		.4byte	.LASF35
+ 1160 03d4 05       		.byte	0x5
+ 1161 03d5 54       		.byte	0x54
+ 1162 03d6 12       		.uleb128 0x12
+ 1163 03d7 DE020000 		.4byte	.LASF36
+ 1164 03db DE020000 		.4byte	.LASF36
+ 1165 03df 01       		.byte	0x1
+ 1166 03e0 1B       		.byte	0x1b
+ 1167 03e1 12       		.uleb128 0x12
+ 1168 03e2 9B010000 		.4byte	.LASF37
+ 1169 03e6 9B010000 		.4byte	.LASF37
+ 1170 03ea 0A       		.byte	0xa
+ 1171 03eb 92       		.byte	0x92
+ 1172 03ec 12       		.uleb128 0x12
+ 1173 03ed C6010000 		.4byte	.LASF38
+ 1174 03f1 C6010000 		.4byte	.LASF38
+ 1175 03f5 0B       		.byte	0xb
+ 1176 03f6 92       		.byte	0x92
+ 1177 03f7 12       		.uleb128 0x12
+ 1178 03f8 0B000000 		.4byte	.LASF39
+ 1179 03fc 0B000000 		.4byte	.LASF39
+ 1180 0400 0C       		.byte	0xc
+ 1181 0401 5A       		.byte	0x5a
+ 1182 0402 12       		.uleb128 0x12
+ 1183 0403 92000000 		.4byte	.LASF40
+ 1184 0407 92000000 		.4byte	.LASF40
+ 1185 040b 0D       		.byte	0xd
+ 1186 040c 18       		.byte	0x18
+ 1187 040d 12       		.uleb128 0x12
+ 1188 040e 68000000 		.4byte	.LASF41
+ 1189 0412 68000000 		.4byte	.LASF41
+ 1190 0416 0D       		.byte	0xd
+ 1191 0417 23       		.byte	0x23
+ 1192 0418 12       		.uleb128 0x12
+ 1193 0419 FB010000 		.4byte	.LASF42
+ 1194 041d FB010000 		.4byte	.LASF42
+ 1195 0421 0E       		.byte	0xe
+ 1196 0422 18       		.byte	0x18
+ 1197 0423 12       		.uleb128 0x12
+ 1198 0424 DF000000 		.4byte	.LASF43
+ 1199 0428 DF000000 		.4byte	.LASF43
+ 1200 042c 0E       		.byte	0xe
+ 1201 042d 23       		.byte	0x23
+ 1202 042e 12       		.uleb128 0x12
+ 1203 042f E5020000 		.4byte	.LASF44
+ 1204 0433 E5020000 		.4byte	.LASF44
+ 1205 0437 0F       		.byte	0xf
+ 1206 0438 18       		.byte	0x18
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 25
+
+
+ 1207 0439 12       		.uleb128 0x12
+ 1208 043a 01030000 		.4byte	.LASF45
+ 1209 043e 01030000 		.4byte	.LASF45
+ 1210 0442 0F       		.byte	0xf
+ 1211 0443 23       		.byte	0x23
+ 1212 0444 12       		.uleb128 0x12
+ 1213 0445 AA000000 		.4byte	.LASF46
+ 1214 0449 AA000000 		.4byte	.LASF46
+ 1215 044d 10       		.byte	0x10
+ 1216 044e 2F       		.byte	0x2f
+ 1217 044f 12       		.uleb128 0x12
+ 1218 0450 1B030000 		.4byte	.LASF47
+ 1219 0454 1B030000 		.4byte	.LASF47
+ 1220 0458 11       		.byte	0x11
+ 1221 0459 2F       		.byte	0x2f
+ 1222 045a 12       		.uleb128 0x12
+ 1223 045b 41020000 		.4byte	.LASF48
+ 1224 045f 41020000 		.4byte	.LASF48
+ 1225 0463 12       		.byte	0x12
+ 1226 0464 2F       		.byte	0x2f
+ 1227 0465 12       		.uleb128 0x12
+ 1228 0466 8F020000 		.4byte	.LASF49
+ 1229 046a 8F020000 		.4byte	.LASF49
+ 1230 046e 13       		.byte	0x13
+ 1231 046f 2F       		.byte	0x2f
+ 1232 0470 00       		.byte	0
+ 1233              		.section	.debug_abbrev,"",%progbits
+ 1234              	.Ldebug_abbrev0:
+ 1235 0000 01       		.uleb128 0x1
+ 1236 0001 11       		.uleb128 0x11
+ 1237 0002 01       		.byte	0x1
+ 1238 0003 25       		.uleb128 0x25
+ 1239 0004 0E       		.uleb128 0xe
+ 1240 0005 13       		.uleb128 0x13
+ 1241 0006 0B       		.uleb128 0xb
+ 1242 0007 03       		.uleb128 0x3
+ 1243 0008 0E       		.uleb128 0xe
+ 1244 0009 1B       		.uleb128 0x1b
+ 1245 000a 0E       		.uleb128 0xe
+ 1246 000b 55       		.uleb128 0x55
+ 1247 000c 17       		.uleb128 0x17
+ 1248 000d 11       		.uleb128 0x11
+ 1249 000e 01       		.uleb128 0x1
+ 1250 000f 10       		.uleb128 0x10
+ 1251 0010 17       		.uleb128 0x17
+ 1252 0011 00       		.byte	0
+ 1253 0012 00       		.byte	0
+ 1254 0013 02       		.uleb128 0x2
+ 1255 0014 24       		.uleb128 0x24
+ 1256 0015 00       		.byte	0
+ 1257 0016 0B       		.uleb128 0xb
+ 1258 0017 0B       		.uleb128 0xb
+ 1259 0018 3E       		.uleb128 0x3e
+ 1260 0019 0B       		.uleb128 0xb
+ 1261 001a 03       		.uleb128 0x3
+ 1262 001b 0E       		.uleb128 0xe
+ 1263 001c 00       		.byte	0
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 26
+
+
+ 1264 001d 00       		.byte	0
+ 1265 001e 03       		.uleb128 0x3
+ 1266 001f 16       		.uleb128 0x16
+ 1267 0020 00       		.byte	0
+ 1268 0021 03       		.uleb128 0x3
+ 1269 0022 0E       		.uleb128 0xe
+ 1270 0023 3A       		.uleb128 0x3a
+ 1271 0024 0B       		.uleb128 0xb
+ 1272 0025 3B       		.uleb128 0x3b
+ 1273 0026 0B       		.uleb128 0xb
+ 1274 0027 49       		.uleb128 0x49
+ 1275 0028 13       		.uleb128 0x13
+ 1276 0029 00       		.byte	0
+ 1277 002a 00       		.byte	0
+ 1278 002b 04       		.uleb128 0x4
+ 1279 002c 24       		.uleb128 0x24
+ 1280 002d 00       		.byte	0
+ 1281 002e 0B       		.uleb128 0xb
+ 1282 002f 0B       		.uleb128 0xb
+ 1283 0030 3E       		.uleb128 0x3e
+ 1284 0031 0B       		.uleb128 0xb
+ 1285 0032 03       		.uleb128 0x3
+ 1286 0033 08       		.uleb128 0x8
+ 1287 0034 00       		.byte	0
+ 1288 0035 00       		.byte	0
+ 1289 0036 05       		.uleb128 0x5
+ 1290 0037 2E       		.uleb128 0x2e
+ 1291 0038 01       		.byte	0x1
+ 1292 0039 3F       		.uleb128 0x3f
+ 1293 003a 19       		.uleb128 0x19
+ 1294 003b 03       		.uleb128 0x3
+ 1295 003c 0E       		.uleb128 0xe
+ 1296 003d 3A       		.uleb128 0x3a
+ 1297 003e 0B       		.uleb128 0xb
+ 1298 003f 3B       		.uleb128 0x3b
+ 1299 0040 0B       		.uleb128 0xb
+ 1300 0041 27       		.uleb128 0x27
+ 1301 0042 19       		.uleb128 0x19
+ 1302 0043 11       		.uleb128 0x11
+ 1303 0044 01       		.uleb128 0x1
+ 1304 0045 12       		.uleb128 0x12
+ 1305 0046 06       		.uleb128 0x6
+ 1306 0047 40       		.uleb128 0x40
+ 1307 0048 18       		.uleb128 0x18
+ 1308 0049 9742     		.uleb128 0x2117
+ 1309 004b 19       		.uleb128 0x19
+ 1310 004c 01       		.uleb128 0x1
+ 1311 004d 13       		.uleb128 0x13
+ 1312 004e 00       		.byte	0
+ 1313 004f 00       		.byte	0
+ 1314 0050 06       		.uleb128 0x6
+ 1315 0051 898201   		.uleb128 0x4109
+ 1316 0054 00       		.byte	0
+ 1317 0055 11       		.uleb128 0x11
+ 1318 0056 01       		.uleb128 0x1
+ 1319 0057 31       		.uleb128 0x31
+ 1320 0058 13       		.uleb128 0x13
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 27
+
+
+ 1321 0059 00       		.byte	0
+ 1322 005a 00       		.byte	0
+ 1323 005b 07       		.uleb128 0x7
+ 1324 005c 2E       		.uleb128 0x2e
+ 1325 005d 01       		.byte	0x1
+ 1326 005e 3F       		.uleb128 0x3f
+ 1327 005f 19       		.uleb128 0x19
+ 1328 0060 03       		.uleb128 0x3
+ 1329 0061 0E       		.uleb128 0xe
+ 1330 0062 3A       		.uleb128 0x3a
+ 1331 0063 0B       		.uleb128 0xb
+ 1332 0064 3B       		.uleb128 0x3b
+ 1333 0065 0B       		.uleb128 0xb
+ 1334 0066 27       		.uleb128 0x27
+ 1335 0067 19       		.uleb128 0x19
+ 1336 0068 11       		.uleb128 0x11
+ 1337 0069 01       		.uleb128 0x1
+ 1338 006a 12       		.uleb128 0x12
+ 1339 006b 06       		.uleb128 0x6
+ 1340 006c 40       		.uleb128 0x40
+ 1341 006d 18       		.uleb128 0x18
+ 1342 006e 9642     		.uleb128 0x2116
+ 1343 0070 19       		.uleb128 0x19
+ 1344 0071 01       		.uleb128 0x1
+ 1345 0072 13       		.uleb128 0x13
+ 1346 0073 00       		.byte	0
+ 1347 0074 00       		.byte	0
+ 1348 0075 08       		.uleb128 0x8
+ 1349 0076 898201   		.uleb128 0x4109
+ 1350 0079 01       		.byte	0x1
+ 1351 007a 11       		.uleb128 0x11
+ 1352 007b 01       		.uleb128 0x1
+ 1353 007c 31       		.uleb128 0x31
+ 1354 007d 13       		.uleb128 0x13
+ 1355 007e 01       		.uleb128 0x1
+ 1356 007f 13       		.uleb128 0x13
+ 1357 0080 00       		.byte	0
+ 1358 0081 00       		.byte	0
+ 1359 0082 09       		.uleb128 0x9
+ 1360 0083 8A8201   		.uleb128 0x410a
+ 1361 0086 00       		.byte	0
+ 1362 0087 02       		.uleb128 0x2
+ 1363 0088 18       		.uleb128 0x18
+ 1364 0089 9142     		.uleb128 0x2111
+ 1365 008b 18       		.uleb128 0x18
+ 1366 008c 00       		.byte	0
+ 1367 008d 00       		.byte	0
+ 1368 008e 0A       		.uleb128 0xa
+ 1369 008f 898201   		.uleb128 0x4109
+ 1370 0092 01       		.byte	0x1
+ 1371 0093 11       		.uleb128 0x11
+ 1372 0094 01       		.uleb128 0x1
+ 1373 0095 31       		.uleb128 0x31
+ 1374 0096 13       		.uleb128 0x13
+ 1375 0097 00       		.byte	0
+ 1376 0098 00       		.byte	0
+ 1377 0099 0B       		.uleb128 0xb
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 28
+
+
+ 1378 009a 2E       		.uleb128 0x2e
+ 1379 009b 01       		.byte	0x1
+ 1380 009c 3F       		.uleb128 0x3f
+ 1381 009d 19       		.uleb128 0x19
+ 1382 009e 03       		.uleb128 0x3
+ 1383 009f 0E       		.uleb128 0xe
+ 1384 00a0 3A       		.uleb128 0x3a
+ 1385 00a1 0B       		.uleb128 0xb
+ 1386 00a2 3B       		.uleb128 0x3b
+ 1387 00a3 0B       		.uleb128 0xb
+ 1388 00a4 27       		.uleb128 0x27
+ 1389 00a5 19       		.uleb128 0x19
+ 1390 00a6 49       		.uleb128 0x49
+ 1391 00a7 13       		.uleb128 0x13
+ 1392 00a8 8701     		.uleb128 0x87
+ 1393 00aa 19       		.uleb128 0x19
+ 1394 00ab 11       		.uleb128 0x11
+ 1395 00ac 01       		.uleb128 0x1
+ 1396 00ad 12       		.uleb128 0x12
+ 1397 00ae 06       		.uleb128 0x6
+ 1398 00af 40       		.uleb128 0x40
+ 1399 00b0 18       		.uleb128 0x18
+ 1400 00b1 9642     		.uleb128 0x2116
+ 1401 00b3 19       		.uleb128 0x19
+ 1402 00b4 01       		.uleb128 0x1
+ 1403 00b5 13       		.uleb128 0x13
+ 1404 00b6 00       		.byte	0
+ 1405 00b7 00       		.byte	0
+ 1406 00b8 0C       		.uleb128 0xc
+ 1407 00b9 34       		.uleb128 0x34
+ 1408 00ba 00       		.byte	0
+ 1409 00bb 03       		.uleb128 0x3
+ 1410 00bc 0E       		.uleb128 0xe
+ 1411 00bd 3A       		.uleb128 0x3a
+ 1412 00be 0B       		.uleb128 0xb
+ 1413 00bf 3B       		.uleb128 0x3b
+ 1414 00c0 05       		.uleb128 0x5
+ 1415 00c1 49       		.uleb128 0x49
+ 1416 00c2 13       		.uleb128 0x13
+ 1417 00c3 3F       		.uleb128 0x3f
+ 1418 00c4 19       		.uleb128 0x19
+ 1419 00c5 3C       		.uleb128 0x3c
+ 1420 00c6 19       		.uleb128 0x19
+ 1421 00c7 00       		.byte	0
+ 1422 00c8 00       		.byte	0
+ 1423 00c9 0D       		.uleb128 0xd
+ 1424 00ca 35       		.uleb128 0x35
+ 1425 00cb 00       		.byte	0
+ 1426 00cc 49       		.uleb128 0x49
+ 1427 00cd 13       		.uleb128 0x13
+ 1428 00ce 00       		.byte	0
+ 1429 00cf 00       		.byte	0
+ 1430 00d0 0E       		.uleb128 0xe
+ 1431 00d1 01       		.uleb128 0x1
+ 1432 00d2 01       		.byte	0x1
+ 1433 00d3 49       		.uleb128 0x49
+ 1434 00d4 13       		.uleb128 0x13
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 29
+
+
+ 1435 00d5 01       		.uleb128 0x1
+ 1436 00d6 13       		.uleb128 0x13
+ 1437 00d7 00       		.byte	0
+ 1438 00d8 00       		.byte	0
+ 1439 00d9 0F       		.uleb128 0xf
+ 1440 00da 21       		.uleb128 0x21
+ 1441 00db 00       		.byte	0
+ 1442 00dc 49       		.uleb128 0x49
+ 1443 00dd 13       		.uleb128 0x13
+ 1444 00de 2F       		.uleb128 0x2f
+ 1445 00df 0B       		.uleb128 0xb
+ 1446 00e0 00       		.byte	0
+ 1447 00e1 00       		.byte	0
+ 1448 00e2 10       		.uleb128 0x10
+ 1449 00e3 34       		.uleb128 0x34
+ 1450 00e4 00       		.byte	0
+ 1451 00e5 03       		.uleb128 0x3
+ 1452 00e6 0E       		.uleb128 0xe
+ 1453 00e7 3A       		.uleb128 0x3a
+ 1454 00e8 0B       		.uleb128 0xb
+ 1455 00e9 3B       		.uleb128 0x3b
+ 1456 00ea 0B       		.uleb128 0xb
+ 1457 00eb 49       		.uleb128 0x49
+ 1458 00ec 13       		.uleb128 0x13
+ 1459 00ed 3F       		.uleb128 0x3f
+ 1460 00ee 19       		.uleb128 0x19
+ 1461 00ef 02       		.uleb128 0x2
+ 1462 00f0 18       		.uleb128 0x18
+ 1463 00f1 00       		.byte	0
+ 1464 00f2 00       		.byte	0
+ 1465 00f3 11       		.uleb128 0x11
+ 1466 00f4 34       		.uleb128 0x34
+ 1467 00f5 00       		.byte	0
+ 1468 00f6 03       		.uleb128 0x3
+ 1469 00f7 08       		.uleb128 0x8
+ 1470 00f8 3A       		.uleb128 0x3a
+ 1471 00f9 0B       		.uleb128 0xb
+ 1472 00fa 3B       		.uleb128 0x3b
+ 1473 00fb 0B       		.uleb128 0xb
+ 1474 00fc 49       		.uleb128 0x49
+ 1475 00fd 13       		.uleb128 0x13
+ 1476 00fe 3F       		.uleb128 0x3f
+ 1477 00ff 19       		.uleb128 0x19
+ 1478 0100 02       		.uleb128 0x2
+ 1479 0101 18       		.uleb128 0x18
+ 1480 0102 00       		.byte	0
+ 1481 0103 00       		.byte	0
+ 1482 0104 12       		.uleb128 0x12
+ 1483 0105 2E       		.uleb128 0x2e
+ 1484 0106 00       		.byte	0
+ 1485 0107 3F       		.uleb128 0x3f
+ 1486 0108 19       		.uleb128 0x19
+ 1487 0109 3C       		.uleb128 0x3c
+ 1488 010a 19       		.uleb128 0x19
+ 1489 010b 6E       		.uleb128 0x6e
+ 1490 010c 0E       		.uleb128 0xe
+ 1491 010d 03       		.uleb128 0x3
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 30
+
+
+ 1492 010e 0E       		.uleb128 0xe
+ 1493 010f 3A       		.uleb128 0x3a
+ 1494 0110 0B       		.uleb128 0xb
+ 1495 0111 3B       		.uleb128 0x3b
+ 1496 0112 0B       		.uleb128 0xb
+ 1497 0113 00       		.byte	0
+ 1498 0114 00       		.byte	0
+ 1499 0115 00       		.byte	0
+ 1500              		.section	.debug_aranges,"",%progbits
+ 1501 0000 34000000 		.4byte	0x34
+ 1502 0004 0200     		.2byte	0x2
+ 1503 0006 00000000 		.4byte	.Ldebug_info0
+ 1504 000a 04       		.byte	0x4
+ 1505 000b 00       		.byte	0
+ 1506 000c 0000     		.2byte	0
+ 1507 000e 0000     		.2byte	0
+ 1508 0010 00000000 		.4byte	.LFB63
+ 1509 0014 40000000 		.4byte	.LFE63-.LFB63
+ 1510 0018 00000000 		.4byte	.LFB64
+ 1511 001c A4000000 		.4byte	.LFE64-.LFB64
+ 1512 0020 00000000 		.4byte	.LFB65
+ 1513 0024 14000000 		.4byte	.LFE65-.LFB65
+ 1514 0028 00000000 		.4byte	.LFB66
+ 1515 002c 7C020000 		.4byte	.LFE66-.LFB66
+ 1516 0030 00000000 		.4byte	0
+ 1517 0034 00000000 		.4byte	0
+ 1518              		.section	.debug_ranges,"",%progbits
+ 1519              	.Ldebug_ranges0:
+ 1520 0000 00000000 		.4byte	.LFB63
+ 1521 0004 40000000 		.4byte	.LFE63
+ 1522 0008 00000000 		.4byte	.LFB64
+ 1523 000c A4000000 		.4byte	.LFE64
+ 1524 0010 00000000 		.4byte	.LFB65
+ 1525 0014 14000000 		.4byte	.LFE65
+ 1526 0018 00000000 		.4byte	.LFB66
+ 1527 001c 7C020000 		.4byte	.LFE66
+ 1528 0020 00000000 		.4byte	0
+ 1529 0024 00000000 		.4byte	0
+ 1530              		.section	.debug_line,"",%progbits
+ 1531              	.Ldebug_line0:
+ 1532 0000 1A030000 		.section	.debug_str,"MS",%progbits,1
+ 1532      02002402 
+ 1532      00000201 
+ 1532      FB0E0D00 
+ 1532      01010101 
+ 1533              	.LASF27:
+ 1534 0000 6D325F64 		.ascii	"m2_dir_pin\000"
+ 1534      69725F70 
+ 1534      696E00
+ 1535              	.LASF39:
+ 1536 000b 54696D65 		.ascii	"Timer_1_Start\000"
+ 1536      725F315F 
+ 1536      53746172 
+ 1536      7400
+ 1537              	.LASF52:
+ 1538 0019 433A5C55 		.ascii	"C:\\Users\\dylan\\Documents\\135_motor_project.cyds"
+ 1538      73657273 
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 31
+
+
+ 1538      5C64796C 
+ 1538      616E5C44 
+ 1538      6F63756D 
+ 1539 0048 6E00     		.ascii	"n\000"
+ 1540              	.LASF32:
+ 1541 004a 436F6E74 		.ascii	"Control_Reg_6_Write\000"
+ 1541      726F6C5F 
+ 1541      5265675F 
+ 1541      365F5772 
+ 1541      69746500 
+ 1542              	.LASF9:
+ 1543 005e 5F5F696E 		.ascii	"__int32_t\000"
+ 1543      7433325F 
+ 1543      7400
+ 1544              	.LASF41:
+ 1545 0068 70756C73 		.ascii	"pulse_ready_isr_Enable\000"
+ 1545      655F7265 
+ 1545      6164795F 
+ 1545      6973725F 
+ 1545      456E6162 
+ 1546              	.LASF3:
+ 1547 007f 73686F72 		.ascii	"short unsigned int\000"
+ 1547      7420756E 
+ 1547      7369676E 
+ 1547      65642069 
+ 1547      6E7400
+ 1548              	.LASF40:
+ 1549 0092 70756C73 		.ascii	"pulse_ready_isr_StartEx\000"
+ 1549      655F7265 
+ 1549      6164795F 
+ 1549      6973725F 
+ 1549      53746172 
+ 1550              	.LASF46:
+ 1551 00aa 436F6E74 		.ascii	"Control_Reg_3_Write\000"
+ 1551      726F6C5F 
+ 1551      5265675F 
+ 1551      335F5772 
+ 1551      69746500 
+ 1552              	.LASF10:
+ 1553 00be 696E7433 		.ascii	"int32_t\000"
+ 1553      325F7400 
+ 1554              	.LASF22:
+ 1555 00c6 6D315F73 		.ascii	"m1_steps\000"
+ 1555      74657073 
+ 1555      00
+ 1556              	.LASF11:
+ 1557 00cf 666C6F61 		.ascii	"float\000"
+ 1557      7400
+ 1558              	.LASF18:
+ 1559 00d5 706F735F 		.ascii	"pos_reset\000"
+ 1559      72657365 
+ 1559      7400
+ 1560              	.LASF43:
+ 1561 00df 6973725F 		.ascii	"isr_rx_Enable\000"
+ 1561      72785F45 
+ 1561      6E61626C 
+ 1561      6500
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 32
+
+
+ 1562              	.LASF1:
+ 1563 00ed 756E7369 		.ascii	"unsigned char\000"
+ 1563      676E6564 
+ 1563      20636861 
+ 1563      7200
+ 1564              	.LASF50:
+ 1565 00fb 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 1565      43313120 
+ 1565      352E342E 
+ 1565      31203230 
+ 1565      31363036 
+ 1566 012e 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 1566      20726576 
+ 1566      6973696F 
+ 1566      6E203233 
+ 1566      37373135 
+ 1567 0161 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 1567      66756E63 
+ 1567      74696F6E 
+ 1567      2D736563 
+ 1567      74696F6E 
+ 1568              	.LASF5:
+ 1569 0189 6C6F6E67 		.ascii	"long unsigned int\000"
+ 1569      20756E73 
+ 1569      69676E65 
+ 1569      6420696E 
+ 1569      7400
+ 1570              	.LASF37:
+ 1571 019b 50574D5F 		.ascii	"PWM_1_Start\000"
+ 1571      315F5374 
+ 1571      61727400 
+ 1572              	.LASF35:
+ 1573 01a7 55415254 		.ascii	"UART_Start\000"
+ 1573      5F537461 
+ 1573      727400
+ 1574              	.LASF19:
+ 1575 01b2 49544D5F 		.ascii	"ITM_RxBuffer\000"
+ 1575      52784275 
+ 1575      66666572 
+ 1575      00
+ 1576              	.LASF12:
+ 1577 01bf 646F7562 		.ascii	"double\000"
+ 1577      6C6500
+ 1578              	.LASF38:
+ 1579 01c6 50574D5F 		.ascii	"PWM_2_Start\000"
+ 1579      325F5374 
+ 1579      61727400 
+ 1580              	.LASF23:
+ 1581 01d2 6D325F73 		.ascii	"m2_steps\000"
+ 1581      74657073 
+ 1581      00
+ 1582              	.LASF53:
+ 1583 01db 6D61696E 		.ascii	"main\000"
+ 1583      00
+ 1584              	.LASF17:
+ 1585 01e0 70756C73 		.ascii	"pulse_ready_isr\000"
+ 1585      655F7265 
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 33
+
+
+ 1585      6164795F 
+ 1585      69737200 
+ 1586              	.LASF26:
+ 1587 01f0 6D315F64 		.ascii	"m1_dir_pin\000"
+ 1587      69725F70 
+ 1587      696E00
+ 1588              	.LASF42:
+ 1589 01fb 6973725F 		.ascii	"isr_rx_StartEx\000"
+ 1589      72785F53 
+ 1589      74617274 
+ 1589      457800
+ 1590              	.LASF8:
+ 1591 020a 756E7369 		.ascii	"unsigned int\000"
+ 1591      676E6564 
+ 1591      20696E74 
+ 1591      00
+ 1592              	.LASF29:
+ 1593 0217 6D325F73 		.ascii	"m2_step_pin\000"
+ 1593      7465705F 
+ 1593      70696E00 
+ 1594              	.LASF16:
+ 1595 0223 6973725F 		.ascii	"isr_rx\000"
+ 1595      727800
+ 1596              	.LASF7:
+ 1597 022a 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 1597      206C6F6E 
+ 1597      6720756E 
+ 1597      7369676E 
+ 1597      65642069 
+ 1598              	.LASF48:
+ 1599 0241 436F6E74 		.ascii	"Control_Reg_1_Write\000"
+ 1599      726F6C5F 
+ 1599      5265675F 
+ 1599      315F5772 
+ 1599      69746500 
+ 1600              	.LASF20:
+ 1601 0255 75617274 		.ascii	"uart_recv_buf\000"
+ 1601      5F726563 
+ 1601      765F6275 
+ 1601      6600
+ 1602              	.LASF0:
+ 1603 0263 7369676E 		.ascii	"signed char\000"
+ 1603      65642063 
+ 1603      68617200 
+ 1604              	.LASF24:
+ 1605 026f 6D315F64 		.ascii	"m1_dir\000"
+ 1605      697200
+ 1606              	.LASF21:
+ 1607 0276 75617274 		.ascii	"uart_recv_count\000"
+ 1607      5F726563 
+ 1607      765F636F 
+ 1607      756E7400 
+ 1608              	.LASF15:
+ 1609 0286 73697A65 		.ascii	"sizetype\000"
+ 1609      74797065 
+ 1609      00
+ 1610              	.LASF49:
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 34
+
+
+ 1611 028f 436F6E74 		.ascii	"Control_Reg_2_Write\000"
+ 1611      726F6C5F 
+ 1611      5265675F 
+ 1611      325F5772 
+ 1611      69746500 
+ 1612              	.LASF6:
+ 1613 02a3 6C6F6E67 		.ascii	"long long int\000"
+ 1613      206C6F6E 
+ 1613      6720696E 
+ 1613      7400
+ 1614              	.LASF28:
+ 1615 02b1 6D315F73 		.ascii	"m1_step_pin\000"
+ 1615      7465705F 
+ 1615      70696E00 
+ 1616              	.LASF51:
+ 1617 02bd 6D61696E 		.ascii	"main.c\000"
+ 1617      2E6300
+ 1618              	.LASF13:
+ 1619 02c4 63686172 		.ascii	"char\000"
+ 1619      00
+ 1620              	.LASF33:
+ 1621 02c9 50696E5F 		.ascii	"Pin_1_ClearInterrupt\000"
+ 1621      315F436C 
+ 1621      65617249 
+ 1621      6E746572 
+ 1621      72757074 
+ 1622              	.LASF36:
+ 1623 02de 7072696E 		.ascii	"printf\000"
+ 1623      746600
+ 1624              	.LASF44:
+ 1625 02e5 706F735F 		.ascii	"pos_reset_StartEx\000"
+ 1625      72657365 
+ 1625      745F5374 
+ 1625      61727445 
+ 1625      7800
+ 1626              	.LASF2:
+ 1627 02f7 73686F72 		.ascii	"short int\000"
+ 1627      7420696E 
+ 1627      7400
+ 1628              	.LASF45:
+ 1629 0301 706F735F 		.ascii	"pos_reset_Enable\000"
+ 1629      72657365 
+ 1629      745F456E 
+ 1629      61626C65 
+ 1629      00
+ 1630              	.LASF4:
+ 1631 0312 6C6F6E67 		.ascii	"long int\000"
+ 1631      20696E74 
+ 1631      00
+ 1632              	.LASF47:
+ 1633 031b 436F6E74 		.ascii	"Control_Reg_4_Write\000"
+ 1633      726F6C5F 
+ 1633      5265675F 
+ 1633      345F5772 
+ 1633      69746500 
+ 1634              	.LASF14:
+ 1635 032f 6C6F6E67 		.ascii	"long double\000"
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccdCKqgk.s 			page 35
+
+
+ 1635      20646F75 
+ 1635      626C6500 
+ 1636              	.LASF25:
+ 1637 033b 6D325F64 		.ascii	"m2_dir\000"
+ 1637      697200
+ 1638              	.LASF30:
+ 1639 0342 55415254 		.ascii	"UART_GetChar\000"
+ 1639      5F476574 
+ 1639      43686172 
+ 1639      00
+ 1640              	.LASF34:
+ 1641 034f 43794465 		.ascii	"CyDelay\000"
+ 1641      6C617900 
+ 1642              	.LASF31:
+ 1643 0357 436F6E74 		.ascii	"Control_Reg_5_Write\000"
+ 1643      726F6C5F 
+ 1643      5265675F 
+ 1643      355F5772 
+ 1643      69746500 
+ 1644              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

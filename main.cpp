@@ -157,6 +157,11 @@ int main()
         return 1;
     }
 
+    /*************** BEHAVIOR *****************/
+    short int difficulty = 0; //[0, 1, 2] = [Easy, Medium, Hard]
+    short int state = 0; //[0, 1, 2, 3, 4] = [Wait, Catch, Bank Left, Straight, Bank Right]
+    float v_x_0, v_y_0;
+
     /*************** MAIN LOOP ****************/
     printf("\nProgram started...\n");
     auto t0 = chrono::steady_clock::now(); // Initialize timer

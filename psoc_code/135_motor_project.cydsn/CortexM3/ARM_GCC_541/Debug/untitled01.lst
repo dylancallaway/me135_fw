@@ -1,0 +1,570 @@
+ARM GAS  C:\Users\lucdd\AppData\Local\Temp\ccGt8oOA.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"untitled01.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text._write,"ax",%progbits
+  20              		.align	2
+  21              		.global	_write
+  22              		.thumb
+  23              		.thumb_func
+  24              		.type	_write, %function
+  25              	_write:
+  26              	.LFB0:
+  27              		.file 1 "untitled01.c"
+   1:untitled01.c  **** #if defined(__ARMCC_VERSION)
+   2:untitled01.c  **** /* For MDK/RVDS compiler revise fputc function for printf functionality */
+   3:untitled01.c  **** struct __FILE 
+   4:untitled01.c  **** {
+   5:untitled01.c  **** int handle;  
+   6:untitled01.c  **** };
+   7:untitled01.c  **** enum 
+   8:untitled01.c  **** {
+   9:untitled01.c  **** STDIN_HANDLE,
+  10:untitled01.c  **** STDOUT_HANDLE,
+  11:untitled01.c  **** STDERR_HANDLE
+  12:untitled01.c  **** };
+  13:untitled01.c  **** FILE __stdin = {STDIN_HANDLE};
+  14:untitled01.c  **** FILE __stdout = {STDOUT_HANDLE};
+  15:untitled01.c  **** FILE __stderr = {STDERR_HANDLE};
+  16:untitled01.c  **** int fputc(int ch, FILE *file) 
+  17:untitled01.c  **** {
+  18:untitled01.c  **** int ret = EOF;
+  19:untitled01.c  **** switch( file->handle )
+  20:untitled01.c  **** {
+  21:untitled01.c  **** case STDOUT_HANDLE:
+  22:untitled01.c  **** UART_UartPutChar(ch);
+  23:untitled01.c  **** ret = ch ;
+  24:untitled01.c  **** break ;
+  25:untitled01.c  **** case STDERR_HANDLE:
+  26:untitled01.c  **** ret = ch ;
+  27:untitled01.c  **** break ;
+  28:untitled01.c  **** default:
+  29:untitled01.c  **** file = file;
+  30:untitled01.c  **** break ;
+ARM GAS  C:\Users\lucdd\AppData\Local\Temp\ccGt8oOA.s 			page 2
+
+
+  31:untitled01.c  **** }
+  32:untitled01.c  **** return ret ;
+  33:untitled01.c  **** }
+  34:untitled01.c  **** #elif defined (__ICCARM__)      /* IAR */
+  35:untitled01.c  **** /* For IAR compiler revise __write() function for printf functionality */
+  36:untitled01.c  **** size_t __write(int handle, const unsigned char * buffer, size_t size)
+  37:untitled01.c  **** {
+  38:untitled01.c  **** size_t nChars = 0;
+  39:untitled01.c  **** if (buffer == 0)
+  40:untitled01.c  **** {
+  41:untitled01.c  **** /*
+  42:untitled01.c  **** * This means that we should flush internal buffers.  Since we
+  43:untitled01.c  **** * don't we just return.  (Remember, "handle" == -1 means that all
+  44:untitled01.c  **** * handles should be flushed.)
+  45:untitled01.c  **** */
+  46:untitled01.c  **** return (0);
+  47:untitled01.c  **** }
+  48:untitled01.c  **** for (/* Empty */; size != 0; --size)
+  49:untitled01.c  **** {
+  50:untitled01.c  **** UART_PutChar(*buffer++);
+  51:untitled01.c  **** ++nChars;
+  52:untitled01.c  **** }
+  53:untitled01.c  **** return (nChars);
+  54:untitled01.c  **** }
+  55:untitled01.c  **** #else  /* (__GNUC__)  GCC */
+  56:untitled01.c  **** /* For GCC compiler revise _write() function for printf functionality */
+  57:untitled01.c  **** int _write(int file, char *ptr, int len)
+  58:untitled01.c  **** {
+  28              		.loc 1 58 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              	.LVL0:
+  33 0000 70B5     		push	{r4, r5, r6, lr}
+  34              		.cfi_def_cfa_offset 16
+  35              		.cfi_offset 4, -16
+  36              		.cfi_offset 5, -12
+  37              		.cfi_offset 6, -8
+  38              		.cfi_offset 14, -4
+  39 0002 1646     		mov	r6, r2
+  40              	.LVL1:
+  59:untitled01.c  **** int i;
+  60:untitled01.c  **** file = file;
+  61:untitled01.c  **** for (i = 0; i < len; i++)
+  41              		.loc 1 61 0
+  42 0004 0024     		movs	r4, #0
+  43 0006 05E0     		b	.L2
+  44              	.LVL2:
+  45              	.L3:
+  46              	.LBB2:
+  62:untitled01.c  **** {
+  63:untitled01.c  **** UART_PutChar(*ptr++);
+  47              		.loc 1 63 0 discriminator 3
+  48 0008 4D1C     		adds	r5, r1, #1
+  49              	.LVL3:
+  50 000a 0878     		ldrb	r0, [r1]	@ zero_extendqisi2
+  51 000c FFF7FEFF 		bl	UART_PutChar
+ARM GAS  C:\Users\lucdd\AppData\Local\Temp\ccGt8oOA.s 			page 3
+
+
+  52              	.LVL4:
+  53              	.LBE2:
+  61:untitled01.c  **** {
+  54              		.loc 1 61 0 discriminator 3
+  55 0010 0134     		adds	r4, r4, #1
+  56              	.LVL5:
+  57              	.LBB3:
+  58              		.loc 1 63 0 discriminator 3
+  59 0012 2946     		mov	r1, r5
+  60              	.LVL6:
+  61              	.L2:
+  62              	.LBE3:
+  61:untitled01.c  **** {
+  63              		.loc 1 61 0 discriminator 1
+  64 0014 B442     		cmp	r4, r6
+  65 0016 F7DB     		blt	.L3
+  64:untitled01.c  **** }
+  65:untitled01.c  **** return len;
+  66:untitled01.c  **** }
+  66              		.loc 1 66 0
+  67 0018 3046     		mov	r0, r6
+  68 001a 70BD     		pop	{r4, r5, r6, pc}
+  69              		.cfi_endproc
+  70              	.LFE0:
+  71              		.size	_write, .-_write
+  72              		.text
+  73              	.Letext0:
+  74              		.section	.debug_info,"",%progbits
+  75              	.Ldebug_info0:
+  76 0000 B5000000 		.4byte	0xb5
+  77 0004 0400     		.2byte	0x4
+  78 0006 00000000 		.4byte	.Ldebug_abbrev0
+  79 000a 04       		.byte	0x4
+  80 000b 01       		.uleb128 0x1
+  81 000c 9F000000 		.4byte	.LASF2
+  82 0010 0C       		.byte	0xc
+  83 0011 00000000 		.4byte	.LASF3
+  84 0015 17000000 		.4byte	.LASF4
+  85 0019 18000000 		.4byte	.Ldebug_ranges0+0x18
+  86 001d 00000000 		.4byte	0
+  87 0021 00000000 		.4byte	.Ldebug_line0
+  88 0025 02       		.uleb128 0x2
+  89 0026 98000000 		.4byte	.LASF5
+  90 002a 01       		.byte	0x1
+  91 002b 39       		.byte	0x39
+  92 002c 99000000 		.4byte	0x99
+  93 0030 00000000 		.4byte	.LFB0
+  94 0034 1C000000 		.4byte	.LFE0-.LFB0
+  95 0038 01       		.uleb128 0x1
+  96 0039 9C       		.byte	0x9c
+  97 003a 99000000 		.4byte	0x99
+  98 003e 03       		.uleb128 0x3
+  99 003f 12000000 		.4byte	.LASF0
+ 100 0043 01       		.byte	0x1
+ 101 0044 39       		.byte	0x39
+ 102 0045 99000000 		.4byte	0x99
+ 103 0049 00000000 		.4byte	.LLST0
+ARM GAS  C:\Users\lucdd\AppData\Local\Temp\ccGt8oOA.s 			page 4
+
+
+ 104 004d 04       		.uleb128 0x4
+ 105 004e 70747200 		.ascii	"ptr\000"
+ 106 0052 01       		.byte	0x1
+ 107 0053 39       		.byte	0x39
+ 108 0054 A0000000 		.4byte	0xa0
+ 109 0058 21000000 		.4byte	.LLST1
+ 110 005c 04       		.uleb128 0x4
+ 111 005d 6C656E00 		.ascii	"len\000"
+ 112 0061 01       		.byte	0x1
+ 113 0062 39       		.byte	0x39
+ 114 0063 99000000 		.4byte	0x99
+ 115 0067 4A000000 		.4byte	.LLST2
+ 116 006b 05       		.uleb128 0x5
+ 117 006c 6900     		.ascii	"i\000"
+ 118 006e 01       		.byte	0x1
+ 119 006f 3B       		.byte	0x3b
+ 120 0070 99000000 		.4byte	0x99
+ 121 0074 68000000 		.4byte	.LLST3
+ 122 0078 06       		.uleb128 0x6
+ 123 0079 00000000 		.4byte	.Ldebug_ranges0+0
+ 124 007d 07       		.uleb128 0x7
+ 125 007e 2D010000 		.4byte	.LASF6
+ 126 0082 01       		.byte	0x1
+ 127 0083 3F       		.byte	0x3f
+ 128 0084 99000000 		.4byte	0x99
+ 129 0088 8E000000 		.4byte	0x8e
+ 130 008c 08       		.uleb128 0x8
+ 131 008d 00       		.byte	0
+ 132 008e 09       		.uleb128 0x9
+ 133 008f 10000000 		.4byte	.LVL4
+ 134 0093 AD000000 		.4byte	0xad
+ 135 0097 00       		.byte	0
+ 136 0098 00       		.byte	0
+ 137 0099 0A       		.uleb128 0xa
+ 138 009a 04       		.byte	0x4
+ 139 009b 05       		.byte	0x5
+ 140 009c 696E7400 		.ascii	"int\000"
+ 141 00a0 0B       		.uleb128 0xb
+ 142 00a1 04       		.byte	0x4
+ 143 00a2 A6000000 		.4byte	0xa6
+ 144 00a6 0C       		.uleb128 0xc
+ 145 00a7 01       		.byte	0x1
+ 146 00a8 08       		.byte	0x8
+ 147 00a9 0D000000 		.4byte	.LASF1
+ 148 00ad 0D       		.uleb128 0xd
+ 149 00ae 2D010000 		.4byte	.LASF6
+ 150 00b2 2D010000 		.4byte	.LASF6
+ 151 00b6 01       		.byte	0x1
+ 152 00b7 3F       		.byte	0x3f
+ 153 00b8 00       		.byte	0
+ 154              		.section	.debug_abbrev,"",%progbits
+ 155              	.Ldebug_abbrev0:
+ 156 0000 01       		.uleb128 0x1
+ 157 0001 11       		.uleb128 0x11
+ 158 0002 01       		.byte	0x1
+ 159 0003 25       		.uleb128 0x25
+ 160 0004 0E       		.uleb128 0xe
+ARM GAS  C:\Users\lucdd\AppData\Local\Temp\ccGt8oOA.s 			page 5
+
+
+ 161 0005 13       		.uleb128 0x13
+ 162 0006 0B       		.uleb128 0xb
+ 163 0007 03       		.uleb128 0x3
+ 164 0008 0E       		.uleb128 0xe
+ 165 0009 1B       		.uleb128 0x1b
+ 166 000a 0E       		.uleb128 0xe
+ 167 000b 55       		.uleb128 0x55
+ 168 000c 17       		.uleb128 0x17
+ 169 000d 11       		.uleb128 0x11
+ 170 000e 01       		.uleb128 0x1
+ 171 000f 10       		.uleb128 0x10
+ 172 0010 17       		.uleb128 0x17
+ 173 0011 00       		.byte	0
+ 174 0012 00       		.byte	0
+ 175 0013 02       		.uleb128 0x2
+ 176 0014 2E       		.uleb128 0x2e
+ 177 0015 01       		.byte	0x1
+ 178 0016 3F       		.uleb128 0x3f
+ 179 0017 19       		.uleb128 0x19
+ 180 0018 03       		.uleb128 0x3
+ 181 0019 0E       		.uleb128 0xe
+ 182 001a 3A       		.uleb128 0x3a
+ 183 001b 0B       		.uleb128 0xb
+ 184 001c 3B       		.uleb128 0x3b
+ 185 001d 0B       		.uleb128 0xb
+ 186 001e 27       		.uleb128 0x27
+ 187 001f 19       		.uleb128 0x19
+ 188 0020 49       		.uleb128 0x49
+ 189 0021 13       		.uleb128 0x13
+ 190 0022 11       		.uleb128 0x11
+ 191 0023 01       		.uleb128 0x1
+ 192 0024 12       		.uleb128 0x12
+ 193 0025 06       		.uleb128 0x6
+ 194 0026 40       		.uleb128 0x40
+ 195 0027 18       		.uleb128 0x18
+ 196 0028 9742     		.uleb128 0x2117
+ 197 002a 19       		.uleb128 0x19
+ 198 002b 01       		.uleb128 0x1
+ 199 002c 13       		.uleb128 0x13
+ 200 002d 00       		.byte	0
+ 201 002e 00       		.byte	0
+ 202 002f 03       		.uleb128 0x3
+ 203 0030 05       		.uleb128 0x5
+ 204 0031 00       		.byte	0
+ 205 0032 03       		.uleb128 0x3
+ 206 0033 0E       		.uleb128 0xe
+ 207 0034 3A       		.uleb128 0x3a
+ 208 0035 0B       		.uleb128 0xb
+ 209 0036 3B       		.uleb128 0x3b
+ 210 0037 0B       		.uleb128 0xb
+ 211 0038 49       		.uleb128 0x49
+ 212 0039 13       		.uleb128 0x13
+ 213 003a 02       		.uleb128 0x2
+ 214 003b 17       		.uleb128 0x17
+ 215 003c 00       		.byte	0
+ 216 003d 00       		.byte	0
+ 217 003e 04       		.uleb128 0x4
+ARM GAS  C:\Users\lucdd\AppData\Local\Temp\ccGt8oOA.s 			page 6
+
+
+ 218 003f 05       		.uleb128 0x5
+ 219 0040 00       		.byte	0
+ 220 0041 03       		.uleb128 0x3
+ 221 0042 08       		.uleb128 0x8
+ 222 0043 3A       		.uleb128 0x3a
+ 223 0044 0B       		.uleb128 0xb
+ 224 0045 3B       		.uleb128 0x3b
+ 225 0046 0B       		.uleb128 0xb
+ 226 0047 49       		.uleb128 0x49
+ 227 0048 13       		.uleb128 0x13
+ 228 0049 02       		.uleb128 0x2
+ 229 004a 17       		.uleb128 0x17
+ 230 004b 00       		.byte	0
+ 231 004c 00       		.byte	0
+ 232 004d 05       		.uleb128 0x5
+ 233 004e 34       		.uleb128 0x34
+ 234 004f 00       		.byte	0
+ 235 0050 03       		.uleb128 0x3
+ 236 0051 08       		.uleb128 0x8
+ 237 0052 3A       		.uleb128 0x3a
+ 238 0053 0B       		.uleb128 0xb
+ 239 0054 3B       		.uleb128 0x3b
+ 240 0055 0B       		.uleb128 0xb
+ 241 0056 49       		.uleb128 0x49
+ 242 0057 13       		.uleb128 0x13
+ 243 0058 02       		.uleb128 0x2
+ 244 0059 17       		.uleb128 0x17
+ 245 005a 00       		.byte	0
+ 246 005b 00       		.byte	0
+ 247 005c 06       		.uleb128 0x6
+ 248 005d 0B       		.uleb128 0xb
+ 249 005e 01       		.byte	0x1
+ 250 005f 55       		.uleb128 0x55
+ 251 0060 17       		.uleb128 0x17
+ 252 0061 00       		.byte	0
+ 253 0062 00       		.byte	0
+ 254 0063 07       		.uleb128 0x7
+ 255 0064 2E       		.uleb128 0x2e
+ 256 0065 01       		.byte	0x1
+ 257 0066 3F       		.uleb128 0x3f
+ 258 0067 19       		.uleb128 0x19
+ 259 0068 03       		.uleb128 0x3
+ 260 0069 0E       		.uleb128 0xe
+ 261 006a 3A       		.uleb128 0x3a
+ 262 006b 0B       		.uleb128 0xb
+ 263 006c 3B       		.uleb128 0x3b
+ 264 006d 0B       		.uleb128 0xb
+ 265 006e 49       		.uleb128 0x49
+ 266 006f 13       		.uleb128 0x13
+ 267 0070 3C       		.uleb128 0x3c
+ 268 0071 19       		.uleb128 0x19
+ 269 0072 01       		.uleb128 0x1
+ 270 0073 13       		.uleb128 0x13
+ 271 0074 00       		.byte	0
+ 272 0075 00       		.byte	0
+ 273 0076 08       		.uleb128 0x8
+ 274 0077 18       		.uleb128 0x18
+ARM GAS  C:\Users\lucdd\AppData\Local\Temp\ccGt8oOA.s 			page 7
+
+
+ 275 0078 00       		.byte	0
+ 276 0079 00       		.byte	0
+ 277 007a 00       		.byte	0
+ 278 007b 09       		.uleb128 0x9
+ 279 007c 898201   		.uleb128 0x4109
+ 280 007f 00       		.byte	0
+ 281 0080 11       		.uleb128 0x11
+ 282 0081 01       		.uleb128 0x1
+ 283 0082 31       		.uleb128 0x31
+ 284 0083 13       		.uleb128 0x13
+ 285 0084 00       		.byte	0
+ 286 0085 00       		.byte	0
+ 287 0086 0A       		.uleb128 0xa
+ 288 0087 24       		.uleb128 0x24
+ 289 0088 00       		.byte	0
+ 290 0089 0B       		.uleb128 0xb
+ 291 008a 0B       		.uleb128 0xb
+ 292 008b 3E       		.uleb128 0x3e
+ 293 008c 0B       		.uleb128 0xb
+ 294 008d 03       		.uleb128 0x3
+ 295 008e 08       		.uleb128 0x8
+ 296 008f 00       		.byte	0
+ 297 0090 00       		.byte	0
+ 298 0091 0B       		.uleb128 0xb
+ 299 0092 0F       		.uleb128 0xf
+ 300 0093 00       		.byte	0
+ 301 0094 0B       		.uleb128 0xb
+ 302 0095 0B       		.uleb128 0xb
+ 303 0096 49       		.uleb128 0x49
+ 304 0097 13       		.uleb128 0x13
+ 305 0098 00       		.byte	0
+ 306 0099 00       		.byte	0
+ 307 009a 0C       		.uleb128 0xc
+ 308 009b 24       		.uleb128 0x24
+ 309 009c 00       		.byte	0
+ 310 009d 0B       		.uleb128 0xb
+ 311 009e 0B       		.uleb128 0xb
+ 312 009f 3E       		.uleb128 0x3e
+ 313 00a0 0B       		.uleb128 0xb
+ 314 00a1 03       		.uleb128 0x3
+ 315 00a2 0E       		.uleb128 0xe
+ 316 00a3 00       		.byte	0
+ 317 00a4 00       		.byte	0
+ 318 00a5 0D       		.uleb128 0xd
+ 319 00a6 2E       		.uleb128 0x2e
+ 320 00a7 00       		.byte	0
+ 321 00a8 3F       		.uleb128 0x3f
+ 322 00a9 19       		.uleb128 0x19
+ 323 00aa 3C       		.uleb128 0x3c
+ 324 00ab 19       		.uleb128 0x19
+ 325 00ac 6E       		.uleb128 0x6e
+ 326 00ad 0E       		.uleb128 0xe
+ 327 00ae 03       		.uleb128 0x3
+ 328 00af 0E       		.uleb128 0xe
+ 329 00b0 3A       		.uleb128 0x3a
+ 330 00b1 0B       		.uleb128 0xb
+ 331 00b2 3B       		.uleb128 0x3b
+ARM GAS  C:\Users\lucdd\AppData\Local\Temp\ccGt8oOA.s 			page 8
+
+
+ 332 00b3 0B       		.uleb128 0xb
+ 333 00b4 00       		.byte	0
+ 334 00b5 00       		.byte	0
+ 335 00b6 00       		.byte	0
+ 336              		.section	.debug_loc,"",%progbits
+ 337              	.Ldebug_loc0:
+ 338              	.LLST0:
+ 339 0000 00000000 		.4byte	.LVL0
+ 340 0004 08000000 		.4byte	.LVL2
+ 341 0008 0100     		.2byte	0x1
+ 342 000a 50       		.byte	0x50
+ 343 000b 08000000 		.4byte	.LVL2
+ 344 000f 1C000000 		.4byte	.LFE0
+ 345 0013 0400     		.2byte	0x4
+ 346 0015 F3       		.byte	0xf3
+ 347 0016 01       		.uleb128 0x1
+ 348 0017 50       		.byte	0x50
+ 349 0018 9F       		.byte	0x9f
+ 350 0019 00000000 		.4byte	0
+ 351 001d 00000000 		.4byte	0
+ 352              	.LLST1:
+ 353 0021 00000000 		.4byte	.LVL0
+ 354 0025 0A000000 		.4byte	.LVL3
+ 355 0029 0100     		.2byte	0x1
+ 356 002b 51       		.byte	0x51
+ 357 002c 0A000000 		.4byte	.LVL3
+ 358 0030 14000000 		.4byte	.LVL6
+ 359 0034 0100     		.2byte	0x1
+ 360 0036 55       		.byte	0x55
+ 361 0037 14000000 		.4byte	.LVL6
+ 362 003b 1C000000 		.4byte	.LFE0
+ 363 003f 0100     		.2byte	0x1
+ 364 0041 51       		.byte	0x51
+ 365 0042 00000000 		.4byte	0
+ 366 0046 00000000 		.4byte	0
+ 367              	.LLST2:
+ 368 004a 00000000 		.4byte	.LVL0
+ 369 004e 08000000 		.4byte	.LVL2
+ 370 0052 0100     		.2byte	0x1
+ 371 0054 52       		.byte	0x52
+ 372 0055 08000000 		.4byte	.LVL2
+ 373 0059 1C000000 		.4byte	.LFE0
+ 374 005d 0100     		.2byte	0x1
+ 375 005f 56       		.byte	0x56
+ 376 0060 00000000 		.4byte	0
+ 377 0064 00000000 		.4byte	0
+ 378              	.LLST3:
+ 379 0068 04000000 		.4byte	.LVL1
+ 380 006c 08000000 		.4byte	.LVL2
+ 381 0070 0200     		.2byte	0x2
+ 382 0072 30       		.byte	0x30
+ 383 0073 9F       		.byte	0x9f
+ 384 0074 08000000 		.4byte	.LVL2
+ 385 0078 1C000000 		.4byte	.LFE0
+ 386 007c 0100     		.2byte	0x1
+ 387 007e 54       		.byte	0x54
+ 388 007f 00000000 		.4byte	0
+ARM GAS  C:\Users\lucdd\AppData\Local\Temp\ccGt8oOA.s 			page 9
+
+
+ 389 0083 00000000 		.4byte	0
+ 390              		.section	.debug_aranges,"",%progbits
+ 391 0000 1C000000 		.4byte	0x1c
+ 392 0004 0200     		.2byte	0x2
+ 393 0006 00000000 		.4byte	.Ldebug_info0
+ 394 000a 04       		.byte	0x4
+ 395 000b 00       		.byte	0
+ 396 000c 0000     		.2byte	0
+ 397 000e 0000     		.2byte	0
+ 398 0010 00000000 		.4byte	.LFB0
+ 399 0014 1C000000 		.4byte	.LFE0-.LFB0
+ 400 0018 00000000 		.4byte	0
+ 401 001c 00000000 		.4byte	0
+ 402              		.section	.debug_ranges,"",%progbits
+ 403              	.Ldebug_ranges0:
+ 404 0000 08000000 		.4byte	.LBB2
+ 405 0004 10000000 		.4byte	.LBE2
+ 406 0008 12000000 		.4byte	.LBB3
+ 407 000c 14000000 		.4byte	.LBE3
+ 408 0010 00000000 		.4byte	0
+ 409 0014 00000000 		.4byte	0
+ 410 0018 00000000 		.4byte	.LFB0
+ 411 001c 1C000000 		.4byte	.LFE0
+ 412 0020 00000000 		.4byte	0
+ 413 0024 00000000 		.4byte	0
+ 414              		.section	.debug_line,"",%progbits
+ 415              	.Ldebug_line0:
+ 416 0000 4E000000 		.section	.debug_str,"MS",%progbits,1
+ 416      02002300 
+ 416      00000201 
+ 416      FB0E0D00 
+ 416      01010101 
+ 417              	.LASF3:
+ 418 0000 756E7469 		.ascii	"untitled01.c\000"
+ 418      746C6564 
+ 418      30312E63 
+ 418      00
+ 419              	.LASF1:
+ 420 000d 63686172 		.ascii	"char\000"
+ 420      00
+ 421              	.LASF0:
+ 422 0012 66696C65 		.ascii	"file\000"
+ 422      00
+ 423              	.LASF4:
+ 424 0017 433A5C55 		.ascii	"C:\\Users\\lucdd\\Google Drive\\Berkeley\\Courses\\"
+ 424      73657273 
+ 424      5C6C7563 
+ 424      64645C47 
+ 424      6F6F676C 
+ 425 0044 53707269 		.ascii	"Spring 2019\\ME135\\Bair Hockey\\135 motor\\135_mot"
+ 425      6E672032 
+ 425      3031395C 
+ 425      4D453133 
+ 425      355C4261 
+ 426 0073 6F725F77 		.ascii	"or_workspace\\135_motor_project.cydsn\000"
+ 426      6F726B73 
+ 426      70616365 
+ARM GAS  C:\Users\lucdd\AppData\Local\Temp\ccGt8oOA.s 			page 10
+
+
+ 426      5C313335 
+ 426      5F6D6F74 
+ 427              	.LASF5:
+ 428 0098 5F777269 		.ascii	"_write\000"
+ 428      746500
+ 429              	.LASF2:
+ 430 009f 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 430      43313120 
+ 430      352E342E 
+ 430      31203230 
+ 430      31363036 
+ 431 00d2 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 431      20726576 
+ 431      6973696F 
+ 431      6E203233 
+ 431      37373135 
+ 432 0105 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 432      66756E63 
+ 432      74696F6E 
+ 432      2D736563 
+ 432      74696F6E 
+ 433              	.LASF6:
+ 434 012d 55415254 		.ascii	"UART_PutChar\000"
+ 434      5F507574 
+ 434      43686172 
+ 434      00
+ 435              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

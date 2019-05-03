@@ -1,0 +1,505 @@
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccBR832g.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m3
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 1
+  11              		.eabi_attribute 34, 1
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"util.c"
+  16              		.text
+  17              	.Ltext0:
+  18              		.cfi_sections	.debug_frame
+  19              		.section	.text._write,"ax",%progbits
+  20              		.align	2
+  21              		.global	_write
+  22              		.thumb
+  23              		.thumb_func
+  24              		.type	_write, %function
+  25              	_write:
+  26              	.LFB0:
+  27              		.file 1 "util.c"
+   1:util.c        **** #if defined(__ARMCC_VERSION)
+   2:util.c        **** /* For MDK/RVDS compiler revise fputc function for printf functionality */
+   3:util.c        **** struct __FILE 
+   4:util.c        **** {
+   5:util.c        **** int handle;  
+   6:util.c        **** };
+   7:util.c        **** enum 
+   8:util.c        **** {
+   9:util.c        **** STDIN_HANDLE,
+  10:util.c        **** STDOUT_HANDLE,
+  11:util.c        **** STDERR_HANDLE
+  12:util.c        **** };
+  13:util.c        **** FILE __stdin = {STDIN_HANDLE};
+  14:util.c        **** FILE __stdout = {STDOUT_HANDLE};
+  15:util.c        **** FILE __stderr = {STDERR_HANDLE};
+  16:util.c        **** int fputc(int ch, FILE *file) 
+  17:util.c        **** {
+  18:util.c        **** int ret = EOF;
+  19:util.c        **** switch( file->handle )
+  20:util.c        **** {
+  21:util.c        **** case STDOUT_HANDLE:
+  22:util.c        **** UART_UartPutChar(ch);
+  23:util.c        **** ret = ch ;
+  24:util.c        **** break ;
+  25:util.c        **** case STDERR_HANDLE:
+  26:util.c        **** ret = ch ;
+  27:util.c        **** break ;
+  28:util.c        **** default:
+  29:util.c        **** file = file;
+  30:util.c        **** break ;
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccBR832g.s 			page 2
+
+
+  31:util.c        **** }
+  32:util.c        **** return ret ;
+  33:util.c        **** }
+  34:util.c        **** #elif defined (__ICCARM__)      /* IAR */
+  35:util.c        **** /* For IAR compiler revise __write() function for printf functionality */
+  36:util.c        **** size_t __write(int handle, const unsigned char * buffer, size_t size)
+  37:util.c        **** {
+  38:util.c        **** size_t nChars = 0;
+  39:util.c        **** if (buffer == 0)
+  40:util.c        **** {
+  41:util.c        **** /*
+  42:util.c        **** * This means that we should flush internal buffers.  Since we
+  43:util.c        **** * don't we just return.  (Remember, "handle" == -1 means that all
+  44:util.c        **** * handles should be flushed.)
+  45:util.c        **** */
+  46:util.c        **** return (0);
+  47:util.c        **** }
+  48:util.c        **** for (/* Empty */; size != 0; --size)
+  49:util.c        **** {
+  50:util.c        **** UART_PutChar(*buffer++);
+  51:util.c        **** ++nChars;
+  52:util.c        **** }
+  53:util.c        **** return (nChars);
+  54:util.c        **** }
+  55:util.c        **** #else  /* (__GNUC__)  GCC */
+  56:util.c        **** /* For GCC compiler revise _write() function for printf functionality */
+  57:util.c        **** void UART_PutChar();
+  58:util.c        **** int _write(int file, char *ptr, int len)
+  59:util.c        **** {
+  28              		.loc 1 59 0
+  29              		.cfi_startproc
+  30              		@ args = 0, pretend = 0, frame = 0
+  31              		@ frame_needed = 0, uses_anonymous_args = 0
+  32              	.LVL0:
+  33 0000 70B5     		push	{r4, r5, r6, lr}
+  34              		.cfi_def_cfa_offset 16
+  35              		.cfi_offset 4, -16
+  36              		.cfi_offset 5, -12
+  37              		.cfi_offset 6, -8
+  38              		.cfi_offset 14, -4
+  39 0002 1646     		mov	r6, r2
+  40              	.LVL1:
+  60:util.c        **** int i;
+  61:util.c        **** file = file;
+  62:util.c        **** for (i = 0; i < len; i++)
+  41              		.loc 1 62 0
+  42 0004 0024     		movs	r4, #0
+  43 0006 05E0     		b	.L2
+  44              	.LVL2:
+  45              	.L3:
+  63:util.c        **** {
+  64:util.c        **** UART_PutChar(*ptr++);
+  46              		.loc 1 64 0 discriminator 3
+  47 0008 4D1C     		adds	r5, r1, #1
+  48              	.LVL3:
+  49 000a 0878     		ldrb	r0, [r1]	@ zero_extendqisi2
+  50 000c FFF7FEFF 		bl	UART_PutChar
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccBR832g.s 			page 3
+
+
+  51              	.LVL4:
+  62:util.c        **** {
+  52              		.loc 1 62 0 discriminator 3
+  53 0010 0134     		adds	r4, r4, #1
+  54              	.LVL5:
+  55              		.loc 1 64 0 discriminator 3
+  56 0012 2946     		mov	r1, r5
+  57              	.LVL6:
+  58              	.L2:
+  62:util.c        **** {
+  59              		.loc 1 62 0 discriminator 1
+  60 0014 B442     		cmp	r4, r6
+  61 0016 F7DB     		blt	.L3
+  65:util.c        **** }
+  66:util.c        **** return len;
+  67:util.c        **** }
+  62              		.loc 1 67 0
+  63 0018 3046     		mov	r0, r6
+  64 001a 70BD     		pop	{r4, r5, r6, pc}
+  65              		.cfi_endproc
+  66              	.LFE0:
+  67              		.size	_write, .-_write
+  68              		.text
+  69              	.Letext0:
+  70              		.section	.debug_info,"",%progbits
+  71              	.Ldebug_info0:
+  72 0000 9E000000 		.4byte	0x9e
+  73 0004 0400     		.2byte	0x4
+  74 0006 00000000 		.4byte	.Ldebug_abbrev0
+  75 000a 04       		.byte	0x4
+  76 000b 01       		.uleb128 0x1
+  77 000c 49000000 		.4byte	.LASF2
+  78 0010 0C       		.byte	0xc
+  79 0011 00000000 		.4byte	.LASF3
+  80 0015 11000000 		.4byte	.LASF4
+  81 0019 00000000 		.4byte	.Ldebug_ranges0+0
+  82 001d 00000000 		.4byte	0
+  83 0021 00000000 		.4byte	.Ldebug_line0
+  84 0025 02       		.uleb128 0x2
+  85 0026 42000000 		.4byte	.LASF5
+  86 002a 01       		.byte	0x1
+  87 002b 3A       		.byte	0x3a
+  88 002c 82000000 		.4byte	0x82
+  89 0030 00000000 		.4byte	.LFB0
+  90 0034 1C000000 		.4byte	.LFE0-.LFB0
+  91 0038 01       		.uleb128 0x1
+  92 0039 9C       		.byte	0x9c
+  93 003a 82000000 		.4byte	0x82
+  94 003e 03       		.uleb128 0x3
+  95 003f 07000000 		.4byte	.LASF0
+  96 0043 01       		.byte	0x1
+  97 0044 3A       		.byte	0x3a
+  98 0045 82000000 		.4byte	0x82
+  99 0049 00000000 		.4byte	.LLST0
+ 100 004d 04       		.uleb128 0x4
+ 101 004e 70747200 		.ascii	"ptr\000"
+ 102 0052 01       		.byte	0x1
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccBR832g.s 			page 4
+
+
+ 103 0053 3A       		.byte	0x3a
+ 104 0054 89000000 		.4byte	0x89
+ 105 0058 21000000 		.4byte	.LLST1
+ 106 005c 04       		.uleb128 0x4
+ 107 005d 6C656E00 		.ascii	"len\000"
+ 108 0061 01       		.byte	0x1
+ 109 0062 3A       		.byte	0x3a
+ 110 0063 82000000 		.4byte	0x82
+ 111 0067 4A000000 		.4byte	.LLST2
+ 112 006b 05       		.uleb128 0x5
+ 113 006c 6900     		.ascii	"i\000"
+ 114 006e 01       		.byte	0x1
+ 115 006f 3C       		.byte	0x3c
+ 116 0070 82000000 		.4byte	0x82
+ 117 0074 68000000 		.4byte	.LLST3
+ 118 0078 06       		.uleb128 0x6
+ 119 0079 10000000 		.4byte	.LVL4
+ 120 007d 96000000 		.4byte	0x96
+ 121 0081 00       		.byte	0
+ 122 0082 07       		.uleb128 0x7
+ 123 0083 04       		.byte	0x4
+ 124 0084 05       		.byte	0x5
+ 125 0085 696E7400 		.ascii	"int\000"
+ 126 0089 08       		.uleb128 0x8
+ 127 008a 04       		.byte	0x4
+ 128 008b 8F000000 		.4byte	0x8f
+ 129 008f 09       		.uleb128 0x9
+ 130 0090 01       		.byte	0x1
+ 131 0091 08       		.byte	0x8
+ 132 0092 0C000000 		.4byte	.LASF1
+ 133 0096 0A       		.uleb128 0xa
+ 134 0097 D7000000 		.4byte	.LASF6
+ 135 009b D7000000 		.4byte	.LASF6
+ 136 009f 01       		.byte	0x1
+ 137 00a0 39       		.byte	0x39
+ 138 00a1 00       		.byte	0
+ 139              		.section	.debug_abbrev,"",%progbits
+ 140              	.Ldebug_abbrev0:
+ 141 0000 01       		.uleb128 0x1
+ 142 0001 11       		.uleb128 0x11
+ 143 0002 01       		.byte	0x1
+ 144 0003 25       		.uleb128 0x25
+ 145 0004 0E       		.uleb128 0xe
+ 146 0005 13       		.uleb128 0x13
+ 147 0006 0B       		.uleb128 0xb
+ 148 0007 03       		.uleb128 0x3
+ 149 0008 0E       		.uleb128 0xe
+ 150 0009 1B       		.uleb128 0x1b
+ 151 000a 0E       		.uleb128 0xe
+ 152 000b 55       		.uleb128 0x55
+ 153 000c 17       		.uleb128 0x17
+ 154 000d 11       		.uleb128 0x11
+ 155 000e 01       		.uleb128 0x1
+ 156 000f 10       		.uleb128 0x10
+ 157 0010 17       		.uleb128 0x17
+ 158 0011 00       		.byte	0
+ 159 0012 00       		.byte	0
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccBR832g.s 			page 5
+
+
+ 160 0013 02       		.uleb128 0x2
+ 161 0014 2E       		.uleb128 0x2e
+ 162 0015 01       		.byte	0x1
+ 163 0016 3F       		.uleb128 0x3f
+ 164 0017 19       		.uleb128 0x19
+ 165 0018 03       		.uleb128 0x3
+ 166 0019 0E       		.uleb128 0xe
+ 167 001a 3A       		.uleb128 0x3a
+ 168 001b 0B       		.uleb128 0xb
+ 169 001c 3B       		.uleb128 0x3b
+ 170 001d 0B       		.uleb128 0xb
+ 171 001e 27       		.uleb128 0x27
+ 172 001f 19       		.uleb128 0x19
+ 173 0020 49       		.uleb128 0x49
+ 174 0021 13       		.uleb128 0x13
+ 175 0022 11       		.uleb128 0x11
+ 176 0023 01       		.uleb128 0x1
+ 177 0024 12       		.uleb128 0x12
+ 178 0025 06       		.uleb128 0x6
+ 179 0026 40       		.uleb128 0x40
+ 180 0027 18       		.uleb128 0x18
+ 181 0028 9742     		.uleb128 0x2117
+ 182 002a 19       		.uleb128 0x19
+ 183 002b 01       		.uleb128 0x1
+ 184 002c 13       		.uleb128 0x13
+ 185 002d 00       		.byte	0
+ 186 002e 00       		.byte	0
+ 187 002f 03       		.uleb128 0x3
+ 188 0030 05       		.uleb128 0x5
+ 189 0031 00       		.byte	0
+ 190 0032 03       		.uleb128 0x3
+ 191 0033 0E       		.uleb128 0xe
+ 192 0034 3A       		.uleb128 0x3a
+ 193 0035 0B       		.uleb128 0xb
+ 194 0036 3B       		.uleb128 0x3b
+ 195 0037 0B       		.uleb128 0xb
+ 196 0038 49       		.uleb128 0x49
+ 197 0039 13       		.uleb128 0x13
+ 198 003a 02       		.uleb128 0x2
+ 199 003b 17       		.uleb128 0x17
+ 200 003c 00       		.byte	0
+ 201 003d 00       		.byte	0
+ 202 003e 04       		.uleb128 0x4
+ 203 003f 05       		.uleb128 0x5
+ 204 0040 00       		.byte	0
+ 205 0041 03       		.uleb128 0x3
+ 206 0042 08       		.uleb128 0x8
+ 207 0043 3A       		.uleb128 0x3a
+ 208 0044 0B       		.uleb128 0xb
+ 209 0045 3B       		.uleb128 0x3b
+ 210 0046 0B       		.uleb128 0xb
+ 211 0047 49       		.uleb128 0x49
+ 212 0048 13       		.uleb128 0x13
+ 213 0049 02       		.uleb128 0x2
+ 214 004a 17       		.uleb128 0x17
+ 215 004b 00       		.byte	0
+ 216 004c 00       		.byte	0
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccBR832g.s 			page 6
+
+
+ 217 004d 05       		.uleb128 0x5
+ 218 004e 34       		.uleb128 0x34
+ 219 004f 00       		.byte	0
+ 220 0050 03       		.uleb128 0x3
+ 221 0051 08       		.uleb128 0x8
+ 222 0052 3A       		.uleb128 0x3a
+ 223 0053 0B       		.uleb128 0xb
+ 224 0054 3B       		.uleb128 0x3b
+ 225 0055 0B       		.uleb128 0xb
+ 226 0056 49       		.uleb128 0x49
+ 227 0057 13       		.uleb128 0x13
+ 228 0058 02       		.uleb128 0x2
+ 229 0059 17       		.uleb128 0x17
+ 230 005a 00       		.byte	0
+ 231 005b 00       		.byte	0
+ 232 005c 06       		.uleb128 0x6
+ 233 005d 898201   		.uleb128 0x4109
+ 234 0060 00       		.byte	0
+ 235 0061 11       		.uleb128 0x11
+ 236 0062 01       		.uleb128 0x1
+ 237 0063 31       		.uleb128 0x31
+ 238 0064 13       		.uleb128 0x13
+ 239 0065 00       		.byte	0
+ 240 0066 00       		.byte	0
+ 241 0067 07       		.uleb128 0x7
+ 242 0068 24       		.uleb128 0x24
+ 243 0069 00       		.byte	0
+ 244 006a 0B       		.uleb128 0xb
+ 245 006b 0B       		.uleb128 0xb
+ 246 006c 3E       		.uleb128 0x3e
+ 247 006d 0B       		.uleb128 0xb
+ 248 006e 03       		.uleb128 0x3
+ 249 006f 08       		.uleb128 0x8
+ 250 0070 00       		.byte	0
+ 251 0071 00       		.byte	0
+ 252 0072 08       		.uleb128 0x8
+ 253 0073 0F       		.uleb128 0xf
+ 254 0074 00       		.byte	0
+ 255 0075 0B       		.uleb128 0xb
+ 256 0076 0B       		.uleb128 0xb
+ 257 0077 49       		.uleb128 0x49
+ 258 0078 13       		.uleb128 0x13
+ 259 0079 00       		.byte	0
+ 260 007a 00       		.byte	0
+ 261 007b 09       		.uleb128 0x9
+ 262 007c 24       		.uleb128 0x24
+ 263 007d 00       		.byte	0
+ 264 007e 0B       		.uleb128 0xb
+ 265 007f 0B       		.uleb128 0xb
+ 266 0080 3E       		.uleb128 0x3e
+ 267 0081 0B       		.uleb128 0xb
+ 268 0082 03       		.uleb128 0x3
+ 269 0083 0E       		.uleb128 0xe
+ 270 0084 00       		.byte	0
+ 271 0085 00       		.byte	0
+ 272 0086 0A       		.uleb128 0xa
+ 273 0087 2E       		.uleb128 0x2e
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccBR832g.s 			page 7
+
+
+ 274 0088 00       		.byte	0
+ 275 0089 3F       		.uleb128 0x3f
+ 276 008a 19       		.uleb128 0x19
+ 277 008b 3C       		.uleb128 0x3c
+ 278 008c 19       		.uleb128 0x19
+ 279 008d 6E       		.uleb128 0x6e
+ 280 008e 0E       		.uleb128 0xe
+ 281 008f 03       		.uleb128 0x3
+ 282 0090 0E       		.uleb128 0xe
+ 283 0091 3A       		.uleb128 0x3a
+ 284 0092 0B       		.uleb128 0xb
+ 285 0093 3B       		.uleb128 0x3b
+ 286 0094 0B       		.uleb128 0xb
+ 287 0095 00       		.byte	0
+ 288 0096 00       		.byte	0
+ 289 0097 00       		.byte	0
+ 290              		.section	.debug_loc,"",%progbits
+ 291              	.Ldebug_loc0:
+ 292              	.LLST0:
+ 293 0000 00000000 		.4byte	.LVL0
+ 294 0004 08000000 		.4byte	.LVL2
+ 295 0008 0100     		.2byte	0x1
+ 296 000a 50       		.byte	0x50
+ 297 000b 08000000 		.4byte	.LVL2
+ 298 000f 1C000000 		.4byte	.LFE0
+ 299 0013 0400     		.2byte	0x4
+ 300 0015 F3       		.byte	0xf3
+ 301 0016 01       		.uleb128 0x1
+ 302 0017 50       		.byte	0x50
+ 303 0018 9F       		.byte	0x9f
+ 304 0019 00000000 		.4byte	0
+ 305 001d 00000000 		.4byte	0
+ 306              	.LLST1:
+ 307 0021 00000000 		.4byte	.LVL0
+ 308 0025 0A000000 		.4byte	.LVL3
+ 309 0029 0100     		.2byte	0x1
+ 310 002b 51       		.byte	0x51
+ 311 002c 0A000000 		.4byte	.LVL3
+ 312 0030 14000000 		.4byte	.LVL6
+ 313 0034 0100     		.2byte	0x1
+ 314 0036 55       		.byte	0x55
+ 315 0037 14000000 		.4byte	.LVL6
+ 316 003b 1C000000 		.4byte	.LFE0
+ 317 003f 0100     		.2byte	0x1
+ 318 0041 51       		.byte	0x51
+ 319 0042 00000000 		.4byte	0
+ 320 0046 00000000 		.4byte	0
+ 321              	.LLST2:
+ 322 004a 00000000 		.4byte	.LVL0
+ 323 004e 08000000 		.4byte	.LVL2
+ 324 0052 0100     		.2byte	0x1
+ 325 0054 52       		.byte	0x52
+ 326 0055 08000000 		.4byte	.LVL2
+ 327 0059 1C000000 		.4byte	.LFE0
+ 328 005d 0100     		.2byte	0x1
+ 329 005f 56       		.byte	0x56
+ 330 0060 00000000 		.4byte	0
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccBR832g.s 			page 8
+
+
+ 331 0064 00000000 		.4byte	0
+ 332              	.LLST3:
+ 333 0068 04000000 		.4byte	.LVL1
+ 334 006c 08000000 		.4byte	.LVL2
+ 335 0070 0200     		.2byte	0x2
+ 336 0072 30       		.byte	0x30
+ 337 0073 9F       		.byte	0x9f
+ 338 0074 08000000 		.4byte	.LVL2
+ 339 0078 1C000000 		.4byte	.LFE0
+ 340 007c 0100     		.2byte	0x1
+ 341 007e 54       		.byte	0x54
+ 342 007f 00000000 		.4byte	0
+ 343 0083 00000000 		.4byte	0
+ 344              		.section	.debug_aranges,"",%progbits
+ 345 0000 1C000000 		.4byte	0x1c
+ 346 0004 0200     		.2byte	0x2
+ 347 0006 00000000 		.4byte	.Ldebug_info0
+ 348 000a 04       		.byte	0x4
+ 349 000b 00       		.byte	0
+ 350 000c 0000     		.2byte	0
+ 351 000e 0000     		.2byte	0
+ 352 0010 00000000 		.4byte	.LFB0
+ 353 0014 1C000000 		.4byte	.LFE0-.LFB0
+ 354 0018 00000000 		.4byte	0
+ 355 001c 00000000 		.4byte	0
+ 356              		.section	.debug_ranges,"",%progbits
+ 357              	.Ldebug_ranges0:
+ 358 0000 00000000 		.4byte	.LFB0
+ 359 0004 1C000000 		.4byte	.LFE0
+ 360 0008 00000000 		.4byte	0
+ 361 000c 00000000 		.4byte	0
+ 362              		.section	.debug_line,"",%progbits
+ 363              	.Ldebug_line0:
+ 364 0000 48000000 		.section	.debug_str,"MS",%progbits,1
+ 364      02001D00 
+ 364      00000201 
+ 364      FB0E0D00 
+ 364      01010101 
+ 365              	.LASF3:
+ 366 0000 7574696C 		.ascii	"util.c\000"
+ 366      2E6300
+ 367              	.LASF0:
+ 368 0007 66696C65 		.ascii	"file\000"
+ 368      00
+ 369              	.LASF1:
+ 370 000c 63686172 		.ascii	"char\000"
+ 370      00
+ 371              	.LASF4:
+ 372 0011 433A5C55 		.ascii	"C:\\Users\\dylan\\Documents\\135_motor_project.cyds"
+ 372      73657273 
+ 372      5C64796C 
+ 372      616E5C44 
+ 372      6F63756D 
+ 373 0040 6E00     		.ascii	"n\000"
+ 374              	.LASF5:
+ 375 0042 5F777269 		.ascii	"_write\000"
+ 375      746500
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccBR832g.s 			page 9
+
+
+ 376              	.LASF2:
+ 377 0049 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 377      43313120 
+ 377      352E342E 
+ 377      31203230 
+ 377      31363036 
+ 378 007c 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 378      20726576 
+ 378      6973696F 
+ 378      6E203233 
+ 378      37373135 
+ 379 00af 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 379      66756E63 
+ 379      74696F6E 
+ 379      2D736563 
+ 379      74696F6E 
+ 380              	.LASF6:
+ 381 00d7 55415254 		.ascii	"UART_PutChar\000"
+ 381      5F507574 
+ 381      43686172 
+ 381      00
+ 382              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
