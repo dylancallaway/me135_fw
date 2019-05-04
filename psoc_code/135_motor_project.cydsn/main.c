@@ -14,10 +14,14 @@ LED: Reg 3
 *******************************************/
 /******************************************/
 
-// 270 steps in X
-// 240 steps in Y
+// Gantry MAX travels
+// 1200 steps
 
-#define steps_per_pixel 6
+// Camera coord MAX
+// X = 8 to X = 139
+// Y = 3 to Y = 175
+
+#define steps_per_pixel 9.16
 
 /************ FUNCTION PROTOTYPES *******************/
 int printf(const char * format, ...);
@@ -111,10 +115,10 @@ int main(void)
 
     while (1)
     {
-        printf("\t(%.2f, %.2f)\t", x_0, y_0);
+        // printf("\t(%.2f, %.2f)\t", x_0, y_0);
         dx = (float)x_1 - x_0;
         dy = (float)y_1 - y_0;
-        if ( (dx != 0 && x_1 <= 200) || (dy != 0 && y_1 <= 200) )
+        if ( (dx != 0 && x_1 <= 131) || (dy != 0 && y_1 <= 100) )
         {   
             Control_Reg_4_Write(m1_step_pin || m2_step_pin); // Motor wake/sleep
             Control_Reg_3_Write(1); // LED on
