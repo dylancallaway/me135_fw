@@ -22,10 +22,8 @@ using namespace cv;
 Mat src(FRM_ROWS, FRM_COLS, CV_8UC3, Scalar(0, 0, 0)); // 8 bit, 3 channel
 Mat thresh(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));    // 8 bit, 1 channel
 vector<vector<Point>> contours;                        // Vector of integer vectors for contours
-Mat b(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));         // 8 bit, 1 channel
-Mat g(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));         // 8 bit, 1 channel
-Mat r(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));         // 8 bit, 1 channel
-Mat bgr[3] = {b, g, r};
+
+bool block_ready = 1;
 
 VideoCapture cam(0); // Camera object
 /* ****************************************************************/
@@ -245,14 +243,14 @@ int main()
 #define GOAL_MAX_X 108
 
                     int16_t coord[2] = {0, 0};
-                    if (y_1 > 50 && v_y > 0 && x_pred >= GOAL_MIN_X && x_pred <= GOAL_MAX_X)
+                    if (block_ready && y_1 > 100 && v_y > 0)
                     {
-                        if (x_pred <= X_MAX / 2)
+                        if (x_pred >= GOAL_MIN_X && x_pred <= GOAL_MIN_X + 20)
                         {
                             coord[0] = 50;
                             coord[1] = 0;
                         }
-                        else if (x_pred >= X_MAX / 2)
+                        else if (x_pred <= GOAL_MAX_X && x_pred >= GOAL_MAX_X - 20)
                         {
                             coord[0] = 80;
                             coord[1] = 0;
@@ -260,6 +258,9 @@ int main()
                         // Send to predicted position
                         serialFlush(fd);
                         write(fd, &coord, 4);
+                        block_ready = 0;
+                        delay(250);
+                        block_ready = 1;
                         // printf("Moved to (%d, %d)...\n", coord[0], coord[1]);
                     }
                     else
