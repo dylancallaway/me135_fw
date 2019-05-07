@@ -18,7 +18,7 @@
 <v>Output</v>
 </TreeKeys>
 <TreeStates>
-<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="135_motor_project-000">
+<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="135_motor_project-000\135_motor_project\TopDesign">
 <ExpandedNodeIds>
 <v>135_motor_project-000</v>
 <v>135_motor_project-000\135_motor_project</v>
@@ -256,7 +256,6 @@
 <OpenDocs>
 <name v=".\main.c" />
 <name v=".\TopDesign\TopDesign.cysch" />
-<name v=".\135_motor_project.cydwr" />
 </OpenDocs>
 <OpenDocsLayout><![CDATA[<?xml version="1.0"?><!--
 
@@ -264,7 +263,7 @@
   Copyright (c) 2001-2016 Actipro Software LLC.  All rights reserved.
   http://www.actiprosoftware.com
 
---><DocumentLayout Version="1.0"><LayoutData><TabbedMdiRootContainer Orientation="Horizontal"><TabbedMdiContainer Size="1014, 513" SelectedTabbedMdiWindow="40463889-7450-4501-b906-80a9faee2f04"><DocumentWindow Key="C:\Users\dylan\Documents\135_motor_project.cydsn\main.c" Guid="40463889-7450-4501-b906-80a9faee2f04" /><DocumentWindow Key="C:\Users\dylan\Documents\135_motor_project.cydsn\TopDesign\TopDesign.cysch" Guid="0b334e74-8639-4105-9eab-3999f47d3820" /><DocumentWindow Key="C:\Users\dylan\Documents\135_motor_project.cydsn\135_motor_project.cydwr" Guid="7a8ffe0a-27a6-4eb6-9125-ee7236d25b87" /><ToolWindow Key="Start Page:bd4649ab-da6b-4d04-a663-c722b8bf99db:Start Page" Guid="2ca92e07-1bc4-4d52-b114-0004e455828d" /></TabbedMdiContainer></TabbedMdiRootContainer><FloatingContainers /></LayoutData></DocumentLayout>]]></OpenDocsLayout>
+--><DocumentLayout Version="1.0"><LayoutData><TabbedMdiRootContainer Orientation="Horizontal"><TabbedMdiContainer Size="1014, 513" SelectedTabbedMdiWindow="4dd6dcea-94ac-4523-93e8-4bdb34017a3b"><ToolWindow Key="Start Page:bd4649ab-da6b-4d04-a663-c722b8bf99db:Start Page" Guid="2ca92e07-1bc4-4d52-b114-0004e455828d" /><DocumentWindow Key="C:\Users\dylan\Documents\me135_fw\psoc_code\135_motor_project.cydsn\main.c" Guid="4dd6dcea-94ac-4523-93e8-4bdb34017a3b" /><DocumentWindow Key="C:\Users\dylan\Documents\me135_fw\psoc_code\135_motor_project.cydsn\TopDesign\TopDesign.cysch" Guid="20fc34e1-497d-43f5-a1aa-568b3d9d6d85" /></TabbedMdiContainer></TabbedMdiRootContainer><FloatingContainers /></LayoutData></DocumentLayout>]]></OpenDocsLayout>
 <config v="" />
 <AutoUpdate v="true" />
 </CyGuid_843a90a4-0c4b-4e44-991d-05e7fb117a21>

@@ -21,7 +21,7 @@ LED: Reg 3
 // X = 8 to X = 139
 // Y = 3 to Y = 175
 
-#define steps_per_pixel 9.16
+#define steps_per_pixel 8.14
 
 /************ FUNCTION PROTOTYPES *******************/
 int printf(const char * format, ...);
@@ -73,6 +73,8 @@ CY_ISR(pulse_ready_isr)
 /****************** (0, 0) ROUTINE ****************/
 CY_ISR(pos_reset)
 {
+    x_1 = 0;
+    y_1 = 0;
     x_0 = 0;
     y_0 = 0;
     Pin_1_ClearInterrupt();
@@ -139,7 +141,7 @@ int main(void)
             Control_Reg_1_Write(m1_dir_pin);
             Control_Reg_2_Write(m2_dir_pin);
 
-            #define FP_TOL 0.01 // Fixes floating point imprecision
+            #define FP_TOL 0.06 // Fixes floating point imprecision
             if (x_0 > (float)x_1 - FP_TOL && x_0 < (float)x_1 + FP_TOL)
             {
                 x_0 = x_1;

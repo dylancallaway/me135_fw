@@ -2,7 +2,7 @@
 --	Conversion of 135_motor_project.v to vh2:
 --
 --	Cypress Semiconductor - WARP Version 6.3 IR 41
---	Fri May 03 13:16:15 2019
+--	Fri May 03 22:20:47 2019
 --
 
 USE cypress.cypress.all;

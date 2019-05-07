@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 1
 
 
    1              		.syntax unified
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
   28:Generated_Source\PSoC5/Clock_1.c **** 
   29:Generated_Source\PSoC5/Clock_1.c **** 
   30:Generated_Source\PSoC5/Clock_1.c **** /*******************************************************************************
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 2
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 2
 
 
   31:Generated_Source\PSoC5/Clock_1.c **** * Function Name: Clock_1_Start
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
   54:Generated_Source\PSoC5/Clock_1.c **** * Function Name: Clock_1_Stop
   55:Generated_Source\PSoC5/Clock_1.c **** ********************************************************************************
   56:Generated_Source\PSoC5/Clock_1.c **** *
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 3
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 3
 
 
   57:Generated_Source\PSoC5/Clock_1.c **** * Summary:
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
   80:Generated_Source\PSoC5/Clock_1.c **** 
   81:Generated_Source\PSoC5/Clock_1.c **** 
   82:Generated_Source\PSoC5/Clock_1.c **** /*******************************************************************************
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 4
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 4
 
 
   83:Generated_Source\PSoC5/Clock_1.c **** * Function Name: Clock_1_StopBlock
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  111 0018 1370     		strb	r3, [r2]
  116:Generated_Source\PSoC5/Clock_1.c **** #endif /* Clock_1__CFG3 */
  117:Generated_Source\PSoC5/Clock_1.c **** 
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 5
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 5
 
 
  118:Generated_Source\PSoC5/Clock_1.c ****         /* Clear mask of bus clock. */
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  136:Generated_Source\PSoC5/Clock_1.c ****         CY_SET_REG16(Clock_1_DIV_PTR, oldDivider);
  148              		.loc 1 136 0
  149 0056 7F33     		adds	r3, r3, #127
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 6
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 6
 
 
  150 0058 1A80     		strh	r2, [r3]	@ movhi
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  160:Generated_Source\PSoC5/Clock_1.c ****     {
  161:Generated_Source\PSoC5/Clock_1.c ****         Clock_1_CLKSTBY &= (uint8)(~Clock_1_CLKSTBY_MASK);
  181              		.loc 1 161 0
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 7
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 7
 
 
  182 0002 064A     		ldr	r2, .L15
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  189:Generated_Source\PSoC5/Clock_1.c **** * Returns:
  190:Generated_Source\PSoC5/Clock_1.c **** *  None
  191:Generated_Source\PSoC5/Clock_1.c **** *
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 8
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 8
 
 
  192:Generated_Source\PSoC5/Clock_1.c **** *******************************************************************************/
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  246:Generated_Source\PSoC5/Clock_1.c ****                     CY_SET_REG16(CYREG_CLKDIST_WRK0, oldDivider);
  247:Generated_Source\PSoC5/Clock_1.c ****                     CLK_DIST_LD = CYCLK_LD_DISABLE|CYCLK_LD_SYNC_EN|CYCLK_LD_LOAD;
  248:Generated_Source\PSoC5/Clock_1.c **** 
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 9
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 9
 
 
  249:Generated_Source\PSoC5/Clock_1.c ****                     /* Wait for clock to be disabled */
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  213              		@ link register save eliminated.
  299:Generated_Source\PSoC5/Clock_1.c ****     return CY_GET_REG16(Clock_1_DIV_PTR);
  214              		.loc 1 299 0
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 10
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 10
 
 
  215 0000 014B     		ldr	r3, .L18
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  235              		.loc 1 333 0
  236              		.cfi_startproc
  237              		@ args = 0, pretend = 0, frame = 0
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 11
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 11
 
 
  238              		@ frame_needed = 0, uses_anonymous_args = 0
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  362:Generated_Source\PSoC5/Clock_1.c **** *
  363:Generated_Source\PSoC5/Clock_1.c **** * Returns:
  364:Generated_Source\PSoC5/Clock_1.c **** *  None
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 12
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 12
 
 
  365:Generated_Source\PSoC5/Clock_1.c **** *
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  388:Generated_Source\PSoC5/Clock_1.c **** uint8 Clock_1_GetModeRegister(void) 
  389:Generated_Source\PSoC5/Clock_1.c **** {
  295              		.loc 1 389 0
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 13
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 13
 
 
  296              		.cfi_startproc
@@ -778,7 +778,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  419:Generated_Source\PSoC5/Clock_1.c **** void Clock_1_SetSourceRegister(uint8 clkSource) 
  420:Generated_Source\PSoC5/Clock_1.c **** {
  421:Generated_Source\PSoC5/Clock_1.c ****     uint16 currDiv = Clock_1_GetDividerRegister();
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 14
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 14
 
 
  422:Generated_Source\PSoC5/Clock_1.c ****     uint8 oldSrc = Clock_1_GetSourceRegister();
@@ -838,7 +838,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  329              		.loc 1 467 0
  330 0004 00F00700 		and	r0, r0, #7
  331 0008 7047     		bx	lr
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 15
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 15
 
 
  332              	.L31:
@@ -898,7 +898,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  379 001e 00B1     		cbz	r0, .L35
  205:Generated_Source\PSoC5/Clock_1.c ****         {
  380              		.loc 1 205 0 discriminator 2
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 16
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 16
 
 
  381 0020 85B9     		cbnz	r5, .L34
@@ -958,7 +958,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  425 0056 0C39     		subs	r1, r1, #12
  426 0058 0B78     		ldrb	r3, [r1]	@ zero_extendqisi2
  427 005a 03F07F03 		and	r3, r3, #127
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 17
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 17
 
 
  428 005e 0B70     		strb	r3, [r1]
@@ -1018,7 +1018,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  472 00a2 00E0     		b	.L41
  473              	.LVL19:
  474              	.L43:
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 18
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 18
 
 
  475 00a4 0122     		movs	r2, #1
@@ -1078,7 +1078,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  524              	.LVL23:
  525 0000 38B5     		push	{r3, r4, r5, lr}
  526              		.cfi_def_cfa_offset 16
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 19
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 19
 
 
  527              		.cfi_offset 3, -16
@@ -1138,7 +1138,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  569 0034 1378     		ldrb	r3, [r2]	@ zero_extendqisi2
  438:Generated_Source\PSoC5/Clock_1.c ****             (Clock_1_MOD_SRC & (uint8)(~Clock_1_SRC_SEL_MSK)) | clkSource;
  570              		.loc 1 438 0
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 20
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 20
 
 
  571 0036 03F0F803 		and	r3, r3, #248
@@ -1180,48 +1180,48 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  604 0006 00000000 		.4byte	.Ldebug_abbrev0
  605 000a 04       		.byte	0x4
  606 000b 01       		.uleb128 0x1
- 607 000c 4F020000 		.4byte	.LASF36
+ 607 000c 48020000 		.4byte	.LASF36
  608 0010 0C       		.byte	0xc
- 609 0011 E5000000 		.4byte	.LASF37
- 610 0015 26000000 		.4byte	.LASF38
+ 609 0011 9A000000 		.4byte	.LASF37
+ 610 0015 99010000 		.4byte	.LASF38
  611 0019 00000000 		.4byte	.Ldebug_ranges0+0
  612 001d 00000000 		.4byte	0
  613 0021 00000000 		.4byte	.Ldebug_line0
  614 0025 02       		.uleb128 0x2
  615 0026 01       		.byte	0x1
  616 0027 06       		.byte	0x6
- 617 0028 6F010000 		.4byte	.LASF0
+ 617 0028 24010000 		.4byte	.LASF0
  618 002c 02       		.uleb128 0x2
  619 002d 01       		.byte	0x1
  620 002e 08       		.byte	0x8
- 621 002f 55010000 		.4byte	.LASF1
+ 621 002f 0A010000 		.4byte	.LASF1
  622 0033 02       		.uleb128 0x2
  623 0034 02       		.byte	0x2
  624 0035 05       		.byte	0x5
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 21
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 21
 
 
  625 0036 1C000000 		.4byte	.LASF2
  626 003a 02       		.uleb128 0x2
  627 003b 02       		.byte	0x2
  628 003c 07       		.byte	0x7
- 629 003d BA010000 		.4byte	.LASF3
+ 629 003d 6F010000 		.4byte	.LASF3
  630 0041 02       		.uleb128 0x2
  631 0042 04       		.byte	0x4
  632 0043 05       		.byte	0x5
- 633 0044 2C010000 		.4byte	.LASF4
+ 633 0044 E1000000 		.4byte	.LASF4
  634 0048 02       		.uleb128 0x2
  635 0049 04       		.byte	0x4
  636 004a 07       		.byte	0x7
- 637 004b F4010000 		.4byte	.LASF5
+ 637 004b ED010000 		.4byte	.LASF5
  638 004f 02       		.uleb128 0x2
  639 0050 08       		.byte	0x8
  640 0051 05       		.byte	0x5
- 641 0052 0C010000 		.4byte	.LASF6
+ 641 0052 C1000000 		.4byte	.LASF6
  642 0056 02       		.uleb128 0x2
  643 0057 08       		.byte	0x8
  644 0058 07       		.byte	0x7
- 645 0059 7B010000 		.4byte	.LASF7
+ 645 0059 30010000 		.4byte	.LASF7
  646 005d 03       		.uleb128 0x3
  647 005e 04       		.byte	0x4
  648 005f 05       		.byte	0x5
@@ -1229,36 +1229,36 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  650 0064 02       		.uleb128 0x2
  651 0065 04       		.byte	0x4
  652 0066 07       		.byte	0x7
- 653 0067 92010000 		.4byte	.LASF8
+ 653 0067 47010000 		.4byte	.LASF8
  654 006b 04       		.uleb128 0x4
- 655 006c D4000000 		.4byte	.LASF9
+ 655 006c 89000000 		.4byte	.LASF9
  656 0070 02       		.byte	0x2
  657 0071 E401     		.2byte	0x1e4
  658 0073 2C000000 		.4byte	0x2c
  659 0077 04       		.uleb128 0x4
- 660 0078 BE000000 		.4byte	.LASF10
+ 660 0078 73000000 		.4byte	.LASF10
  661 007c 02       		.byte	0x2
  662 007d E501     		.2byte	0x1e5
  663 007f 3A000000 		.4byte	0x3a
  664 0083 02       		.uleb128 0x2
  665 0084 04       		.byte	0x4
  666 0085 04       		.byte	0x4
- 667 0086 06010000 		.4byte	.LASF11
+ 667 0086 BB000000 		.4byte	.LASF11
  668 008a 02       		.uleb128 0x2
  669 008b 08       		.byte	0x8
  670 008c 04       		.byte	0x4
- 671 008d 2B020000 		.4byte	.LASF12
+ 671 008d 24020000 		.4byte	.LASF12
  672 0091 02       		.uleb128 0x2
  673 0092 01       		.byte	0x1
  674 0093 08       		.byte	0x8
- 675 0094 CD010000 		.4byte	.LASF13
+ 675 0094 82010000 		.4byte	.LASF13
  676 0098 04       		.uleb128 0x4
- 677 0099 EF010000 		.4byte	.LASF14
+ 677 0099 E8010000 		.4byte	.LASF14
  678 009d 02       		.byte	0x2
  679 009e 8E02     		.2byte	0x28e
  680 00a0 A4000000 		.4byte	0xa4
  681 00a4 05       		.uleb128 0x5
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 22
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 22
 
 
  682 00a5 6B000000 		.4byte	0x6b
@@ -1278,7 +1278,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  696 00c9 01       		.uleb128 0x1
  697 00ca 9C       		.byte	0x9c
  698 00cb 06       		.uleb128 0x6
- 699 00cc 06020000 		.4byte	.LASF17
+ 699 00cc FF010000 		.4byte	.LASF17
  700 00d0 01       		.byte	0x1
  701 00d1 47       		.byte	0x47
  702 00d2 00000000 		.4byte	.LFB1
@@ -1286,7 +1286,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  704 00da 01       		.uleb128 0x1
  705 00db 9C       		.byte	0x9c
  706 00dc 07       		.uleb128 0x7
- 707 00dd 1A010000 		.4byte	.LASF18
+ 707 00dd CF000000 		.4byte	.LASF18
  708 00e1 01       		.byte	0x1
  709 00e2 64       		.byte	0x64
  710 00e3 00000000 		.4byte	.LFB2
@@ -1298,7 +1298,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  716 00f2 0A000000 		.4byte	.LBB2
  717 00f6 62000000 		.4byte	.LBE2-.LBB2
  718 00fa 09       		.uleb128 0x9
- 719 00fb E4010000 		.4byte	.LASF30
+ 719 00fb DD010000 		.4byte	.LASF30
  720 00ff 01       		.byte	0x1
  721 0100 69       		.byte	0x69
  722 0101 77000000 		.4byte	0x77
@@ -1306,7 +1306,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  724 0109 00       		.byte	0
  725 010a 00       		.byte	0
  726 010b 07       		.uleb128 0x7
- 727 010c 32020000 		.4byte	.LASF19
+ 727 010c 2B020000 		.4byte	.LASF19
  728 0110 01       		.byte	0x1
  729 0111 9D       		.byte	0x9d
  730 0112 00000000 		.4byte	.LFB3
@@ -1315,10 +1315,10 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  733 011b 9C       		.byte	0x9c
  734 011c 2E010000 		.4byte	0x12e
  735 0120 0A       		.uleb128 0xa
- 736 0121 35010000 		.4byte	.LASF21
+ 736 0121 EA000000 		.4byte	.LASF21
  737 0125 01       		.byte	0x1
  738 0126 9D       		.byte	0x9d
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 23
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 23
 
 
  739 0127 6B000000 		.4byte	0x6b
@@ -1326,7 +1326,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  741 012c 50       		.byte	0x50
  742 012d 00       		.byte	0
  743 012e 0B       		.uleb128 0xb
- 744 012f 8B000000 		.4byte	.LASF24
+ 744 012f 40000000 		.4byte	.LASF24
  745 0133 01       		.byte	0x1
  746 0134 2901     		.2byte	0x129
  747 0136 77000000 		.4byte	0x77
@@ -1335,7 +1335,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  750 0142 01       		.uleb128 0x1
  751 0143 9C       		.byte	0x9c
  752 0144 0C       		.uleb128 0xc
- 753 0145 13020000 		.4byte	.LASF20
+ 753 0145 0C020000 		.4byte	.LASF20
  754 0149 01       		.byte	0x1
  755 014a 4C01     		.2byte	0x14c
  756 014c 00000000 		.4byte	.LFB6
@@ -1344,14 +1344,14 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  759 0155 9C       		.byte	0x9c
  760 0156 6B010000 		.4byte	0x16b
  761 015a 0D       		.uleb128 0xd
- 762 015b 63010000 		.4byte	.LASF22
+ 762 015b 18010000 		.4byte	.LASF22
  763 015f 01       		.byte	0x1
  764 0160 4C01     		.2byte	0x14c
  765 0162 6B000000 		.4byte	0x6b
  766 0166 13000000 		.4byte	.LLST1
  767 016a 00       		.byte	0
  768 016b 0C       		.uleb128 0xc
- 769 016c 71000000 		.4byte	.LASF23
+ 769 016c 26000000 		.4byte	.LASF23
  770 0170 01       		.byte	0x1
  771 0171 6F01     		.2byte	0x16f
  772 0173 00000000 		.4byte	.LFB7
@@ -1360,14 +1360,14 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  775 017c 9C       		.byte	0x9c
  776 017d 92010000 		.4byte	0x192
  777 0181 0D       		.uleb128 0xd
- 778 0182 63010000 		.4byte	.LASF22
+ 778 0182 18010000 		.4byte	.LASF22
  779 0186 01       		.byte	0x1
  780 0187 6F01     		.2byte	0x16f
  781 0189 6B000000 		.4byte	0x6b
  782 018d 34000000 		.4byte	.LLST2
  783 0191 00       		.byte	0
  784 0192 0B       		.uleb128 0xb
- 785 0193 A6000000 		.4byte	.LASF25
+ 785 0193 5B000000 		.4byte	.LASF25
  786 0197 01       		.byte	0x1
  787 0198 8401     		.2byte	0x184
  788 019a 6B000000 		.4byte	0x6b
@@ -1376,9 +1376,9 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  791 01a6 01       		.uleb128 0x1
  792 01a7 9C       		.byte	0x9c
  793 01a8 0B       		.uleb128 0xb
- 794 01a9 DD020000 		.4byte	.LASF26
+ 794 01a9 D6020000 		.4byte	.LASF26
  795 01ad 01       		.byte	0x1
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 24
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 24
 
 
  796 01ae D001     		.2byte	0x1d0
@@ -1388,7 +1388,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  800 01bc 01       		.uleb128 0x1
  801 01bd 9C       		.byte	0x9c
  802 01be 07       		.uleb128 0x7
- 803 01bf 9F010000 		.4byte	.LASF27
+ 803 01bf 54010000 		.4byte	.LASF27
  804 01c3 01       		.byte	0x1
  805 01c4 C1       		.byte	0xc1
  806 01c5 00000000 		.4byte	.LFB4
@@ -1397,31 +1397,31 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  809 01ce 9C       		.byte	0x9c
  810 01cf 2F020000 		.4byte	0x22f
  811 01d3 0E       		.uleb128 0xe
- 812 01d4 DA000000 		.4byte	.LASF28
+ 812 01d4 8F000000 		.4byte	.LASF28
  813 01d8 01       		.byte	0x1
  814 01d9 C1       		.byte	0xc1
  815 01da 77000000 		.4byte	0x77
  816 01de 55000000 		.4byte	.LLST3
  817 01e2 0E       		.uleb128 0xe
- 818 01e3 C5000000 		.4byte	.LASF29
+ 818 01e3 7A000000 		.4byte	.LASF29
  819 01e7 01       		.byte	0x1
  820 01e8 C1       		.byte	0xc1
  821 01e9 6B000000 		.4byte	0x6b
  822 01ed 76000000 		.4byte	.LLST4
  823 01f1 09       		.uleb128 0x9
- 824 01f2 47020000 		.4byte	.LASF31
+ 824 01f2 40020000 		.4byte	.LASF31
  825 01f6 01       		.byte	0x1
  826 01f7 C4       		.byte	0xc4
  827 01f8 6B000000 		.4byte	0x6b
  828 01fc 97000000 		.4byte	.LLST5
  829 0200 09       		.uleb128 0x9
- 830 0201 DC010000 		.4byte	.LASF32
+ 830 0201 91010000 		.4byte	.LASF32
  831 0205 01       		.byte	0x1
  832 0206 C6       		.byte	0xc6
  833 0207 6B000000 		.4byte	0x6b
  834 020b E5000000 		.4byte	.LLST6
  835 020f 0F       		.uleb128 0xf
- 836 0210 E4010000 		.4byte	.LASF30
+ 836 0210 DD010000 		.4byte	.LASF30
  837 0214 01       		.byte	0x1
  838 0215 C7       		.byte	0xc7
  839 0216 77000000 		.4byte	0x77
@@ -1435,10 +1435,10 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  847 022a 2E010000 		.4byte	0x12e
  848 022e 00       		.byte	0
  849 022f 11       		.uleb128 0x11
- 850 0230 3B010000 		.4byte	.LASF39
+ 850 0230 F0000000 		.4byte	.LASF39
  851 0234 01       		.byte	0x1
  852 0235 A301     		.2byte	0x1a3
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 25
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 25
 
 
  853 0237 00000000 		.4byte	.LFB9
@@ -1446,7 +1446,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  855 023f 01       		.uleb128 0x1
  856 0240 9C       		.byte	0x9c
  857 0241 0D       		.uleb128 0xd
- 858 0242 D2010000 		.4byte	.LASF33
+ 858 0242 87010000 		.4byte	.LASF33
  859 0246 01       		.byte	0x1
  860 0247 A301     		.2byte	0x1a3
  861 0249 6B000000 		.4byte	0x6b
@@ -1458,7 +1458,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  867 0259 77000000 		.4byte	0x77
  868 025d 19010000 		.4byte	.LLST8
  869 0261 13       		.uleb128 0x13
- 870 0262 CD000000 		.4byte	.LASF35
+ 870 0262 82000000 		.4byte	.LASF35
  871 0266 01       		.byte	0x1
  872 0267 A601     		.2byte	0x1a6
  873 0269 6B000000 		.4byte	0x6b
@@ -1498,7 +1498,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  907 0015 00       		.byte	0
  908 0016 0B       		.uleb128 0xb
  909 0017 0B       		.uleb128 0xb
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 26
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 26
 
 
  910 0018 3E       		.uleb128 0x3e
@@ -1558,7 +1558,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  964 004e 40       		.uleb128 0x40
  965 004f 18       		.uleb128 0x18
  966 0050 9742     		.uleb128 0x2117
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 27
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 27
 
 
  967 0052 19       		.uleb128 0x19
@@ -1618,7 +1618,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  1021 0089 00       		.byte	0
  1022 008a 03       		.uleb128 0x3
  1023 008b 0E       		.uleb128 0xe
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 28
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 28
 
 
  1024 008c 3A       		.uleb128 0x3a
@@ -1678,7 +1678,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  1078 00c3 9742     		.uleb128 0x2117
  1079 00c5 19       		.uleb128 0x19
  1080 00c6 01       		.uleb128 0x1
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 29
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 29
 
 
  1081 00c7 13       		.uleb128 0x13
@@ -1738,7 +1738,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  1135 00ff 13       		.uleb128 0x13
  1136 0100 00       		.byte	0
  1137 0101 00       		.byte	0
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 30
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 30
 
 
  1138 0102 11       		.uleb128 0x11
@@ -1798,7 +1798,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  1192              		.section	.debug_loc,"",%progbits
  1193              	.Ldebug_loc0:
  1194              	.LLST0:
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 31
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 31
 
 
  1195 0000 2A000000 		.4byte	.LVL0
@@ -1858,7 +1858,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  1249 0085 D8000000 		.4byte	.LFE4
  1250 0089 0400     		.2byte	0x4
  1251 008b F3       		.byte	0xf3
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 32
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 32
 
 
  1252 008c 01       		.uleb128 0x1
@@ -1918,7 +1918,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  1306 0110 9F       		.byte	0x9f
  1307 0111 00000000 		.4byte	0
  1308 0115 00000000 		.4byte	0
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 33
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 33
 
 
  1309              	.LLST8:
@@ -1978,7 +1978,7 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  1363 0034 18000000 		.4byte	.LFE7
  1364 0038 00000000 		.4byte	.LFB8
  1365 003c 10000000 		.4byte	.LFE8
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 34
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 34
 
 
  1366 0040 00000000 		.4byte	.LFB10
@@ -2011,193 +2011,193 @@ ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 1
  1384 001c 73686F72 		.ascii	"short int\000"
  1384      7420696E 
  1384      7400
- 1385              	.LASF38:
- 1386 0026 433A5C55 		.ascii	"C:\\Users\\lucdd\\Documents\\GitHub\\me135_fw\\psoc"
- 1386      73657273 
- 1386      5C6C7563 
- 1386      64645C44 
- 1386      6F63756D 
- 1387 0053 5F636F64 		.ascii	"_code\\135_motor_project.cydsn\000"
- 1387      655C3133 
- 1387      355F6D6F 
- 1387      746F725F 
- 1387      70726F6A 
- 1388              	.LASF23:
- 1389 0071 436C6F63 		.ascii	"Clock_1_ClearModeRegister\000"
- 1389      6B5F315F 
- 1389      436C6561 
- 1389      724D6F64 
- 1389      65526567 
- 1390              	.LASF24:
- 1391 008b 436C6F63 		.ascii	"Clock_1_GetDividerRegister\000"
- 1391      6B5F315F 
- 1391      47657444 
- 1391      69766964 
- 1391      65725265 
- 1392              	.LASF25:
- 1393 00a6 436C6F63 		.ascii	"Clock_1_GetModeRegister\000"
- 1393      6B5F315F 
- 1393      4765744D 
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 35
+ 1385              	.LASF23:
+ 1386 0026 436C6F63 		.ascii	"Clock_1_ClearModeRegister\000"
+ 1386      6B5F315F 
+ 1386      436C6561 
+ 1386      724D6F64 
+ 1386      65526567 
+ 1387              	.LASF24:
+ 1388 0040 436C6F63 		.ascii	"Clock_1_GetDividerRegister\000"
+ 1388      6B5F315F 
+ 1388      47657444 
+ 1388      69766964 
+ 1388      65725265 
+ 1389              	.LASF25:
+ 1390 005b 436C6F63 		.ascii	"Clock_1_GetModeRegister\000"
+ 1390      6B5F315F 
+ 1390      4765744D 
+ 1390      6F646552 
+ 1390      65676973 
+ 1391              	.LASF10:
+ 1392 0073 75696E74 		.ascii	"uint16\000"
+ 1392      313600
+ 1393              	.LASF29:
+ 1394 007a 72657374 		.ascii	"restart\000"
+ 1394      61727400 
+ 1395              	.LASF35:
+ 1396 0082 6F6C6453 		.ascii	"oldSrc\000"
+ 1396      726300
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 35
 
 
- 1393      6F646552 
- 1393      65676973 
- 1394              	.LASF10:
- 1395 00be 75696E74 		.ascii	"uint16\000"
- 1395      313600
- 1396              	.LASF29:
- 1397 00c5 72657374 		.ascii	"restart\000"
- 1397      61727400 
- 1398              	.LASF35:
- 1399 00cd 6F6C6453 		.ascii	"oldSrc\000"
- 1399      726300
- 1400              	.LASF9:
- 1401 00d4 75696E74 		.ascii	"uint8\000"
- 1401      3800
- 1402              	.LASF28:
- 1403 00da 636C6B44 		.ascii	"clkDivider\000"
- 1403      69766964 
- 1403      657200
- 1404              	.LASF37:
- 1405 00e5 47656E65 		.ascii	"Generated_Source\\PSoC5\\Clock_1.c\000"
- 1405      72617465 
- 1405      645F536F 
- 1405      75726365 
- 1405      5C50536F 
- 1406              	.LASF11:
- 1407 0106 666C6F61 		.ascii	"float\000"
- 1407      7400
- 1408              	.LASF6:
- 1409 010c 6C6F6E67 		.ascii	"long long int\000"
- 1409      206C6F6E 
- 1409      6720696E 
- 1409      7400
- 1410              	.LASF18:
- 1411 011a 436C6F63 		.ascii	"Clock_1_StopBlock\000"
- 1411      6B5F315F 
- 1411      53746F70 
- 1411      426C6F63 
- 1411      6B00
- 1412              	.LASF4:
- 1413 012c 6C6F6E67 		.ascii	"long int\000"
- 1413      20696E74 
- 1413      00
- 1414              	.LASF21:
- 1415 0135 73746174 		.ascii	"state\000"
- 1415      6500
- 1416              	.LASF39:
- 1417 013b 436C6F63 		.ascii	"Clock_1_SetSourceRegister\000"
- 1417      6B5F315F 
- 1417      53657453 
- 1417      6F757263 
- 1417      65526567 
- 1418              	.LASF1:
- 1419 0155 756E7369 		.ascii	"unsigned char\000"
- 1419      676E6564 
- 1419      20636861 
- 1419      7200
- 1420              	.LASF22:
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 36
+ 1397              	.LASF9:
+ 1398 0089 75696E74 		.ascii	"uint8\000"
+ 1398      3800
+ 1399              	.LASF28:
+ 1400 008f 636C6B44 		.ascii	"clkDivider\000"
+ 1400      69766964 
+ 1400      657200
+ 1401              	.LASF37:
+ 1402 009a 47656E65 		.ascii	"Generated_Source\\PSoC5\\Clock_1.c\000"
+ 1402      72617465 
+ 1402      645F536F 
+ 1402      75726365 
+ 1402      5C50536F 
+ 1403              	.LASF11:
+ 1404 00bb 666C6F61 		.ascii	"float\000"
+ 1404      7400
+ 1405              	.LASF6:
+ 1406 00c1 6C6F6E67 		.ascii	"long long int\000"
+ 1406      206C6F6E 
+ 1406      6720696E 
+ 1406      7400
+ 1407              	.LASF18:
+ 1408 00cf 436C6F63 		.ascii	"Clock_1_StopBlock\000"
+ 1408      6B5F315F 
+ 1408      53746F70 
+ 1408      426C6F63 
+ 1408      6B00
+ 1409              	.LASF4:
+ 1410 00e1 6C6F6E67 		.ascii	"long int\000"
+ 1410      20696E74 
+ 1410      00
+ 1411              	.LASF21:
+ 1412 00ea 73746174 		.ascii	"state\000"
+ 1412      6500
+ 1413              	.LASF39:
+ 1414 00f0 436C6F63 		.ascii	"Clock_1_SetSourceRegister\000"
+ 1414      6B5F315F 
+ 1414      53657453 
+ 1414      6F757263 
+ 1414      65526567 
+ 1415              	.LASF1:
+ 1416 010a 756E7369 		.ascii	"unsigned char\000"
+ 1416      676E6564 
+ 1416      20636861 
+ 1416      7200
+ 1417              	.LASF22:
+ 1418 0118 6D6F6465 		.ascii	"modeBitMask\000"
+ 1418      4269744D 
+ 1418      61736B00 
+ 1419              	.LASF0:
+ 1420 0124 7369676E 		.ascii	"signed char\000"
+ 1420      65642063 
+ 1420      68617200 
+ 1421              	.LASF7:
+ 1422 0130 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 1422      206C6F6E 
+ 1422      6720756E 
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 36
 
 
- 1421 0163 6D6F6465 		.ascii	"modeBitMask\000"
- 1421      4269744D 
- 1421      61736B00 
- 1422              	.LASF0:
- 1423 016f 7369676E 		.ascii	"signed char\000"
- 1423      65642063 
- 1423      68617200 
- 1424              	.LASF7:
- 1425 017b 6C6F6E67 		.ascii	"long long unsigned int\000"
- 1425      206C6F6E 
- 1425      6720756E 
- 1425      7369676E 
- 1425      65642069 
- 1426              	.LASF8:
- 1427 0192 756E7369 		.ascii	"unsigned int\000"
- 1427      676E6564 
- 1427      20696E74 
- 1427      00
- 1428              	.LASF27:
- 1429 019f 436C6F63 		.ascii	"Clock_1_SetDividerRegister\000"
- 1429      6B5F315F 
- 1429      53657444 
- 1429      69766964 
- 1429      65725265 
- 1430              	.LASF3:
- 1431 01ba 73686F72 		.ascii	"short unsigned int\000"
- 1431      7420756E 
- 1431      7369676E 
- 1431      65642069 
- 1431      6E7400
- 1432              	.LASF13:
- 1433 01cd 63686172 		.ascii	"char\000"
- 1433      00
- 1434              	.LASF33:
- 1435 01d2 636C6B53 		.ascii	"clkSource\000"
- 1435      6F757263 
- 1435      6500
- 1436              	.LASF32:
- 1437 01dc 63757272 		.ascii	"currSrc\000"
- 1437      53726300 
+ 1422      7369676E 
+ 1422      65642069 
+ 1423              	.LASF8:
+ 1424 0147 756E7369 		.ascii	"unsigned int\000"
+ 1424      676E6564 
+ 1424      20696E74 
+ 1424      00
+ 1425              	.LASF27:
+ 1426 0154 436C6F63 		.ascii	"Clock_1_SetDividerRegister\000"
+ 1426      6B5F315F 
+ 1426      53657444 
+ 1426      69766964 
+ 1426      65725265 
+ 1427              	.LASF3:
+ 1428 016f 73686F72 		.ascii	"short unsigned int\000"
+ 1428      7420756E 
+ 1428      7369676E 
+ 1428      65642069 
+ 1428      6E7400
+ 1429              	.LASF13:
+ 1430 0182 63686172 		.ascii	"char\000"
+ 1430      00
+ 1431              	.LASF33:
+ 1432 0187 636C6B53 		.ascii	"clkSource\000"
+ 1432      6F757263 
+ 1432      6500
+ 1433              	.LASF32:
+ 1434 0191 63757272 		.ascii	"currSrc\000"
+ 1434      53726300 
+ 1435              	.LASF38:
+ 1436 0199 433A5C55 		.ascii	"C:\\Users\\dylan\\Documents\\me135_fw\\psoc_code\\1"
+ 1436      73657273 
+ 1436      5C64796C 
+ 1436      616E5C44 
+ 1436      6F63756D 
+ 1437 01c6 33355F6D 		.ascii	"35_motor_project.cydsn\000"
+ 1437      6F746F72 
+ 1437      5F70726F 
+ 1437      6A656374 
+ 1437      2E637964 
  1438              	.LASF30:
- 1439 01e4 6F6C6444 		.ascii	"oldDivider\000"
+ 1439 01dd 6F6C6444 		.ascii	"oldDivider\000"
  1439      69766964 
  1439      657200
  1440              	.LASF14:
- 1441 01ef 72656738 		.ascii	"reg8\000"
+ 1441 01e8 72656738 		.ascii	"reg8\000"
  1441      00
  1442              	.LASF5:
- 1443 01f4 6C6F6E67 		.ascii	"long unsigned int\000"
+ 1443 01ed 6C6F6E67 		.ascii	"long unsigned int\000"
  1443      20756E73 
  1443      69676E65 
  1443      6420696E 
  1443      7400
  1444              	.LASF17:
- 1445 0206 436C6F63 		.ascii	"Clock_1_Stop\000"
+ 1445 01ff 436C6F63 		.ascii	"Clock_1_Stop\000"
  1445      6B5F315F 
  1445      53746F70 
-ARM GAS  C:\Users\lucdd\AppData\Local\Temp\cc5rw6ag.s 			page 37
+ARM GAS  C:\Users\dylan\AppData\Local\Temp\ccDf2itc.s 			page 37
 
 
  1445      00
  1446              	.LASF20:
- 1447 0213 436C6F63 		.ascii	"Clock_1_SetModeRegister\000"
+ 1447 020c 436C6F63 		.ascii	"Clock_1_SetModeRegister\000"
  1447      6B5F315F 
  1447      5365744D 
  1447      6F646552 
  1447      65676973 
  1448              	.LASF12:
- 1449 022b 646F7562 		.ascii	"double\000"
+ 1449 0224 646F7562 		.ascii	"double\000"
  1449      6C6500
  1450              	.LASF19:
- 1451 0232 436C6F63 		.ascii	"Clock_1_StandbyPower\000"
+ 1451 022b 436C6F63 		.ascii	"Clock_1_StandbyPower\000"
  1451      6B5F315F 
  1451      5374616E 
  1451      64627950 
  1451      6F776572 
  1452              	.LASF31:
- 1453 0247 656E6162 		.ascii	"enabled\000"
+ 1453 0240 656E6162 		.ascii	"enabled\000"
  1453      6C656400 
  1454              	.LASF36:
- 1455 024f 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
+ 1455 0248 474E5520 		.ascii	"GNU C11 5.4.1 20160609 (release) [ARM/embedded-5-br"
  1455      43313120 
  1455      352E342E 
  1455      31203230 
  1455      31363036 
- 1456 0282 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
+ 1456 027b 616E6368 		.ascii	"anch revision 237715] -mcpu=cortex-m3 -mthumb -g -O"
  1456      20726576 
  1456      6973696F 
  1456      6E203233 
  1456      37373135 
- 1457 02b5 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
+ 1457 02ae 67202D66 		.ascii	"g -ffunction-sections -ffat-lto-objects\000"
  1457      66756E63 
  1457      74696F6E 
  1457      2D736563 
  1457      74696F6E 
  1458              	.LASF26:
- 1459 02dd 436C6F63 		.ascii	"Clock_1_GetSourceRegister\000"
+ 1459 02d6 436C6F63 		.ascii	"Clock_1_GetSourceRegister\000"
  1459      6B5F315F 
  1459      47657453 
  1459      6F757263 
