@@ -130,14 +130,14 @@ int main()
     /*******************************************************/
 
     /*************** THRESHOLDING AND CROPPING SETUP ****************/
-    Scalar lowerb = Scalar(0, 0, 50);              // Lower bound for thresholding
-    Scalar upperb = Scalar(30, 70, 150);           // Upper bound for thresholding
+    Scalar lowerb = Scalar(0, 0, 60);              // Lower bound for thresholding
+    Scalar upperb = Scalar(25, 65, 150);           // Upper bound for thresholding
     Rect roi_1 = Rect(28, 14, 257, 206);           // Initial crop
     Rect roi_2 = Rect(77, 14, 225 - 77, 235 - 14); // Crop after perspective correction
     /*******************************************************/
 
     /****************** IMAGE DISPLAY SETUP ******************/
-#define DISP_IMGS 1
+#define DISP_IMGS 0
 #if DISP_IMGS == 1
     namedWindow("SRC", WINDOW_NORMAL);    // src image window
     namedWindow("THRESH", WINDOW_NORMAL); // thresh image window
@@ -158,9 +158,9 @@ int main()
     }
 
     /*************** BEHAVIOR *****************/
-    short int difficulty = 0; //[0, 1, 2] = [Easy, Medium, Hard]
-    short int state = 0; //[0, 1, 2, 3, 4] = [Wait, Catch, Bank Left, Straight, Bank Right]
-    float v_x_0, v_y_0;
+    // short int difficulty = 0; //[0, 1, 2] = [Easy, Medium, Hard]
+    // short int state = 0;      //[0, 1, 2, 3, 4] = [Wait, Catch, Bank Left, Straight, Bank Right]
+    // float v_x_0, v_y_0;
 
     /*************** MAIN LOOP ****************/
     printf("\nProgram started...\n");
@@ -175,89 +175,129 @@ int main()
 
         // normalize(src, src, 0, 255, NORM_MINMAX); // $$$
         inRange(src, lowerb, upperb, thresh);
-        medianBlur(thresh, thresh, 7); // $$
-
-        morphologyEx(thresh, thresh, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(7, 7)));
+        medianBlur(thresh, thresh, 5); // $$
+        // morphologyEx(thresh, thresh, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(5, 5)));
+        // blur(thresh, thresh, Size(5, 5));
+        // inRange(thresh, 100, 255);
 
         findContours(thresh, contours, RETR_TREE, CHAIN_APPROX_SIMPLE, Point(0, 0));
         Point puck_center;
-        for (uint8_t i = 0; i < contours.size(); i++)
+        bool waiting = 0;
+        bool finding = 1;
+
+        if (contours.size() > 0)
         {
-            Rect rect = boundingRect(contours[i]);
-            double peri = arcLength(contours[i], 1);
-
-            // cout << rect << "\t" << peri << "\n";
-
-            if (rect.width >= 7 && rect.width <= 15 && rect.height >= 5 && rect.height <= 13 && peri >= 28 && peri <= 40)
+            for (uint8_t i = 0; i < contours.size(); i++)
             {
-                puck_center = Point(rect.x + rect.width / 2, rect.y + rect.height / 2);
+                Rect rect = boundingRect(contours[i]);
+                double peri = arcLength(contours[i], 1);
 
-                circle(src, puck_center, 2, Scalar(0, 255, 0), -1, 8, 0);
+                // cout << rect << "\t" << peri << "\n";
 
-                // Initialize prediction variables
-                float x_0, y_0, x_1, y_1;
-                float v_x, v_y;
-
-                // Current point x_1, y_1
-                x_1 = puck_center.x, y_1 = puck_center.y;
-
-                auto t1 = chrono::steady_clock::now();     // Update current time
-                chrono::duration<float> t_delta = t1 - t0; // Update t_delta
-                t0 = t1;                                   // Update past time
-                                                           // printf("Time between captures: %.3fms.\n", 1000 * t_delta.count());
-
-                if (y_1 >= 112)
+                if (rect.width >= 10 && rect.width <= 19 && rect.height >= 5 && rect.height <= 15 && peri >= 31 && peri <= 45)
                 {
-                    v_x = (x_1 - x_0) / t_delta.count();
+                    finding = 0;
+                    bool tracking = 1;
+                    puck_center = Point(rect.x + rect.width / 2, rect.y + rect.height / 2);
+
+                    circle(src, puck_center, 2, Scalar(0, 255, 0), -1, 8, 0);
+
+                    // Initialize prediction variables
+                    float x_0, y_0, x_1, y_1;
+                    float v_y;
+
+                    // Current point x_1, y_1
+                    x_1 = puck_center.x, y_1 = puck_center.y;
+
+                    auto t1 = chrono::steady_clock::now();     // Update current time
+                    chrono::duration<float> t_delta = t1 - t0; // Update t_delta
+                    t0 = t1;                                   // Update past time
+                    printf("Time between captures: %.3fms.\n", 1000 * t_delta.count());
+
+                    // v_x = (x_1 - x_0) / t_delta.count();
                     v_y = (y_1 - y_0) / t_delta.count();
-                    x_0 = x_1, y_0 = y_1; // Update past point
 
-                    if (abs(v_x) > 300)
-                    {
-                        v_x = 0;
-                    }
-                    if (abs(v_y) > 300)
-                    {
-                        v_y = 0;
-                    }
-
-                    // float x_min = 8, y_min = 3;
-                    // float x_max = 139, y_max = 175;
-                    float x_pred = x_1 + 20 * v_x * t_delta.count();
-                    float y_pred = y_1 + 20 * v_y * t_delta.count();
-
-                    // cout << v_x << "\t" << v_y << "\n";
-
-                    line(src, Point(x_1, y_1), Point(x_pred, y_pred), Scalar(255, 255, 0), 1, LINE_8);
+#define X_MIN 8
+#define Y_MIN 3
+#define X_MAX 139
+#define Y_MAX 180
 
                     // Puck goes from
                     // X = 8 to X = 139
-                    // Y = 3 to Y = 175
-                    // Middle of table is Y = 112
+                    // Y = 3 to Y = 180 (limit of camera vision, not end of table)
+                    // Middle of table is X = 70 Y = 112
+                    tracking = 0;
+                    bool predicting = 1;
+                    float x_pred = x_0 + (x_1 - x_0) * (Y_MAX - y_0) / (y_1 - y_0);
+                    float y_pred = Y_MAX;
 
-                    // cout << puck_center.x << "\t" << puck_center.y << "\n";
+                    x_0 = x_1, y_0 = y_1; // Update past point
 
-                    // Send to predicted position
-                    int16_t coord[2] = {100, 10};
-                    serialFlush(fd);
-                    write(fd, &coord, 4);
+                    // cout << v_x << "\t" << v_y << "\n";
+                    // cout << x_pred << "\t" << y_pred << "\n";
+
+                    line(src, Point(x_1, y_1), Point(x_pred, y_pred), Scalar(255, 255, 0), 1, LINE_8);
+
+// cout << puck_center.x << "\t" << puck_center.y << "\n";
+
+// Goal is between X = 42 and X = 103
+#define GOAL_MIN_X 38
+#define GOAL_MAX_X 108
+
+                    int16_t coord[2] = {0, 0};
+                    if (y_1 > 50 && v_y > 0 && x_pred >= GOAL_MIN_X && x_pred <= GOAL_MAX_X)
+                    {
+                        if (x_pred <= X_MAX / 2)
+                        {
+                            coord[0] = 50;
+                            coord[1] = 0;
+                        }
+                        else if (x_pred >= X_MAX / 2)
+                        {
+                            coord[0] = 80;
+                            coord[1] = 0;
+                        }
+                        // Send to predicted position
+                        serialFlush(fd);
+                        write(fd, &coord, 4);
+                        // printf("Moved to (%d, %d)...\n", coord[0], coord[1]);
+                    }
+                    else
+                    {
+                        waiting = 1;
+                    }
                 }
+                else
+                {
+                    waiting = 1;
+                }
+                break;
             }
-            break;
-        }
 
 #if DISP_IMGS == 1
-        imshow("SRC", src);
-        imshow("THRESH", thresh);
+            imshow("SRC", src);
+            imshow("THRESH", thresh);
 
-        if (waitKey(10) == 27)
-        {
-            printf("Esc key pressed, stopping feed.\n");
-            break;
-        }
+            if (waitKey(10) == 27)
+            {
+                printf("Esc key pressed, stopping feed.\n");
+                break;
+            }
 #endif
-    }
-    /************* END MAIN LOOP ****************/
+        }
+        else
+        {
+            waiting = 1;
+        }
+
+        if (waiting)
+        {
+            int16_t coord[2] = {65, 0};
+            serialFlush(fd);
+            write(fd, &coord, 4);
+            // printf("Moved to neutral position...\n");
+        }
+    } /************* END MAIN LOOP ****************/
     return 0;
 }
 /*********** END MAIN FUNCTION *****************/
