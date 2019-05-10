@@ -42,8 +42,8 @@ CY_ISR(isr_rx)
 
     if (uart_recv_count > 3)
     {
-        x_1 = (uart_recv_buf[1] << 8) + uart_recv_buf[0]; // new coords
-        y_1 = (uart_recv_buf[3] << 8) + uart_recv_buf[2];
+        x_1 = uart_recv_buf[0]; // new coords
+        y_1 = uart_recv_buf[1];
         uart_recv_count = 0;
         
     }
@@ -163,4 +163,5 @@ int main(void)
         }
     }
 }
+
 
