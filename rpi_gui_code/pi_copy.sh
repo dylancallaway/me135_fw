@@ -1,0 +1,1 @@
+sshpass -p "pi" scp QtBairHockey.py pi@10.42.0.194:/home/pi/Desktop

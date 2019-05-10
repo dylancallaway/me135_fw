@@ -27,6 +27,8 @@ using namespace cv;
 #define GOAL_MIN_X 38
 #define GOAL_MAX_X 108
 
+#define PUCK_HOME 68
+
 // Initialize image matrices
 Mat src(FRM_ROWS, FRM_COLS, CV_8UC3, Scalar(0, 0, 0)); // 8 bit, 3 channel
 Mat thresh(FRM_ROWS, FRM_COLS, CV_8UC1, Scalar(0));    // 8 bit, 1 channel
@@ -135,8 +137,8 @@ int main()
     /*******************************************************/
 
     /*************** THRESHOLDING AND CROPPING SETUP ****************/
-    Scalar lowerb = Scalar(0, 20, 70);             // Lower bound for thresholding
-    Scalar upperb = Scalar(40, 90, 180);           // Upper bound for thresholding
+    Scalar lowerb = Scalar(0, 0, 50);              // Lower bound for thresholding
+    Scalar upperb = Scalar(40, 40, 160);           // Upper bound for thresholding
     Rect roi_1 = Rect(28, 14, 257, 206);           // Initial crop
     Rect roi_2 = Rect(77, 14, 225 - 77, 235 - 14); // Crop after perspective correction
     /*******************************************************/
@@ -181,8 +183,11 @@ int main()
     int difficulty = 1;
     bool run = 1;
 
+    int8_t recv_buf;
+
     while (true)
     {
+        // printf("%d", waiting);
         if (run)
         {
             cam.read(src);
@@ -192,7 +197,7 @@ int main()
 
             // normalize(src, src, 0, 255, NORM_MINMAX); // $$$
             inRange(src, lowerb, upperb, thresh);
-            medianBlur(thresh, thresh, 7); // $$
+            medianBlur(thresh, thresh, 5); // $$
             // morphologyEx(thresh, thresh, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(5, 5)));
             // blur(thresh, thresh, Size(5, 5));
             // inRange(thresh, 100, 255);
@@ -211,7 +216,7 @@ int main()
 
                     // cout << rect << "\t" << peri << "\n";
 
-                    if (rect.width >= 10 && rect.width <= 18 && rect.height >= 6 && rect.height <= 15 && peri >= 32 && peri <= 43)
+                    if (rect.width >= 10 && rect.width <= 19 && rect.height >= 6 && rect.height <= 16 && peri >= 32 && peri <= 48)
                     {
                         finding = 0;
                         bool tracking = 1;
@@ -253,21 +258,22 @@ int main()
                         switch (difficulty)
                         {
                         case 0:
+#define EASY_DELTA 40
                             if (y_2 > 80 && v_y > 0)
                             {
                                 if (x_pred >= GOAL_MIN_X - 5 && x_pred <= 65)
                                 {
-                                    coord[0] = 50;
+                                    coord[0] = PUCK_HOME - EASY_DELTA;
                                     coord[1] = 0;
                                 }
                                 else if (x_pred <= GOAL_MAX_X + 5 && x_pred >= 75)
                                 {
-                                    coord[0] = 80;
+                                    coord[0] = PUCK_HOME + EASY_DELTA;
                                     coord[1] = 0;
                                 }
                                 else
                                 {
-                                    coord[0] = 65;
+                                    coord[0] = PUCK_HOME;
                                     coord[1] = 0;
                                 }
                             }
@@ -277,21 +283,22 @@ int main()
                             }
                             break;
                         case 1:
+#define MED_DELTA 20
                             if (y_2 > 80 && v_y > 0)
                             {
                                 if (x_pred >= GOAL_MIN_X - 30 && x_pred <= 65)
                                 {
-                                    coord[0] = 45;
+                                    coord[0] = PUCK_HOME - MED_DELTA;
                                     coord[1] = 0;
                                 }
                                 else if (x_pred <= GOAL_MAX_X + 30 && x_pred >= 75)
                                 {
-                                    coord[0] = 85;
+                                    coord[0] = PUCK_HOME + MED_DELTA;
                                     coord[1] = 0;
                                 }
                                 else
                                 {
-                                    coord[0] = 65;
+                                    coord[0] = PUCK_HOME;
                                     coord[1] = 0;
                                 }
                             }
@@ -301,22 +308,24 @@ int main()
                             }
                             break;
                         case 2:
+#define HARD_DELTA 20
+#define HARD_Y 20
                             if (y_2 > 80 && v_y > 0)
                             {
                                 if (x_pred >= GOAL_MIN_X - 30 && x_pred <= 65)
                                 {
-                                    coord[0] = 45;
-                                    coord[1] = 40;
+                                    coord[0] = PUCK_HOME - HARD_DELTA;
+                                    coord[1] = 20;
                                 }
                                 else if (x_pred <= GOAL_MAX_X + 30 && x_pred >= 75)
                                 {
-                                    coord[0] = 85;
-                                    coord[1] = 40;
+                                    coord[0] = PUCK_HOME + HARD_DELTA;
+                                    coord[1] = 20;
                                 }
                                 else
                                 {
-                                    coord[0] = 65;
-                                    coord[1] = 0;
+                                    coord[0] = PUCK_HOME;
+                                    coord[1] = HARD_Y;
                                 }
                             }
                             else
@@ -348,32 +357,72 @@ int main()
             {
                 waiting = 1;
             }
-
-            int8_t recv_buf;
             if (waiting)
             {
-                coord[0] = 65;
+                coord[0] = PUCK_HOME;
                 coord[1] = 0;
             }
 
             coord[2] = x_2;
             coord[3] = y_2;
+            // printf("%d\t%d\t%d\t%d\n", coord[0], coord[1], coord[2], coord[3]);
             write(fd, &coord, 4);
 
             if (waiting)
             {
+                // printf("%d\n", difficulty);
                 if (serialDataAvail(fd))
                 {
+                    // recv_buf = serialGetchar(fd);
                     read(fd, &recv_buf, 1);
-                    difficulty = recv_buf;
-                    cout << recv_buf << "\n";
+                    printf("recv: %d\n", recv_buf);
+                    switch (recv_buf)
+                    {
+                    case 48:
+                        difficulty = 0;
+                        break;
+                    case 49:
+                        difficulty = 1;
+                        break;
+                    case 50:
+                        difficulty = 2;
+                        break;
+                    case 51:
+                        run = 1;
+                        break;
+                    case 52:
+                        run = 0;
+                        break;
+                    }
                 }
             }
         }
         else
         {
-            // If run = 0
-            continue;
+            if (serialDataAvail(fd))
+            {
+                // recv_buf = serialGetchar(fd);
+                read(fd, &recv_buf, 1);
+                printf("recv: %d\n", recv_buf);
+                switch (recv_buf)
+                {
+                case 48:
+                    difficulty = 0;
+                    break;
+                case 49:
+                    difficulty = 1;
+                    break;
+                case 50:
+                    difficulty = 2;
+                    break;
+                case 51:
+                    run = 1;
+                    break;
+                case 52:
+                    run = 0;
+                    break;
+                }
+            }
         }
 
     } /************* END MAIN LOOP ****************/
