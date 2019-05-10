@@ -13,7 +13,7 @@
 <v>Output</v>
 </TreeKeys>
 <TreeStates>
-<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="">
+<CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237 type_name="CyDesigner.Common.Base.Controls.CyTreeViewState" version="1" SelectedNodeId="135_motor_project-000\135_motor_project\TopDesign">
 <ExpandedNodeIds>
 <v>135_motor_project-000</v>
 <v>135_motor_project-000\135_motor_project</v>
@@ -159,42 +159,6 @@
 <VisibleNodeIds>
 <v>135_motor_project-000</v>
 <v>135_motor_project-000\135_motor_project</v>
-<v>135_motor_project-000\135_motor_project\CortexM3</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Clock_1.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Cm3Start.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Control_Reg_1.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Control_Reg_1_PM.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Control_Reg_2.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Control_Reg_2_PM.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Control_Reg_3.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Control_Reg_3_PM.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Control_Reg_4.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Control_Reg_4_PM.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Control_Reg_5.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Control_Reg_5_PM.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Control_Reg_6.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Control_Reg_6_PM.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\cy_em_eeprom.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\CyBootAsmGnu.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\CyDmac.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\cyfitter_cfg.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\CyFlash.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\CyLib.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\cymetadata.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\cyPm.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\CySpc.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\cyutils.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Direction_1.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Direction_2.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Heartbeat.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\isr_rx.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\main.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\Pin_1.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\pos_reset.lst</v>
-<v>135_motor_project-000\135_motor_project\CortexM3\ARM_GCC_541\Debug\Listing Files\pulse_ready_isr.lst</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 </TreeStates>
@@ -209,6 +173,20 @@
 <v>135_motor_project-000\135_motor_project\PSoC 5LP Architecture TRM</v>
 <v>135_motor_project-000\135_motor_project\CY8C58LP Family Datasheet</v>
 <v>135_motor_project-000\135_motor_project\System Reference Guides</v>
+<v>135_motor_project-000\135_motor_project\System Reference Guides\cy_boot_v5_80</v>
+<v>135_motor_project-000\135_motor_project\cy_clock_v2_20</v>
+<v>135_motor_project-000\135_motor_project\cy_clock_v2_20\cy_clock_v2_20.pdf</v>
+<v>135_motor_project-000\135_motor_project\cy_isr_v1_70</v>
+<v>135_motor_project-000\135_motor_project\cy_isr_v1_70\cy_isr_v1_70.pdf</v>
+<v>135_motor_project-000\135_motor_project\cy_pins_v2_20</v>
+<v>135_motor_project-000\135_motor_project\cy_pins_v2_20\cy_pins_v2_20.pdf</v>
+<v>135_motor_project-000\135_motor_project\CyControlReg_v1_80</v>
+<v>135_motor_project-000\135_motor_project\CyControlReg_v1_80\CyControlReg_v1_80.pdf</v>
+<v>135_motor_project-000\135_motor_project\PWM_v3_30</v>
+<v>135_motor_project-000\135_motor_project\PWM_v3_30\PWM_v3_30.pdf</v>
+<v>135_motor_project-000\135_motor_project\Timer_v2_80.pdf</v>
+<v>135_motor_project-000\135_motor_project\UART_v2_50.pdf</v>
+<v>135_motor_project-000\135_motor_project\ZeroTerminal.pdf</v>
 </ExpandedNodeIds>
 <VisibleNodeIds>
 <v>135_motor_project-000</v>
@@ -216,6 +194,20 @@
 <v>135_motor_project-000\135_motor_project\PSoC 5LP Architecture TRM</v>
 <v>135_motor_project-000\135_motor_project\CY8C58LP Family Datasheet</v>
 <v>135_motor_project-000\135_motor_project\System Reference Guides</v>
+<v>135_motor_project-000\135_motor_project\System Reference Guides\cy_boot_v5_80</v>
+<v>135_motor_project-000\135_motor_project\cy_clock_v2_20</v>
+<v>135_motor_project-000\135_motor_project\cy_clock_v2_20\cy_clock_v2_20.pdf</v>
+<v>135_motor_project-000\135_motor_project\cy_isr_v1_70</v>
+<v>135_motor_project-000\135_motor_project\cy_isr_v1_70\cy_isr_v1_70.pdf</v>
+<v>135_motor_project-000\135_motor_project\cy_pins_v2_20</v>
+<v>135_motor_project-000\135_motor_project\cy_pins_v2_20\cy_pins_v2_20.pdf</v>
+<v>135_motor_project-000\135_motor_project\CyControlReg_v1_80</v>
+<v>135_motor_project-000\135_motor_project\CyControlReg_v1_80\CyControlReg_v1_80.pdf</v>
+<v>135_motor_project-000\135_motor_project\PWM_v3_30</v>
+<v>135_motor_project-000\135_motor_project\PWM_v3_30\PWM_v3_30.pdf</v>
+<v>135_motor_project-000\135_motor_project\Timer_v2_80.pdf</v>
+<v>135_motor_project-000\135_motor_project\UART_v2_50.pdf</v>
+<v>135_motor_project-000\135_motor_project\ZeroTerminal.pdf</v>
 </VisibleNodeIds>
 </CyGuid_2a325b3b-c96a-4e9f-b7a0-2c44ecb5f237>
 </TreeStatesV2>
@@ -226,8 +218,8 @@
 <Unloaded />
 <OpenDocs>
 <name v=".\main.c" />
-<name v=".\TopDesign\TopDesign.cysch" />
 <name v=".\135_motor_project.cydwr" />
+<name v=".\TopDesign\TopDesign.cysch" />
 </OpenDocs>
 <OpenDocsLayout><![CDATA[<?xml version="1.0"?><!--
 
@@ -235,7 +227,7 @@
   Copyright (c) 2001-2016 Actipro Software LLC.  All rights reserved.
   http://www.actiprosoftware.com
 
---><DocumentLayout Version="1.0"><LayoutData><TabbedMdiRootContainer Orientation="Horizontal"><TabbedMdiContainer Size="879, 543" SelectedTabbedMdiWindow="392260c1-3d26-4dfb-8a1c-f9b56589c164"><ToolWindow Key="Start Page:bd4649ab-da6b-4d04-a663-c722b8bf99db:Start Page" Guid="8f4b44e9-583f-4ec6-ac60-7301d1db3b89" /><DocumentWindow Key="C:\Users\lucdd\Documents\GitHub\me135_fw\psoc_code\135_motor_project.cydsn\main.c" Guid="392260c1-3d26-4dfb-8a1c-f9b56589c164" /><DocumentWindow Key="C:\Users\lucdd\Documents\GitHub\me135_fw\psoc_code\135_motor_project.cydsn\TopDesign\TopDesign.cysch" Guid="7d83296e-ad40-4f14-abf3-cbde5999d52c" /><DocumentWindow Key="C:\Users\lucdd\Documents\GitHub\me135_fw\psoc_code\135_motor_project.cydsn\135_motor_project.cydwr" Guid="3d21d8ab-159c-4af6-953e-4c01f9fdf6dc" /></TabbedMdiContainer></TabbedMdiRootContainer><FloatingContainers /></LayoutData></DocumentLayout>]]></OpenDocsLayout>
+--><DocumentLayout Version="1.0"><LayoutData><TabbedMdiRootContainer Orientation="Horizontal"><TabbedMdiContainer Size="919, 543" SelectedTabbedMdiWindow="43aa9b83-7991-4700-ad47-630fffabb42d"><ToolWindow Key="Start Page:bd4649ab-da6b-4d04-a663-c722b8bf99db:Start Page" Guid="8f4b44e9-583f-4ec6-ac60-7301d1db3b89" /><DocumentWindow Key="C:\Users\lucdd\Documents\GitHub\me135_fw\psoc_code\135_motor_project.cydsn\main.c" Guid="392260c1-3d26-4dfb-8a1c-f9b56589c164" /><DocumentWindow Key="C:\Users\lucdd\Documents\GitHub\me135_fw\psoc_code\135_motor_project.cydsn\135_motor_project.cydwr" Guid="3d21d8ab-159c-4af6-953e-4c01f9fdf6dc" /><DocumentWindow Key="C:\Users\lucdd\Documents\GitHub\me135_fw\psoc_code\135_motor_project.cydsn\TopDesign\TopDesign.cysch" Guid="43aa9b83-7991-4700-ad47-630fffabb42d" /></TabbedMdiContainer></TabbedMdiRootContainer><FloatingContainers /></LayoutData></DocumentLayout>]]></OpenDocsLayout>
 <config v="" />
 <AutoUpdate v="true" />
 </CyGuid_843a90a4-0c4b-4e44-991d-05e7fb117a21>

@@ -21,7 +21,7 @@ LED: Reg 3
 // X = 8 to X = 139
 // Y = 3 to Y = 175
 
-#define steps_per_pixel 8.14
+#define steps_per_pixel 8
 
 /************ FUNCTION PROTOTYPES *******************/
 int printf(const char * format, ...);
@@ -45,6 +45,7 @@ CY_ISR(isr_rx)
         x_1 = (uart_recv_buf[1] << 8) + uart_recv_buf[0]; // new coords
         y_1 = (uart_recv_buf[3] << 8) + uart_recv_buf[2];
         uart_recv_count = 0;
+        
     }
 }
 /*************************************************/
@@ -78,6 +79,7 @@ CY_ISR(pos_reset)
     x_0 = 0;
     y_0 = 0;
     Pin_1_ClearInterrupt();
+    //printf("Position reset"); //For debugging
 }
 /************************************************/
 
@@ -117,9 +119,10 @@ int main(void)
 
     while (1)
     {
-        // printf("\t(%.2f, %.2f)\t", x_0, y_0);
+         //printf("\t(%d, %d)\t", x_1, y_1);
         dx = (float)x_1 - x_0;
         dy = (float)y_1 - y_0;
+        //printf("\t(%f, %f)\t", dx, dy);
         if ( (dx != 0 && x_1 <= 131) || (dy != 0 && y_1 <= 100) )
         {   
             Control_Reg_4_Write(m1_step_pin || m2_step_pin); // Motor wake/sleep
@@ -141,7 +144,7 @@ int main(void)
             Control_Reg_1_Write(m1_dir_pin);
             Control_Reg_2_Write(m2_dir_pin);
 
-            #define FP_TOL 0.06 // Fixes floating point imprecision
+            #define FP_TOL 0.07 // Fixes floating point imprecision
             if (x_0 > (float)x_1 - FP_TOL && x_0 < (float)x_1 + FP_TOL)
             {
                 x_0 = x_1;

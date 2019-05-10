@@ -1,10 +1,10 @@
-C:/Users/dylan/Documents/me135_fw/psoc_code/135_motor_project.cydsn/CortexM3/ARM_GCC_541/Debug/CyBootAsmGnu.o : C:/Users/dylan/Documents/me135_fw/psoc_code/135_motor_project.cydsn/Generated_Source/PSoC5/CyBootAsmGnu.s C:/Users/dylan/Documents/me135_fw/psoc_code/135_motor_project.cydsn/Generated_Source/PSoC5/cydevicegnu.inc C:/Users/dylan/Documents/me135_fw/psoc_code/135_motor_project.cydsn/Generated_Source/PSoC5/cydevicegnu_trm.inc C:/Users/dylan/Documents/me135_fw/psoc_code/135_motor_project.cydsn/Generated_Source/PSoC5/cyfittergnu.inc 
+C:/Users/lucdd/Documents/GitHub/me135_fw/psoc_code/135_motor_project.cydsn/CortexM3/ARM_GCC_541/Debug/CyBootAsmGnu.o : C:/Users/lucdd/Documents/GitHub/me135_fw/psoc_code/135_motor_project.cydsn/Generated_Source/PSoC5/CyBootAsmGnu.s C:/Users/lucdd/Documents/GitHub/me135_fw/psoc_code/135_motor_project.cydsn/Generated_Source/PSoC5/cydevicegnu.inc C:/Users/lucdd/Documents/GitHub/me135_fw/psoc_code/135_motor_project.cydsn/Generated_Source/PSoC5/cydevicegnu_trm.inc C:/Users/lucdd/Documents/GitHub/me135_fw/psoc_code/135_motor_project.cydsn/Generated_Source/PSoC5/cyfittergnu.inc 
 
-C:/Users/dylan/Documents/me135_fw/psoc_code/135_motor_project.cydsn/Generated_Source/PSoC5/CyBootAsmGnu.s : 
+C:/Users/lucdd/Documents/GitHub/me135_fw/psoc_code/135_motor_project.cydsn/Generated_Source/PSoC5/CyBootAsmGnu.s : 
 
-C:/Users/dylan/Documents/me135_fw/psoc_code/135_motor_project.cydsn/Generated_Source/PSoC5/cydevicegnu.inc : 
+C:/Users/lucdd/Documents/GitHub/me135_fw/psoc_code/135_motor_project.cydsn/Generated_Source/PSoC5/cydevicegnu.inc : 
 
-C:/Users/dylan/Documents/me135_fw/psoc_code/135_motor_project.cydsn/Generated_Source/PSoC5/cydevicegnu_trm.inc : 
+C:/Users/lucdd/Documents/GitHub/me135_fw/psoc_code/135_motor_project.cydsn/Generated_Source/PSoC5/cydevicegnu_trm.inc : 
 
-C:/Users/dylan/Documents/me135_fw/psoc_code/135_motor_project.cydsn/Generated_Source/PSoC5/cyfittergnu.inc : 
+C:/Users/lucdd/Documents/GitHub/me135_fw/psoc_code/135_motor_project.cydsn/Generated_Source/PSoC5/cyfittergnu.inc : 
 
